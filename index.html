@@ -41,6 +41,7 @@
     <button id="nav-vehicle">Araçlarım</button>
     <button id="nav-rules">Kurallar & Öneriler</button>
     <button id="nav-admin">Ulusal Görünüm</button>
+    <button id="nav-global">Global Emisyon Haritası</button>
   </nav>
 </header>
 <main>
@@ -55,7 +56,6 @@
           </div>
           <button id="locateBtn" class="btn">📍 Konumumu Bul</button>
         </div>
-        <div id="map" style="margin-top:10px"></div>
         <div style="margin-top:10px">
           <h3 id="locationLabel">Konum: —</h3>
           <div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
@@ -133,40 +133,58 @@
 
   <section id="page-admin" style="display:none">
     <div class="card">
-      <h2>Ulusal Görünüm (Sahte / Simüle)</h2>
+      <h2>Ulusal Görünüm (Simüle)</h2>
       <p class="muted">İllere göre rastgele simüle edilmiş cihaz verileri. Gerçekte merkezi bir API ile gelir.</p>
       <div id="nationalMap" style="height:480px;border-radius:8px"></div>
       <div style="margin-top:8px" id="nationalSummary"></div>
     </div>
   </section>
+
+  <section id="page-global" style="display:none">
+    <div class="card">
+      <h2>Global Emisyon Haritası (Simüle)</h2>
+      <p class="muted">Dünya genelinde örnek/simüle emisyon değerleri gösterilir. Bu, ana sayfadaki canlı WAQI haritasının ayrı bir global görünümü olarak yer alır.</p>
+      <div id="globalMap" style="height:480px;border-radius:8px"></div>
+      <div style="margin-top:8px" id="globalSummary"></div>
+    </div>
+  </section>
+
 </main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-// --- Mevcut WAQI ve Nominatim kodunun çoğunu yeniden kullanıyoruz (kısaltılmış) ---
 const WAQI_TOKEN="9263e25a74b0d93c30387fa753ec876f19869d38";
 const NOMINATIM_BASE="https://nominatim.openstreetmap.org";
 
-// Basit SPA navigation
-const pages={home:document.getElementById('page-home'),register:document.getElementById('page-register'),vehicle:document.getElementById('page-vehicle'),rules:document.getElementById('page-rules'),admin:document.getElementById('page-admin')};
-function show(page){Object.values(pages).forEach(p=>p.style.display='none');pages[page].style.display='block';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+page).classList.add('active');}
+// SPA navigation
+const pages={home:document.getElementById('page-home'),register:document.getElementById('page-register'),vehicle:document.getElementById('page-vehicle'),rules:document.getElementById('page-rules'),admin:document.getElementById('page-admin'),global:document.getElementById('page-global')};
+function show(page){Object.values(pages).forEach(p=>p.style.display='none');pages[page].style.display='block';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+page).classList.add('active');
+  // harita boyutlarını düzelt
+  setTimeout(()=>{
+    if(window.nationalMap) window.nationalMap.invalidateSize();
+    if(window.globalMap) window.globalMap.invalidateSize();
+  },250);
+}
 document.getElementById('nav-home').addEventListener('click',()=>show('home'));
 document.getElementById('nav-register').addEventListener('click',()=>show('register'));
 document.getElementById('nav-vehicle').addEventListener('click',()=>show('vehicle'));
 document.getElementById('nav-rules').addEventListener('click',()=>show('rules'));
 document.getElementById('nav-admin').addEventListener('click',()=>show('admin'));
+document.getElementById('nav-global').addEventListener('click',()=>show('global'));
 
-// --- Nominatim helper ---
+// --- Helpers ---
 async function nominatimSearch(q){const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'tr'}});return res.json();}
 async function nominatimReverse(lat,lon){const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'tr'}});return res.json();}
 
-// Map (home)
-const map=L.map('map').setView([39.925,32.866],6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-let marker=null;
-function setMarker(lat,lon){if(marker) marker.setLatLng([lat,lon]); else marker=L.marker([lat,lon]).addTo(map);map.setView([lat,lon],13);} 
+// --- Global map (taşındı) ---
+let globalMap; let globalMarker=null;
+function setupGlobalMap(){globalMap=L.map('globalMap').setView([20,0],2);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(globalMap);
+  globalMap.on('click', async function(e){const lat=e.latlng.lat, lon=e.latlng.lng;try{const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setGlobalMarker(lat,lon);fetchAQIForGlobal(lat,lon,label);}catch(e){setGlobalMarker(lat,lon);fetchAQIForGlobal(lat,lon,`Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`);} });
+}
+function setGlobalMarker(lat,lon){if(globalMarker) globalMarker.setLatLng([lat,lon]); else globalMarker=L.marker([lat,lon]).addTo(globalMap);globalMap.setView([lat,lon],6);} 
+async function fetchAQIForGlobal(lat,lon,label){try{const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);const resp=await res.json();if(resp.status==='ok') updateAQIUI(resp.data,label); else updateAQIUI(null,label);}catch(err){console.error(err);updateAQIUI(null,label);} }
 
-// UI elemanları
+// UI elements (home uses only AQI UI, global map handles clicks)
 const addressInput=document.getElementById('addressInput');
 const resultList=document.getElementById('resultList');
 const locateBtn=document.getElementById('locateBtn');
@@ -183,54 +201,57 @@ function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setT
 addressInput.addEventListener('input',debounce(async function(){const q=addressInput.value;if(!q){resultList.style.display='none';return;}const res=await nominatimSearch(q);renderResults(res);},250));
 
 function renderResults(items){resultList.innerHTML='';if(!items||items.length===0){resultList.style.display='none';return;}items.forEach(item=>{const div=document.createElement('div');div.className='resultItem';div.innerHTML=`<strong>${item.display_name}</strong>`;div.addEventListener('click',()=>{selectResult(item)});resultList.appendChild(div);});resultList.style.display='block';}
-async function selectResult(item){resultList.style.display='none';addressInput.value=item.display_name;const lat=parseFloat(item.lat),lon=parseFloat(item.lon);setMarker(lat,lon);fetchAQI(lat,lon,item.display_name);}
+async function selectResult(item){resultList.style.display='none';addressInput.value=item.display_name;const lat=parseFloat(item.lat),lon=parseFloat(item.lon);setGlobalMarker(lat,lon);fetchAQIForGlobal(lat,lon,item.display_name);}
 
-locateBtn.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setMarker(lat,lon);fetchAQI(lat,lon,label);},err=>alert('Konuma erişilemiyor.'))}else alert('Geolocation desteklenmiyor.');});
-
-async function fetchAQI(lat,lon,label){try{const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);const resp=await res.json();if(resp.status==='ok') updateAQIUI(resp.data,label);else updateAQIUI(null,label);}catch(err){console.error(err);updateAQIUI(null,label);} }
+locateBtn.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setGlobalMarker(lat,lon);fetchAQIForGlobal(lat,lon,label);},err=>alert('Konuma erişilemiyor.'))}else alert('Geolocation desteklenmiyor.');});
 
 function updateAQIUI(data,label){document.getElementById('locationLabel').textContent='Konum: '+(label||'—');const aqi=data&&data.aqi?data.aqi:null;aqiText.textContent='AQI: '+(aqi!==null?aqi:'—');dominantPollutant.textContent='Baskın Kirletici: '+((data&&data.dominentpol)?data.dominentpol.toUpperCase():'—');let color='green';if(aqi===null) color='#999';else if(aqi<=50) color='green';else if(aqi<=100) color='yellow';else if(aqi<=150) color='orange';else if(aqi<=200) color='red';else if(aqi<=300) color='purple';else color='maroon';aqiBar.style.background=color;aqiBar.style.width=(aqi===null?0:Math.min(aqi,500)/500*100)+'%';aqiBar.textContent=(aqi===null?'—':aqi);pollutantsEl.innerHTML='';const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];if(data&&data.iaqi){keys.forEach(k=>{if(data.iaqi[k]){const li=document.createElement('li');li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;pollutantsEl.appendChild(li);}})}
-// not: cihaz emisyon simülasyonu ayrı
 }
 
 // --- Basit kayıt / cihaz simülasyonu ---
 function loadRegistry(){try{return JSON.parse(localStorage.getItem('emission_registry')||'[]')}catch(e){return []}}
 function saveRegistry(reg){localStorage.setItem('emission_registry',JSON.stringify(reg));}
 
-function renderRegistered(){const list=document.getElementById('registeredList');const reg=loadRegistry();if(reg.length===0){list.innerHTML='<div class="muted">Kayıtlı cihaz yok.</div>';return;}list.innerHTML='';reg.forEach(r=>{const div=document.createElement('div');div.style.padding='8px';div.style.borderBottom='1px solid #eee';div.innerHTML=`<strong>${r.plate}</strong> — ${r.device} <div class="muted">${r.city||''}</div>`;list.appendChild(div);});}
+function renderRegistered(){const list=document.getElementById('registeredList');const reg=loadRegistry();if(!list) return; if(reg.length===0){list.innerHTML='<div class="muted">Kayıtlı cihaz yok.</div>';return;}list.innerHTML='';reg.forEach(r=>{const div=document.createElement('div');div.style.padding='8px';div.style.borderBottom='1px solid #eee';div.innerHTML=`<strong>${r.plate}</strong> — ${r.device} <div class="muted">${r.city||''}</div>`;list.appendChild(div);});}
 
 // register form
-document.getElementById('regBtn').addEventListener('click',()=>{const plate=document.getElementById('reg_plate').value.trim();const device=document.getElementById('reg_device').value.trim();const city=document.getElementById('reg_city').value.trim();if(!plate||!device){alert('Plaka ve cihaz ID gerekli');return;}const reg=loadRegistry();reg.push({plate,device,city,created:Date.now(),lastRead:null});saveRegistry(reg);renderRegistered();document.getElementById('reg_plate').value='';document.getElementById('reg_device').value='';document.getElementById('reg_city').value='';alert('Kayıt oluşturuldu (demo).');});
+document.getElementById('regBtn').addEventListener('click',()=>{const plate=document.getElementById('reg_plate').value.trim();const device=document.getElementById('reg_device').value.trim();const city=document.getElementById('reg_city').value.trim();if(!plate||!device){alert('Plaka ve cihaz ID gerekli');return;}const reg=loadRegistry();const newRec={plate,device,city,created:Date.now(),lastRead:null};reg.push(newRec);saveRegistry(reg);renderRegistered();document.getElementById('reg_plate').value='';document.getElementById('reg_device').value='';document.getElementById('reg_city').value='';alert('Kayıt oluşturuldu (demo).');
+  // kayıt sonrası yavaş yavaş ilk okumaları üret
+  const idx=reg.length-1;gradualChange(idx,{start:30,target:Math.round(Math.random()*140+10),steps:6,interval:2500});
+});
 
 // hızlı kayıt butonu (aside)
-document.getElementById('registerVehicleBtn').addEventListener('click',()=>{const plate=document.getElementById('plateInput').value.trim();const device=document.getElementById('deviceInput').value.trim();const model=document.getElementById('modelInput').value.trim();if(!plate||!device){alert('Plaka ve cihaz girin');return;}const reg=loadRegistry();reg.push({plate,device,model,created:Date.now(),lastRead:null});saveRegistry(reg);document.getElementById('lastRead').textContent='Kayıt oluşturuldu: '+plate;document.getElementById('plateInput').value='';document.getElementById('deviceInput').value='';document.getElementById('modelInput').value='';renderRegistered();renderMyVehicles();});
+document.getElementById('registerVehicleBtn').addEventListener('click',()=>{const plate=document.getElementById('plateInput').value.trim();const device=document.getElementById('deviceInput').value.trim();const model=document.getElementById('modelInput').value.trim();if(!plate||!device){alert('Plaka ve cihaz girin');return;}const reg=loadRegistry();reg.push({plate,device,model,created:Date.now(),lastRead:null});saveRegistry(reg);document.getElementById('lastRead').textContent='Kayıt oluşturuldu: '+plate;document.getElementById('plateInput').value='';document.getElementById('deviceInput').value='';document.getElementById('modelInput').value='';renderRegistered();renderMyVehicles();
+  // hızlı kayıtta da kademeli okuma başlat
+  const idx=loadRegistry().length-1;gradualChange(idx,{start:20,target:Math.round(Math.random()*140+10),steps:6,interval:2500});
+});
 
 // Araçlarım sayfası
-function renderMyVehicles(){const cont=document.getElementById('myVehicles');const reg=loadRegistry();if(reg.length===0){cont.innerHTML='<div class="muted">Kayıtlı araç yok.</div>';return;}cont.innerHTML='';reg.forEach((r,idx)=>{const box=document.createElement('div');box.style.border='1px solid #eee';box.style.padding='8px';box.style.borderRadius='6px';box.style.marginBottom='8px';const last=r.lastRead?`<div>Son PM2.5: <strong>${r.lastRead.pm25}</strong> — Durum: <strong>${r.lastRead.status}</strong></div>`:'<div class="muted">Henüz okuma yok.</div>';box.innerHTML=`<strong>${r.plate}</strong> — ${r.device}<div class="muted">${r.model||''} ${r.city?'- '+r.city:''}</div>${last}<div style="margin-top:8px"><button class="btn" data-idx="${idx}" onclick="forceRead(this)">Manuel Okuma Al</button> <button class="btn" data-idx="${idx}" onclick="simulateTrip(this)">Simüle Seyahat</button></div>`;cont.appendChild(box);});}
+function renderMyVehicles(){const cont=document.getElementById('myVehicles');const reg=loadRegistry();if(!cont) return; if(reg.length===0){cont.innerHTML='<div class="muted">Kayıtlı araç yok.</div>';return;}cont.innerHTML='';reg.forEach((r,idx)=>{const box=document.createElement('div');box.style.border='1px solid #eee';box.style.padding='8px';box.style.borderRadius='6px';box.style.marginBottom='8px';const last=r.lastRead?`<div>Son PM2.5: <strong>${r.lastRead.pm25}</strong> — Durum: <strong>${r.lastRead.status}</strong></div>`:'<div class="muted">Henüz okuma yok.</div>';box.innerHTML=`<strong>${r.plate}</strong> — ${r.device}<div class="muted">${r.model||''} ${r.city?'- '+r.city:''}</div>${last}<div style="margin-top:8px"><button class="btn" data-idx="${idx}" onclick="forceRead(this)">Manuel Okuma Al</button> <button class="btn" data-idx="${idx}" onclick="simulateTrip(this)">Simüle Seyahat</button></div>`;cont.appendChild(box);});}
 
 window.forceRead = function(btn){const idx=parseInt(btn.dataset.idx);simulateDeviceRead(idx);}
-window.simulateTrip = function(btn){const idx=parseInt(btn.dataset.idx);const reg=loadRegistry();if(!reg[idx])return;const current=reg[idx];
-// a travel increases chance of high emissions
-simulateDeviceRead(idx, {multiply:1.5});}
+window.simulateTrip = function(btn){const idx=parseInt(btn.dataset.idx);const reg=loadRegistry();if(!reg[idx])return; // simule seyahat: kademeli artış (yavaşça yükselir)
+  gradualChange(idx,{start: reg[idx].lastRead?reg[idx].lastRead.pm25:30, target: Math.min(400, Math.round((reg[idx].lastRead?reg[idx].lastRead.pm25:30) * (1.6 + Math.random()*0.6))), steps:8, interval:3000});}
 
-// cihaz okuması simülasyonu
-function simulateDeviceRead(index, opts={}){const reg=loadRegistry();if(!reg[index]) return;const basePM25 = Math.round( Math.random()*180 );const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply||1) ));const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));const co = (Math.random()*6).toFixed(2);
-const status = decideStatus(pm25);
-const read = {ts:Date.now(),pm25,pm10,co,status};reg[index].lastRead=read;saveRegistry(reg);renderMyVehicles();document.getElementById('lastRead').innerHTML=`${reg[index].plate} — PM2.5: ${pm25} — ${status}`;}
+// cihaz okuması simülasyonu (anlık)
+function simulateDeviceRead(index, opts={}){const reg=loadRegistry();if(!reg[index]) return;const basePM25 = Math.round( Math.random()*180 );const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply||1) ));const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));const co = (Math.random()*6).toFixed(2);const status = decideStatus(pm25);const read = {ts:Date.now(),pm25,pm10,co,status};reg[index].lastRead=read;saveRegistry(reg);renderMyVehicles();document.getElementById('lastRead').innerHTML=`${reg[index].plate} — PM2.5: ${pm25} — ${status}`;}
 
 function decideStatus(pm25){if(pm25>150) return 'TRAFİĞE UYGUN DEĞİL';if(pm25>100) return 'SINIRLI (KISITLI SAAT)';return 'TRAFİĞE UYGUN';}
+
+// kademeli/ yavaş değişim fonksiyonu
+function gradualChange(index, opts={start:20,target:80,steps:6,interval:3000}){const reg=loadRegistry();if(!reg[index]) return;let step=0;const start=opts.start;const target=opts.target;const steps=opts.steps||6;const interval=opts.interval||3000;const delta = (target - start)/steps;const iv=setInterval(()=>{step++;const currentVal = Math.round(start + delta*step + (Math.random()*5-2));const pm25 = Math.max(0, currentVal);const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));const co = (Math.random()*6).toFixed(2);const status = decideStatus(pm25);const read = {ts:Date.now(),pm25,pm10,co,status};const registry=loadRegistry();if(!registry[index]){clearInterval(iv);return;}registry[index].lastRead=read;saveRegistry(registry);renderMyVehicles();document.getElementById('lastRead').innerHTML=`${registry[index].plate} — PM2.5: ${pm25} — ${status}`;if(step>=steps) clearInterval(iv);},interval);}
 
 // periyodik simülasyon: kayıtlı her cihaza rastgele okuma gönder
 function startBackgroundSimulation(){// demo: her 20s de bir tüm kayıtları güncelle
   setInterval(()=>{
     const reg=loadRegistry();if(!reg.length) return;for(let i=0;i<reg.length;i++){ // biraz rastgelelik
-      if(Math.random()<0.6) simulateDeviceRead(i);
+      if(Math.random()<0.5) simulateDeviceRead(i);
     }
     renderMyVehicles();
   },20000);
 }
 
-// --- Ulusal görünüm (sahte) ---
+// --- Ulusal görünüm (simüle) ---
 const provinces=[
   {name:'İstanbul',lat:41.01,lon:28.97},
   {name:'Ankara',lat:39.92,lon:32.86},
@@ -240,23 +261,21 @@ const provinces=[
   {name:'Adana',lat:36.99,lon:35.32},
   {name:'Samsun',lat:41.28,lon:36.33}
 ];
-function setupNationalMap(){const nmap=L.map('nationalMap').setView([39.0,35.0],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(nmap);provinces.forEach(p=>{const fakePM25=Math.round( Math.random()*240 );const color=getColorForPM25(fakePM25);const marker=L.circleMarker([p.lat,p.lon],{radius:12,color:color,fillColor:color,fillOpacity:0.7}).addTo(nmap);marker.bindPopup(`<strong>${p.name}</strong><br>PM2.5 (sahte): ${fakePM25}`);});document.getElementById('nationalSummary').innerHTML=`<div class="muted">Toplam iller: ${provinces.length}. Bu gösterim tamamen simülasyon amaçlı.</div>`;}
+function setupNationalMap(){window.nationalMap=L.map('nationalMap').setView([39.0,35.0],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(window.nationalMap);provinces.forEach(p=>{const fakePM25=Math.round( Math.random()*240 );const color=getColorForPM25(fakePM25);const marker=L.circleMarker([p.lat,p.lon],{radius:12,color:color,fillColor:color,fillOpacity:0.7}).addTo(window.nationalMap);marker.bindPopup(`<strong>${p.name}</strong><br>PM2.5 (simüle): ${fakePM25}`);});document.getElementById('nationalSummary').innerHTML=`<div class="muted">Toplam iller: ${provinces.length}. Bu gösterim tamamen simüle amaçlı.</div>`;}
 function getColorForPM25(v){if(v<=50) return 'green'; if(v<=100) return 'yellow'; if(v<=150) return 'orange'; if(v<=200) return 'red'; if(v<=300) return 'purple'; return 'maroon';}
 
 // küçük inits
-renderRegistered();renderMyVehicles();startBackgroundSimulation();setupNationalMap();
+renderRegistered();renderMyVehicles();startBackgroundSimulation();setupNationalMap();setupGlobalMap();
 
-// göstergeler için örnek: tüm kayıtlı araçlar için 'trafik izni' sayısını hesapla
-function computeNationStatusSummary(){const reg=loadRegistry();let ok=0,limited=0,notok=0;reg.forEach(r=>{if(!r.lastRead) return; if(r.lastRead.pm25>150) notok++; else if(r.lastRead.pm25>100) limited++; else ok++;});return {ok,limited,notok};}
+// global summary (örnek)
+function populateGlobalSummary(){const countries=['Türkiye','Almanya','Hindistan','Çin','Brezilya','ABD','Rusya'];let html='<div class="muted">Örnek ülke verileri (simüle):</div><ul>';countries.forEach(c=>{html+=`<li>${c}: PM2.5 ~ ${Math.round(Math.random()*200)}</li>`});html+='</ul>';document.getElementById('globalSummary').innerHTML=html;}
+populateGlobalSummary();
 
 // sayfa değişimlerinde map resize
-let homeMapInitialized=true;
-map.on('click', async function(e){const lat=e.latlng.lat;const lon=e.latlng.lng;try{const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Seçilen Nokta (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setMarker(lat,lon);fetchAQI(lat,lon,label);}catch(e){setMarker(lat,lon);fetchAQI(lat,lon,`Seçilen Nokta (${lat.toFixed(3)}, ${lon.toFixed(3)})`);} });
+window.addEventListener('resize',()=>{setTimeout(()=>{if(window.nationalMap) window.nationalMap.invalidateSize(); if(window.globalMap) window.globalMap.invalidateSize();},200)});
 
 // butonlar harici
 function simulateAllReadsNow(){const reg=loadRegistry();for(let i=0;i<reg.length;i++){simulateDeviceRead(i);}renderMyVehicles();}
-
-// export debug fonksiyonu window'a
 window.simulateAllReadsNow=simulateAllReadsNow;
 
 </script>
