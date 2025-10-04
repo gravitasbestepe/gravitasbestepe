@@ -1,480 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Emission Simulator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GravinAir - Araç Emisyon Sistemi</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-:root{--bg:#fafafa;--card:#fff;--muted:#666}
-body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222}
-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0b5;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
-header h1{font-size:18px;margin:0}
-nav{display:flex;gap:8px;align-items:center}
-nav button{background:transparent;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
-nav button.active{background:rgba(255,255,255,.9)}
-.lang-select{margin-left:auto;display:flex;gap:8px;align-items:center}
-.lang-btn{padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer}
-.lang-btn.active{background:white}
-main{padding:12px}
-.grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
-.card{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 16px rgba(12,12,12,.04)}
-#map,#globalMap,#nationalMap{height:420px;border-radius:8px}
-#controls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;padding:8px;background:#f4f4f4;border-radius:8px}
-#addressInput{flex:1;padding:6px;border-radius:6px;border:1px solid #ccc}
-.resultItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer}
-.aqi-bar{height:18px;width:100%;background:#ddd;margin:4px 0;border-radius:5px;overflow:hidden}
-.aqi-fill{height:100%;width:0%;background:green;text-align:center;color:white;font-weight:bold;font-size:12px}
-label{font-size:13px;color:var(--muted)}
-.muted{color:var(--muted);font-size:13px}
-.btn{display:inline-block;padding:8px 10px;border-radius:6px;border:1px solid #bbb;background:white;cursor:pointer}
-@media(max-width:900px){.grid{grid-template-columns:1fr}#map{height:300px}}
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
+  #controls { display:flex; gap:6px; align-items:center; padding:8px; background:#f4f4f4; flex-wrap:wrap; }
+  #map { height:50vh; margin:10px 0; }
+  #vehicleList, #adminPanel { padding:10px; background:white; margin:10px; border-radius:5px; }
+  input, button { padding:5px; margin:2px; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid #ccc; padding:4px; text-align:center; }
 </style>
 </head>
 <body>
-<header>
-  <h1 id="title">Emission Simulator (Demo)</h1>
-  <nav>
-    <button id="nav-home" class="active">Home</button>
-    <button id="nav-register">Device Register</button>
-    <button id="nav-vehicle">My Vehicles</button>
-    <button id="nav-rules">Rules & Advice</button>
-    <button id="nav-global">Global Emission Map</button>
-  </nav>
 
-  <div class="lang-select" aria-hidden="false">
-    <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
-    <button class="lang-btn" data-lang="tr" id="lang-tr">TR</button>
-    <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
-    <button class="lang-btn" data-lang="ru" id="lang-ru">RU</button>
-  </div>
-</header>
+<div id="controls">
+  <button id="googleLogin">Google ile Giriş</button>
+  <span id="userInfo">Henüz giriş yapılmadı</span>
+</div>
 
-<main>
-  <!-- HOME (minimal now) -->
-  <section id="page-home">
-    <div class="grid">
-      <div class="card">
-        <h2 id="home-title">Quick Vehicle Emission Simulator</h2>
-        <p class="muted" id="home-desc">Register your device and get simulated emission readings here.</p>
-        <div style="margin-top:10px">
-          <h3 id="lastReadLabel">Last Reading</h3>
-          <div id="lastRead" class="muted">No readings yet.</div>
-          <hr/>
-          <h3 id="behaviourLabel">System Behaviour</h3>
-          <p class="muted" id="behaviourText">This demo simulates device readings and traffic eligibility.</p>
-        </div>
-      </div>
+<div id="vehicleList">
+  <h3>Araç Kayıt Formu</h3>
+  <input type="text" id="plate" placeholder="Plaka"/>
+  <input type="number" id="emission" placeholder="Emisyon (g/km)"/>
+  <input type="text" id="city" placeholder="Şehir"/>
+  <button id="addVehicle">Kaydet</button>
+  <p id="status"></p>
+</div>
 
-      <aside class="card">
-        <h3 id="quickSimTitle">Quick Register</h3>
-        <label id="plateLabel">Plate (e.g. 34ABC34)</label>
-        <input id="plateInput" placeholder="Enter plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-        <label id="deviceLabel">Device ID</label>
-        <input id="deviceInput" placeholder="Device ID" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-        <label id="modelLabel">Model (optional)</label>
-        <input id="modelInput" placeholder="Model" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-        <button id="registerVehicleBtn" class="btn" style="width:100%;margin-top:6px">Register Vehicle</button>
-        <hr/>
-        <div id="miniActions">
-          <button class="btn" onclick="simulateAllReadsNow()">Simulate All Now</button>
-        </div>
-      </aside>
-    </div>
-  </section>
+<div id="adminPanel">
+  <h3>Admin Panel - Kayıtlı Araçlar</h3>
+  <table id="vehicleTable">
+    <thead>
+      <tr><th>Plaka</th><th>Emisyon</th><th>Şehir</th><th>Tarih</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-  <!-- REGISTER -->
-  <section id="page-register" style="display:none">
-    <div class="card">
-      <h2 id="regTitle">Device Register</h2>
-      <label id="reg_plate_label">Plate</label>
-      <input id="reg_plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-      <label id="reg_device_label">Device ID</label>
-      <input id="reg_device" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-      <label id="reg_city_label">City</label>
-      <input id="reg_city" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
-      <button id="regBtn" class="btn">Create Register</button>
-      <hr/>
-      <h3 id="registeredTitle">Registered Devices</h3>
-      <div id="registeredList"></div>
-    </div>
-  </section>
-
-  <!-- VEHICLES -->
-  <section id="page-vehicle" style="display:none">
-    <div class="card">
-      <h2 id="myVehiclesTitle">My Vehicles</h2>
-      <div id="myVehicles"></div>
-    </div>
-  </section>
-
-  <!-- RULES -->
-  <section id="page-rules" style="display:none">
-    <div class="card">
-      <h2 id="rulesTitle">Rules & Advice</h2>
-      <ul>
-        <li id="rule1">PM2.5 &gt; 150 => Traffic ban recommended.</li>
-        <li id="rule2">PM2.5 100-150 => Limited (restricted times).</li>
-        <li id="rule3">PM2.5 &lt;= 100 => Normal traffic permitted.</li>
-      </ul>
-      <h3 id="adviceTitle">Advice</h3>
-      <ol>
-        <li id="advice1">Check filters and catalytic converter.</li>
-        <li id="advice2">Routine maintenance.</li>
-        <li id="advice3">Reduce idling.</li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- GLOBAL MAP -->
-  <section id="page-global" style="display:none">
-    <div class="card">
-      <h2 id="globalTitle">Global Emission Hotspots (Simulated)</h2>
-      <p class="muted" id="globalDesc">Showing simulated dangerous hotspots around the world. Not real data — demo only.</p>
-      <div id="globalMap"></div>
-      <div id="globalSummary" style="margin-top:8px" class="muted"></div>
-    </div>
-  </section>
-
-</main>
+<div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-<script>
-/* ------------------ Translations ------------------ */
-const translations = {
-  en: {
-    title: "Emission Simulator (Demo)",
-    nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map" },
-    homeTitle: "Quick Vehicle Emission Simulator",
-    homeDesc: "Register your device and get simulated emission readings here.",
-    lastReadLabel: "Last Reading",
-    behaviourLabel: "System Behaviour",
-    behaviourText: "This demo simulates device readings and traffic eligibility.",
-    quickRegister: "Quick Register",
-    plateLabel: "Plate (e.g. 34ABC34)",
-    deviceLabel: "Device ID",
-    modelLabel: "Model (optional)",
-    registerBtn: "Register Vehicle",
-    regTitle: "Device Register",
-    registeredTitle: "Registered Devices",
-    myVehiclesTitle: "My Vehicles",
-    rulesTitle: "Rules & Advice",
-    globalTitle: "Global Emission Hotspots (Simulated)",
-    globalDesc: "Showing simulated dangerous hotspots around the world. Not real data — demo only.",
-    registerSuccess: "Registration created (demo).",
-    simulateAll: "Simulate All Now",
-  },
-  tr: {
-    title: "Emisyon Simülatörü (Demo)",
-    nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası" },
-    homeTitle: "Hızlı Araç Emisyon Simülatörü",
-    homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
-    lastReadLabel: "Son Okuma",
-    behaviourLabel: "Sistem Davranışı",
-    behaviourText: "Bu demo, cihaz okumalarını ve trafik uygunluğunu simüle eder.",
-    quickRegister: "Hızlı Kayıt",
-    plateLabel: "Plaka (ör: 34ABC34)",
-    deviceLabel: "Cihaz ID",
-    modelLabel: "Model (isteğe bağlı)",
-    registerBtn: "Araç Kaydet",
-    regTitle: "Cihaz Kayıt",
-    registeredTitle: "Kayıtlı Cihazlar",
-    myVehiclesTitle: "Araçlarım",
-    rulesTitle: "Kurallar & Öneriler",
-    globalTitle: "Global Emisyon Tehlike Noktaları (Simüle)",
-    globalDesc: "Dünya çapındaki tehlikeli noktaların simüle gösterimi. Gerçek veri değil — demo.",
-    registerSuccess: "Kayıt oluşturuldu (demo).",
-    simulateAll: "Tümünü Simüle Et",
-  },
-  de: {
-    title: "Emissionssimulator (Demo)",
-    nav: { home:"Start", register:"Gerät Registr.", vehicle:"Meine Fahrzeuge", rules:"Regeln & Tipps", global:"Globale Emissionskarte" },
-    homeTitle: "Schneller Fahrzeug-Emissionssimulator",
-    homeDesc: "Registrieren Sie Ihr Gerät und erhalten Sie simulierte Emissionswerte.",
-    lastReadLabel: "Letzte Messung",
-    behaviourLabel: "Systemverhalten",
-    behaviourText: "Dieses Demo simuliert Geräteablesungen und Verkehrstauglichkeit.",
-    quickRegister: "Schnellregistrierung",
-    plateLabel: "Kennzeichen (z.B. 34ABC34)",
-    deviceLabel: "Geräte-ID",
-    modelLabel: "Modell (optional)",
-    registerBtn: "Fahrzeug registrieren",
-    regTitle: "Gerät registrieren",
-    registeredTitle: "Registrierte Geräte",
-    myVehiclesTitle: "Meine Fahrzeuge",
-    rulesTitle: "Regeln & Tipps",
-    globalTitle: "Globale Emissions-Hotspots (Simuliert)",
-    globalDesc: "Simulierte gefährliche Hotspots weltweit. Keine echten Daten — Demo.",
-    registerSuccess: "Registrierung erstellt (Demo).",
-    simulateAll: "Jetzt simulieren",
-  },
-  ru: {
-    title: "Симулятор выбросов (демо)",
-    nav: { home:"Главная", register:"Регистрация устройства", vehicle:"Мои авто", rules:"Правила и советы", global:"Глобальная карта выбросов" },
-    homeTitle: "Быстрый симулятор выбросов автомобиля",
-    homeDesc: "Зарегистрируйте устройство и получите симулированные показания.",
-    lastReadLabel: "Последнее чтение",
-    behaviourLabel: "Поведение системы",
-    behaviourText: "Демо симулирует показания устройств и допустимость в трафике.",
-    quickRegister: "Быстрая регистрация",
-    plateLabel: "Номер (например, 34ABC34)",
-    deviceLabel: "ID устройства",
-    modelLabel: "Модель (необязательно)",
-    registerBtn: "Зарегистрировать",
-    regTitle: "Регистрация устройства",
-    registeredTitle: "Зарегистрированные устройства",
-    myVehiclesTitle: "Мои авто",
-    rulesTitle: "Правила и советы",
-    globalTitle: "Глобальные опасные точки (симуляция)",
-    globalDesc: "Показаны смоделированные опасные точки по всему миру. Не реальные данные — только демо.",
-    registerSuccess: "Регистрация создана (демо).",
-    simulateAll: "Симулировать всё",
-  }
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAPz1mkEVT0QG_COEQxZti5l6b2dQkII54",
+  authDomain: "gravinair-a9928.firebaseapp.com",
+  projectId: "gravinair-a9928",
+  storageBucket: "gravinair-a9928.appspot.com",
+  messagingSenderId: "402929247815",
+  appId: "1:402929247815:web:08962ac9a8bf9331267362"
 };
 
-let lang = localStorage.getItem('site_lang') || 'en';
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-/* ------------------ SPA navigation ------------------ */
-const pages = {
-  home: document.getElementById('page-home'),
-  register: document.getElementById('page-register'),
-  vehicle: document.getElementById('page-vehicle'),
-  rules: document.getElementById('page-rules'),
-  global: document.getElementById('page-global')
-};
+// Map
+const map = L.map('map').setView([39.925,32.866], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 
-function show(page){
-  Object.values(pages).forEach(p => p.style.display = 'none');
-  pages[page].style.display = 'block';
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('nav-' + page).classList.add('active');
-  // initialize maps if needed
-  if (page === 'global') {
-    setTimeout(() => { initGlobalMap(); if (window.globalMap) window.globalMap.invalidateSize(); }, 200);
-  }
-}
+// Login
+const loginBtn = document.getElementById("googleLogin");
+const userInfo = document.getElementById("userInfo");
 
-document.getElementById('nav-home').addEventListener('click', ()=>show('home'));
-document.getElementById('nav-register').addEventListener('click', ()=>show('register'));
-document.getElementById('nav-vehicle').addEventListener('click', ()=>show('vehicle'));
-document.getElementById('nav-rules').addEventListener('click', ()=>show('rules'));
-document.getElementById('nav-global').addEventListener('click', ()=>show('global'));
-
-/* ------------------ Language UI ------------------ */
-function setLanguage(l){
-  lang = l;
-  localStorage.setItem('site_lang', l);
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
-  applyTranslations();
-}
-
-document.querySelectorAll('.lang-btn').forEach(b => {
-  b.addEventListener('click', ()=>setLanguage(b.dataset.lang));
+loginBtn.addEventListener("click", async ()=>{
+  try{
+    const result = await signInWithPopup(auth, provider);
+    userInfo.textContent = "Hoşgeldin: " + result.user.displayName;
+    loadVehicles();
+  }catch(err){console.error(err);}
 });
 
-// on load apply language
-setLanguage(lang);
+// Auth State
+onAuthStateChanged(auth,user=>{
+  if(user) userInfo.textContent = "Hoşgeldin: " + user.displayName;
+  else userInfo.textContent = "Henüz giriş yapılmadı";
+});
 
-function applyTranslations(){
-  const t = translations[lang] || translations.en;
-  document.getElementById('title').textContent = t.title;
-  // nav
-  document.getElementById('nav-home').textContent = t.nav.home;
-  document.getElementById('nav-register').textContent = t.nav.register;
-  document.getElementById('nav-vehicle').textContent = t.nav.vehicle;
-  document.getElementById('nav-rules').textContent = t.nav.rules;
-  document.getElementById('nav-global').textContent = t.nav.global;
-  // home
-  document.getElementById('home-title').textContent = t.homeTitle;
-  document.getElementById('home-desc').textContent = t.homeDesc;
-  document.getElementById('lastReadLabel').textContent = t.lastReadLabel;
-  document.getElementById('behaviourLabel').textContent = t.behaviourLabel;
-  document.getElementById('behaviourText').textContent = t.behaviourText;
-  // quick register labels
-  document.getElementById('plateLabel').textContent = t.plateLabel;
-  document.getElementById('deviceLabel').textContent = t.deviceLabel;
-  document.getElementById('modelLabel').textContent = t.modelLabel;
-  document.getElementById('registerVehicleBtn').textContent = t.registerBtn;
-  document.getElementById('regTitle').textContent = t.regTitle;
-  document.getElementById('registeredTitle').textContent = t.registeredTitle;
-  document.getElementById('myVehiclesTitle').textContent = t.myVehiclesTitle;
-  document.getElementById('rulesTitle').textContent = t.rulesTitle;
-  document.getElementById('globalTitle').textContent = t.globalTitle;
-  document.getElementById('globalDesc').textContent = t.globalDesc;
-  // simulate button
-  document.querySelector('#miniActions .btn').textContent = t.simulateAll;
-}
+// Add Vehicle
+document.getElementById("addVehicle").addEventListener("click", async ()=>{
+  const plate = document.getElementById("plate").value.toUpperCase();
+  const emission = parseFloat(document.getElementById("emission").value);
+  const city = document.getElementById("city").value;
+  const status = document.getElementById("status");
 
-/* ------------------ Registry + Simulation (localStorage demo, hooks for backend) ------------------ */
-function loadRegistry(){ try{ return JSON.parse(localStorage.getItem('emission_registry')||'[]'); } catch(e){ return []; } }
-function saveRegistry(reg){ localStorage.setItem('emission_registry', JSON.stringify(reg)); }
-function renderRegistered(){
-  const list = document.getElementById('registeredList');
-  const reg = loadRegistry();
-  if(!list) return;
-  if(reg.length === 0){ list.innerHTML = '<div class="muted">No devices.</div>'; return; }
-  list.innerHTML = '';
-  reg.forEach(r => {
-    const div = document.createElement('div');
-    div.style.padding='8px'; div.style.borderBottom='1px solid #eee';
-    div.innerHTML = `<strong>${r.plate}</strong> — ${r.device} <div class="muted">${r.city || ''}</div>`;
-    list.appendChild(div);
+  if(!plate || isNaN(emission) || !city){ status.textContent="Lütfen tüm alanları doldur!"; return;}
+
+  try{
+    await addDoc(collection(db,"vehicles"),{
+      plate, emission, city, date:new Date().toISOString()
+    });
+    status.textContent = "Araç kaydedildi!";
+    document.getElementById("plate").value="";
+    document.getElementById("emission").value="";
+    document.getElementById("city").value="";
+    loadVehicles();
+  }catch(err){console.error(err); status.textContent="Hata oluştu!";}
+});
+
+// Load Vehicles
+async function loadVehicles(){
+  const tbody = document.querySelector("#vehicleTable tbody");
+  tbody.innerHTML="";
+  const snapshot = await getDocs(collection(db,"vehicles"));
+  snapshot.forEach(doc=>{
+    const v = doc.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${v.plate}</td><td>${v.emission}</td><td>${v.city}</td><td>${new Date(v.date).toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+
+    // Map marker (simüle rastgele koordinat)
+    const lat =  Math.random()*140-70; // -70/+70
+    const lon = Math.random()*360-180; // -180/+180
+    L.circle([lat,lon],{radius:v.emission*50,color:"red"}).addTo(map)
+      .bindPopup(`Plaka: ${v.plate}<br>Emisyon: ${v.emission} g/km<br>Şehir: ${v.city}`);
   });
 }
 
-function renderMyVehicles(){
-  const cont = document.getElementById('myVehicles');
-  const reg = loadRegistry();
-  if(!cont) return;
-  if(reg.length === 0){ cont.innerHTML = '<div class="muted">No vehicles.</div>'; return; }
-  cont.innerHTML = '';
-  reg.forEach((r, idx) => {
-    const box = document.createElement('div');
-    box.style.border='1px solid #eee'; box.style.padding='8px'; box.style.borderRadius='6px'; box.style.marginBottom='8px';
-    const last = r.lastRead ? `<div>PM2.5: <strong>${r.lastRead.pm25}</strong> — Status: <strong>${r.lastRead.status}</strong></div>` : '<div class="muted">No readings yet.</div>';
-    box.innerHTML = `<strong>${r.plate}</strong> — ${r.device}<div class="muted">${r.model||''} ${r.city?'- '+r.city:''}</div>${last}<div style="margin-top:8px"><button class="btn" data-idx="${idx}" onclick="forceRead(this)">Manual Read</button> <button class="btn" data-idx="${idx}" onclick="simulateTrip(this)">Simulate Trip</button></div>`;
-    cont.appendChild(box);
-  });
-}
-
-document.getElementById('regBtn').addEventListener('click', ()=>{
-  const plate = document.getElementById('reg_plate').value.trim();
-  const device = document.getElementById('reg_device').value.trim();
-  const city = document.getElementById('reg_city').value.trim();
-  if(!plate || !device){ alert('Plate and device required'); return; }
-  const reg = loadRegistry();
-  reg.push({ plate, device, city, created: Date.now(), lastRead: null });
-  saveRegistry(reg);
-  renderRegistered(); renderMyVehicles();
-  alert(translations[lang].registerSuccess);
-  // start gradual initial readings
-  const idx = reg.length - 1;
-  gradualChange(idx, { start: 20, target: Math.round(Math.random()*140+10), steps: 6, interval: 2500 });
-});
-
-document.getElementById('registerVehicleBtn').addEventListener('click', ()=>{
-  const plate = document.getElementById('plateInput').value.trim();
-  const device = document.getElementById('deviceInput').value.trim();
-  const model = document.getElementById('modelInput').value.trim();
-  if(!plate || !device){ alert('Plate and device required'); return; }
-  const reg = loadRegistry();
-  reg.push({ plate, device, model, created: Date.now(), lastRead: null });
-  saveRegistry(reg);
-  document.getElementById('lastRead').textContent = 'Registered: ' + plate;
-  document.getElementById('plateInput').value=''; document.getElementById('deviceInput').value=''; document.getElementById('modelInput').value='';
-  renderRegistered(); renderMyVehicles();
-  const idx = loadRegistry().length - 1;
-  gradualChange(idx, { start:20, target: Math.round(Math.random()*140+10), steps:6, interval:2500 });
-});
-
-window.forceRead = function(btn){
-  const idx = parseInt(btn.dataset.idx);
-  simulateDeviceRead(idx);
-}
-
-window.simulateTrip = function(btn){
-  const idx = parseInt(btn.dataset.idx);
-  const reg = loadRegistry();
-  if(!reg[idx]) return;
-  gradualChange(idx, { start: reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30, target: Math.min(400, Math.round((reg[idx].lastRead?reg[idx].lastRead.pm25:30) * (1.6 + Math.random()*0.6))), steps: 8, interval: 3000 });
-}
-
-function simulateDeviceRead(index, opts = {}){
-  const reg = loadRegistry(); if(!reg[index]) return;
-  const basePM25 = Math.round(Math.random()*180);
-  const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply||1)));
-  const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));
-  const co = (Math.random()*6).toFixed(2);
-  const status = decideStatus(pm25);
-  const read = { ts: Date.now(), pm25, pm10, co, status };
-  reg[index].lastRead = read; saveRegistry(reg); renderMyVehicles();
-  document.getElementById('lastRead').innerHTML = `${reg[index].plate} — PM2.5: ${pm25} — ${status}`;
-}
-
-function decideStatus(pm25){
-  if(pm25 > 150) return 'TRAFFIC NOT ALLOWED';
-  if(pm25 > 100) return 'LIMITED (RESTRICTED TIMES)';
-  return 'TRAFFIC ALLOWED';
-}
-
-function gradualChange(index, opts={start:20,target:80,steps:6,interval:3000}){
-  const reg = loadRegistry(); if(!reg[index]) return;
-  let step = 0; const start = opts.start; const target = opts.target; const steps = opts.steps||6; const interval = opts.interval||3000;
-  const delta = (target - start) / steps;
-  const iv = setInterval(()=>{
-    step++;
-    const currentVal = Math.round(start + delta*step + (Math.random()*5-2));
-    const pm25 = Math.max(0, currentVal);
-    const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));
-    const co = (Math.random()*6).toFixed(2);
-    const status = decideStatus(pm25);
-    const read = { ts: Date.now(), pm25, pm10, co, status };
-    const registry = loadRegistry(); if(!registry[index]){ clearInterval(iv); return; }
-    registry[index].lastRead = read; saveRegistry(registry); renderMyVehicles();
-    document.getElementById('lastRead').innerHTML = `${registry[index].plate} — PM2.5: ${pm25} — ${status}`;
-    if(step >= steps) clearInterval(iv);
-  }, interval);
-}
-
-/* ------------------ Periodic background simulation (demo) ------------------ */
-function startBackgroundSimulation(){
-  setInterval(()=>{
-    const reg = loadRegistry(); if(!reg.length) return;
-    for(let i=0;i<reg.length;i++){
-      if(Math.random() < 0.5) simulateDeviceRead(i);
-    }
-    renderMyVehicles();
-  }, 20000);
-}
-
-/* ------------------ Global map (world hotspots) ------------------ */
-let globalMap = null;
-function initGlobalMap(){
-  if(globalMap) return; // already created
-  globalMap = L.map('globalMap').setView([20,0],2);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(globalMap);
-
-  // Simulated global hotspots - give emphasis to infamous polluted areas
-  const hotspots = [
-    {name:'Delhi, India', lat:28.7041, lon:77.1025, pm25: 320},
-    {name:'Beijing, China', lat:39.9042, lon:116.4074, pm25: 280},
-    {name:'Lahore, Pakistan', lat:31.5204, lon:74.3587, pm25: 260},
-    {name:'Dhaka, Bangladesh', lat:23.8103, lon:90.4125, pm25: 240},
-    {name:'Karachi, Pakistan', lat:24.8607, lon:67.0011, pm25: 220},
-    {name:'Ulaanbaatar, Mongolia', lat:47.8864, lon:106.9057, pm25: 300},
-    {name:'Mexico City, Mexico', lat:19.4326, lon:-99.1332, pm25: 180},
-    {name:'Silesia, Poland (industrial)', lat:50.3, lon:18.7, pm25: 190},
-    {name:'Los Angeles, USA (urban)', lat:34.05, lon:-118.24, pm25: 110},
-    {name:'Moscow, Russia', lat:55.7558, lon:37.6176, pm25: 100},
-    {name:'Istanbul, Turkey', lat:41.0, lon:28.97, pm25: 120}
-  ];
-
-  hotspots.forEach(h=>{
-    const color = getColorForPM25(h.pm25);
-    const marker = L.circle([h.lat,h.lon], { radius: Math.min(50000, h.pm25*300), color, fillColor: color, fillOpacity:0.5 }).addTo(globalMap);
-    marker.bindPopup(`<strong>${h.name}</strong><br>Simulated PM2.5: ${h.pm25}`);
-  });
-
-  document.getElementById('globalSummary').innerHTML = `<div class="muted">Hotspots shown are simulated and only for demo purposes.</div>`;
-}
-
-function getColorForPM25(v){
-  if(v<=50) return 'green';
-  if(v<=100) return 'yellow';
-  if(v<=150) return 'orange';
-  if(v<=200) return 'red';
-  if(v<=300) return 'purple';
-  return 'maroon';
-}
-
-/* ------------------ Init ------------------ */
-renderRegistered(); renderMyVehicles(); startBackgroundSimulation();
-show('home'); // default page
-
-// Expose small debug utility
-window.simulateAllReadsNow = function(){ const reg = loadRegistry(); for(let i=0;i<reg.length;i++) simulateDeviceRead(i); renderMyVehicles(); };
-
+// İlk yüklemede
+loadVehicles();
 </script>
 </body>
 </html>
