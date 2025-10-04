@@ -405,11 +405,9 @@ label {
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-// Constants
 const WAQI_TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38";
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 
-// Translations
 const translations = {
     en: {
         title: "Emission Simulator (Demo)",
@@ -446,7 +444,13 @@ const translations = {
         noVehicles: "No vehicles registered.",
         trafficAllowed: "TRAFFIC ALLOWED",
         trafficLimited: "LIMITED (RESTRICTED TIMES)",
-        trafficBanned: "TRAFFIC NOT ALLOWED"
+        trafficBanned: "TRAFFIC NOT ALLOWED",
+        rule1: "PM2.5 > 150 => Traffic ban recommended.",
+        rule2: "PM2.5 100-150 => Limited (restricted times).",
+        rule3: "PM2.5 <= 100 => Normal traffic permitted.",
+        advice1: "Check filters and catalytic converter.",
+        advice2: "Routine maintenance.",
+        advice3: "Reduce idling."
     },
     tr: {
         title: "Emisyon Simülatörü (Demo)",
@@ -483,7 +487,13 @@ const translations = {
         noVehicles: "Kayıtlı araç bulunmamaktadır.",
         trafficAllowed: "TRAFİĞE UYGUN",
         trafficLimited: "KISITLI (KISITLI SAATLER)",
-        trafficBanned: "TRAFİĞE UYGUN DEĞİL"
+        trafficBanned: "TRAFİĞE UYGUN DEĞİL",
+        rule1: "PM2.5 > 150 => Trafik yasağı önerilir.",
+        rule2: "PM2.5 100-150 => Kısıtlı (sınırlı saatler).",
+        rule3: "PM2.5 <= 100 => Normal trafiğe izin verilir.",
+        advice1: "Filtreleri ve katalitik konvertörü kontrol edin.",
+        advice2: "Düzenli bakım.",
+        advice3: "Rölantide çalışmayı azaltın."
     },
     de: { 
         title: "Emissionssimulator (Demo)",
@@ -520,7 +530,13 @@ const translations = {
         noVehicles: "Keine Fahrzeuge registriert.",
         trafficAllowed: "VERKEHR ERLAUBT",
         trafficLimited: "EINGESCHRÄNKT (BEGRENZTE ZEITEN)",
-        trafficBanned: "VERKEHR NICHT ERLAUBT"
+        trafficBanned: "VERKEHR NICHT ERLAUBT",
+        rule1: "PM2.5 > 150 => Verkehrsverbot empfohlen.",
+        rule2: "PM2.5 100-150 => Eingeschränkt (begrenzte Zeiten).",
+        rule3: "PM2.5 <= 100 => Normaler Verkehr erlaubt.",
+        advice1: "Filter und Katalysator überprüfen.",
+        advice2: "Regelmäßige Wartung.",
+        advice3: "Leerlauf reduzieren."
     },
     ru: { 
         title: "Симулятор выбросов (демо)",
@@ -557,17 +573,21 @@ const translations = {
         noVehicles: "Нет зарегистрированных транспортных средств.",
         trafficAllowed: "ДВИЖЕНИЕ РАЗРЕШЕНО",
         trafficLimited: "ОГРАНИЧЕННО (ОГРАНИЧЕННОЕ ВРЕМЯ)",
-        trafficBanned: "ДВИЖЕНИЕ ЗАПРЕЩЕНО"
+        trafficBanned: "ДВИЖЕНИЕ ЗАПРЕЩЕНО",
+        rule1: "PM2.5 > 150 => Рекомендуется запрет движения.",
+        rule2: "PM2.5 100-150 => Ограниченно (ограниченное время).",
+        rule3: "PM2.5 <= 100 => Нормальное движение разрешено.",
+        advice1: "Проверьте фильтры и каталитический нейтрализатор.",
+        advice2: "Регулярное техническое обслуживание.",
+        advice3: "Уменьшите работу на холостом ходу."
     }
 };
 
-// Global state
 let currentLang = localStorage.getItem('site_lang') || 'en';
 let globalMap = null;
 let aqiMap = null;
 let aqiMarker = null;
 
-// DOM Elements
 const pages = {
     home: document.getElementById('page-home'),
     register: document.getElementById('page-register'),
@@ -577,7 +597,6 @@ const pages = {
     aqi: document.getElementById('page-aqi')
 };
 
-// Initialize application
 function initApp() {
     setupEventListeners();
     applyTranslations();
@@ -587,9 +606,7 @@ function initApp() {
     show('home');
 }
 
-// Event Listeners
 function setupEventListeners() {
-    // Navigation
     document.getElementById('nav-home').addEventListener('click', () => show('home'));
     document.getElementById('nav-register').addEventListener('click', () => show('register'));
     document.getElementById('nav-vehicle').addEventListener('click', () => show('vehicle'));
@@ -597,21 +614,17 @@ function setupEventListeners() {
     document.getElementById('nav-global').addEventListener('click', () => show('global'));
     document.getElementById('nav-aqi').addEventListener('click', () => show('aqi'));
 
-    // Language selection
     document.querySelectorAll('.lang-btn').forEach(b => {
         b.addEventListener('click', () => setLanguage(b.dataset.lang));
     });
 
-    // Registration
     document.getElementById('regBtn').addEventListener('click', registerDevice);
 
-    // AQI functionality
     document.getElementById('aqiAddressInput').addEventListener('input', debounce(handleAddressSearch, 300));
     document.getElementById('aqiLocateBtn').addEventListener('click', handleLocateMe);
     document.getElementById('aqiClearBtn').addEventListener('click', handleClearSearch);
 }
 
-// Page Management
 function show(page) {
     Object.values(pages).forEach(p => p.style.display = 'none');
     pages[page].style.display = 'block';
@@ -619,7 +632,6 @@ function show(page) {
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-' + page).classList.add('active');
     
-    // Initialize maps when they become visible
     setTimeout(() => {
         if (page === 'global' && !globalMap) {
             initGlobalMap();
@@ -635,7 +647,6 @@ function show(page) {
     }, 100);
 }
 
-// Language Management
 function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('site_lang', lang);
@@ -648,7 +659,6 @@ function setLanguage(lang) {
 function applyTranslations() {
     const t = translations[currentLang] || translations.en;
     
-    // Update all translatable elements
     document.getElementById('title').textContent = t.title;
     document.getElementById('nav-home').textContent = t.nav.home;
     document.getElementById('nav-register').textContent = t.nav.register;
@@ -676,7 +686,6 @@ function applyTranslations() {
     document.getElementById('globalTitle').textContent = t.globalTitle;
     document.getElementById('globalDesc').textContent = t.globalDesc;
 
-    // AQI Page
     document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
     document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
     document.getElementById('aqiLocateBtn').textContent = t.locateBtn;
@@ -685,11 +694,18 @@ function applyTranslations() {
     document.getElementById('pollutantsPlaceholder').textContent = t.pollutantPlaceholder;
     document.getElementById('aqiAddressInput').placeholder = t.searchPlaceholder;
 
+    document.getElementById('rule1').textContent = t.rule1;
+    document.getElementById('rule2').textContent = t.rule2;
+    document.getElementById('rule3').textContent = t.rule3;
+    document.getElementById('adviceTitle').textContent = t.rulesTitle.replace('Rules & ', '');
+    document.getElementById('advice1').textContent = t.advice1;
+    document.getElementById('advice2').textContent = t.advice2;
+    document.getElementById('advice3').textContent = t.advice3;
+
     renderRegistered();
     renderMyVehicles();
 }
 
-// Device Registration
 function registerDevice() {
     const plate = document.getElementById('reg_plate').value.trim();
     const device = document.getElementById('reg_device').value.trim();
@@ -718,14 +734,12 @@ function registerDevice() {
     renderRegistered();
     renderMyVehicles();
     
-    // Clear form
     document.getElementById('reg_plate').value = '';
     document.getElementById('reg_device').value = '';
     document.getElementById('reg_city').value = '';
     
     alert(translations[currentLang].registerSuccess);
     
-    // Start simulation for new device
     const idx = reg.length - 1;
     gradualChange(idx, { 
         start: 20, 
@@ -735,7 +749,6 @@ function registerDevice() {
     });
 }
 
-// Data Management
 function loadRegistry() {
     try { 
         return JSON.parse(localStorage.getItem('emission_registry') || '[]'); 
@@ -814,7 +827,6 @@ function getStatusClass(status) {
     return '';
 }
 
-// Simulation Functions
 window.forceRead = function(idx) {
     simulateDeviceRead(idx);
 }
@@ -906,7 +918,6 @@ function startBackgroundSimulation() {
     }, 20000);
 }
 
-// Map Functions
 function initGlobalMap() {
     if (globalMap) {
         globalMap.invalidateSize();
@@ -973,7 +984,6 @@ function initAqiMap() {
     });
 }
 
-// AQI Functions
 async function handleAddressSearch() {
     const q = document.getElementById('aqiAddressInput').value;
     if (!q) { 
@@ -1091,8 +1101,8 @@ async function fetchAqiData(lat, lon, label) {
         const res = await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
         const resp = await res.json();
         
-        if (resp.status === "ok") {
-            updateAqiUI(resp.data.iaqi, resp.data.city.name);
+        if (resp.status === "ok" && resp.data) {
+            updateAqiUI(resp.data, label);
         } else {
             updateAqiUI(null, label);
             alert(translations[currentLang].aqiNoData);
@@ -1106,12 +1116,14 @@ async function fetchAqiData(lat, lon, label) {
 
 function updateAqiUI(data, label) {
     const t = translations[currentLang] || translations.en;
-    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${label || '—'}`;
+    const locationName = data && data.city ? data.city.name : label;
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${locationName || '—'}`;
     
     const aqi = data && data.aqi ? data.aqi : null;
     document.getElementById('detailAqiText').textContent = `${t.aqiText}: ${aqi !== null ? aqi : '—'}`;
-    document.getElementById('detailDominantPollutant').textContent = 
-        `${t.aqiPollutant}: ${(data && data.dominentpol) ? data.dominentpol.toUpperCase() : '—'}`;
+    
+    const dominantPollutant = data && data.dominentpol ? data.dominentpol : '—';
+    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: ${dominantPollutant.toUpperCase()}`;
 
     let color = "#999";
     let warning = "", mask = "";
@@ -1142,22 +1154,27 @@ function updateAqiUI(data, label) {
     const pollutantsList = document.getElementById('pollutantsList');
     pollutantsList.innerHTML = '';
     
-    const pollutantKeys = ["pm25", "pm10", "o3", "no2", "so2", "co", "h", "p", "t", "w"];
+    const pollutantKeys = ["pm25", "pm10", "o3", "no2", "so2", "co"];
     if (data && data.iaqi) {
         pollutantKeys.forEach(k => {
-            if (data.iaqi[k]) {
+            if (data.iaqi[k] && data.iaqi[k].v !== undefined) {
                 const value = data.iaqi[k].v;
                 let quality = '—';
-                if (['pm25', 'pm10', 'o3', 'no2', 'so2', 'co'].includes(k)) {
-                    if (value <= 50) quality = '(Good)';
-                    else if (value <= 100) quality = '(Moderate)';
-                    else quality = '(High)';
-                }
+                if (value <= 50) quality = '(Good)';
+                else if (value <= 100) quality = '(Moderate)';
+                else quality = '(High)';
+                
                 const li = document.createElement('li');
                 li.innerHTML = `<strong>${k.toUpperCase()}</strong>: ${value} <span class="muted">${quality}</span>`;
                 pollutantsList.appendChild(li);
             }
         });
+        
+        if (pollutantsList.children.length === 0) {
+            pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
+        }
+    } else {
+        pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
     }
 }
 
@@ -1166,7 +1183,6 @@ async function goToAqiLocation(lat, lon, label) {
     await fetchAqiData(lat, lon, label);
 }
 
-// Utility Functions
 function debounce(fn, wait) {
     let t;
     return function(...args) {
@@ -1184,7 +1200,6 @@ function getColorForPM25(v) {
     return 'maroon';
 }
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
