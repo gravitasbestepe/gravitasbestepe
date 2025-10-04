@@ -7,10 +7,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-#controls { padding:12px; background:#f4f4f4; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-#addressWrapper { position:relative; max-width:720px; width:100%; }
-#addressInput { width:100%; padding:8px 10px; font-size:15px; border:1px solid #ccc; border-radius:6px; }
-#clearBtn, #locateBtn { padding:8px 12px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; }
+#controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:12px; background:#f4f4f4; }
+#addressWrapper { flex:1; position:relative; }
+#addressInput { width:100%; padding:8px 50px 8px 10px; font-size:15px; border:1px solid #ccc; border-radius:6px; }
+#clearBtn { position:absolute; right:5px; top:50%; transform:translateY(-50%); padding:5px 10px; border-radius:6px; border:1px solid #bbb; background:white; cursor:pointer; }
+#locateBtn { padding:8px 12px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; margin-left:5px; }
 #resultList { position:absolute; left:0; right:0; top:44px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:6px; z-index:1000; max-height:400px; overflow:auto; display:none; font-size:14px; }
 .resultItem { padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer; }
 .resultItem:hover { background:#f0f7ff; }
@@ -23,12 +24,12 @@ ul#pollutants { margin:0; padding-left:18px; }
 </head>
 <body>
 <div id="controls">
-<button id="clearBtn">Clear</button>
-<div id="addressWrapper">
-<input id="addressInput" placeholder="Enter city, street, school, or address" autocomplete="off" />
-<div id="resultList"></div>
-</div>
-<button id="locateBtn">Locate Me</button>
+  <div id="addressWrapper">
+    <input id="addressInput" placeholder="Enter city, street, school, or address" autocomplete="off" />
+    <button id="clearBtn">Clear</button>
+    <div id="resultList"></div>
+  </div>
+  <button id="locateBtn">Locate Me</button>
 </div>
 <div id="map"></div>
 <div id="aqiDetails">
@@ -41,6 +42,7 @@ ul#pollutants { margin:0; padding-left:18px; }
 <p id="warningMsg" style="color:#b22222; font-weight:bold;"></p>
 <p id="maskMsg" style="color:#0000aa; font-weight:bold;"></p>
 </div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const WAQI_TOKEN="9263e25a74b0d93c30387fa753ec876f19869d38";
@@ -59,11 +61,14 @@ const dominantPollutant=document.getElementById('dominantPollutant');
 const pollutantsEl=document.getElementById('pollutants');
 const warningMsg=document.getElementById('warningMsg');
 const maskMsg=document.getElementById('maskMsg');
+
 function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setTimeout(()=>fn.apply(this,args),wait);};}
+
 async function nominatimSearch(q){
     const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=20&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});
     return res.json();
 }
+
 function renderResults(items){
     resultList.innerHTML="";
     if(!items||items.length===0){resultList.style.display="none";return;}
@@ -82,9 +87,24 @@ function renderResults(items){
     });
     resultList.style.display='block';
 }
-async function selectResult(item){resultList.style.display='none';addressInput.value=item.display_name;goToLocation(parseFloat(item.lat),parseFloat(item.lon),item.display_name);}
-async function nominatimReverse(lat,lon){const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'en'}});return res.json();}
-function setMarker(lat,lon){if(marker)map.removeLayer(marker);marker=L.marker([lat,lon]).addTo(map);map.setView([lat,lon],15);}
+
+async function selectResult(item){
+    resultList.style.display='none';
+    addressInput.value=item.display_name;
+    goToLocation(parseFloat(item.lat),parseFloat(item.lon),item.display_name);
+}
+
+async function nominatimReverse(lat,lon){
+    const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'en'}});
+    return res.json();
+}
+
+function setMarker(lat,lon){
+    if(marker)map.removeLayer(marker);
+    marker=L.marker([lat,lon]).addTo(map);
+    map.setView([lat,lon],15);
+}
+
 function updateAQIUI(data,label){
     locationLabel.textContent="Location: "+(label||'—');
     const aqi=data&&data.aqi?data.aqi:null;
@@ -115,11 +135,39 @@ function updateAQIUI(data,label){
     warningMsg.textContent=warning;
     maskMsg.textContent=mask;
 }
-async function fetchAQI(lat,lon,label){try{const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);const resp=await res.json();if(resp.status==="ok")updateAQIUI(resp.data,label);else alert("AQI data not available for this location.");}catch(err){alert("Error fetching AQI data.");console.error(err);}}
+
+async function fetchAQI(lat,lon,label){
+    try{
+        const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
+        const resp=await res.json();
+        if(resp.status==="ok")updateAQIUI(resp.data,label);
+        else alert("AQI data not available for this location.");
+    }catch(err){alert("Error fetching AQI data."); console.error(err);}
+}
+
 async function goToLocation(lat,lon,label){setMarker(lat,lon);fetchAQI(lat,lon,label);}
-addressInput.addEventListener('input',debounce(async()=>{const q=addressInput.value;if(!q)return;const results=await nominatimSearch(q);renderResults(results);},300));
-locateBtn.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude;const lon=pos.coords.longitude;const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;goToLocation(lat,lon,label);},err=>alert("Unable to get your location."));}else alert("Geolocation not supported.");});
+
+addressInput.addEventListener('input',debounce(async()=>{
+    const q=addressInput.value;
+    if(!q)return;
+    const results=await nominatimSearch(q);
+    renderResults(results);
+},300));
+
+locateBtn.addEventListener('click',()=>{
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(async pos=>{
+            const lat=pos.coords.latitude;
+            const lon=pos.coords.longitude;
+            const rev=await nominatimReverse(lat,lon);
+            const label=rev && rev.display_name?rev.display_name:`Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+            goToLocation(lat,lon,label);
+        },err=>alert("Unable to get your location."));
+    }else alert("Geolocation not supported.");
+});
+
 clearBtn.addEventListener('click',()=>{addressInput.value="";resultList.style.display="none";});
+
 map.on('click',function(e){const lat=e.latlng.lat;const lon=e.latlng.lng;goToLocation(lat,lon,`Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);});
 </script>
 </body>
