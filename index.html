@@ -267,6 +267,24 @@ label {
     color: var(--muted);
     font-style: italic;
 }
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+.country-aqi-item {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+.country-aqi-item:last-child {
+    border-bottom: none;
+}
+.aqi-value {
+    font-weight: bold;
+    float: right;
+}
 @media (max-width: 900px) {
     .grid {
         grid-template-columns: 1fr;
@@ -281,6 +299,9 @@ label {
     .lang-select {
         margin-left: 0;
         margin-top: 8px;
+    }
+    .quick-actions {
+        flex-direction: column;
     }
 }
 </style>
@@ -309,9 +330,23 @@ label {
             <div class="card">
                 <h2 id="home-title">Quick Vehicle Emission Simulator</h2>
                 <p class="muted" id="home-desc">Register your device and get simulated emission readings here.</p>
+                
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="quickReadAll()" id="quickReadBtn">
+                        Read All Devices
+                    </button>
+                    <button class="btn" onclick="quickSimulateAll()" id="quickSimulateBtn">
+                        Simulate All Trips
+                    </button>
+                </div>
+
                 <div style="margin-top: 16px">
                     <h3 id="lastReadLabel">Last Reading</h3>
                     <div id="lastRead" class="muted">No readings yet.</div>
+                    
+                    <h3 style="margin-top: 16px;" id="vehicleStatusLabel">Vehicle Status</h3>
+                    <div id="vehicleStatus" class="muted">No vehicles registered.</div>
+                    
                     <hr/>
                     <h3 id="behaviourLabel">System Behaviour</h3>
                     <p class="muted" id="behaviourText">This demo simulates device readings and traffic eligibility.</p>
@@ -323,6 +358,13 @@ label {
                 <button class="btn btn-primary" onclick="show('register')" style="margin-top: 12px; width: 100%">
                     Go to Registration
                 </button>
+
+                <div style="margin-top: 20px;">
+                    <h3 id="globalAqiTitle">Country AQI Averages</h3>
+                    <div id="countryAqiList" class="muted">
+                        <div class="loading">Loading country data...</div>
+                    </div>
+                </div>
             </aside>
         </div>
     </section>
@@ -399,11 +441,11 @@ label {
 
     <section id="page-global" style="display:none">
         <div class="card">
-            <h2 id="globalTitle">Global Emission Hotspots (Real Data)</h2>
-            <p class="muted" id="globalDesc">Showing real AQI data for locations with PM2.5 > 125. Data from WAQI API.</p>
+            <h2 id="globalTitle">Global Emission Map</h2>
+            <p class="muted" id="globalDesc">Showing country average AQI values and high pollution areas.</p>
             <div id="globalMap"></div>
             <div id="globalSummary" style="margin-top: 12px" class="muted"></div>
-            <div id="globalLoading" class="loading" style="display: none;">Loading real AQI data...</div>
+            <div id="globalLoading" class="loading" style="display: none;">Loading country AQI data...</div>
         </div>
     </section>
 
@@ -451,20 +493,38 @@ const translations = {
         nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map" },
         homeTitle: "Quick Vehicle Emission Simulator",
         homeDesc: "Register your device and get simulated emission readings here.",
-        lastReadLabel: "Last Reading", behaviourLabel: "System Behaviour",
+        lastReadLabel: "Last Reading", 
+        behaviourLabel: "System Behaviour",
+        vehicleStatusLabel: "Vehicle Status",
         behaviourText: "This demo simulates device readings and traffic eligibility.",
         quickRegisterTitle: "Device Registration",
         quickRegisterDesc: "Use the Device Register tab to manage vehicles.",
-        regTitle: "Device Register", registeredTitle: "Registered Devices", myVehiclesTitle: "My Vehicles", 
-        rulesTitle: "Rules & Advice", globalTitle: "Global Emission Hotspots (Real Data)", 
-        globalDesc: "Showing real AQI data for locations with PM2.5 > 125. Data from WAQI API.",
-        reg_plate_label: "License Plate", reg_device_label: "Device ID", reg_city_label: "City", 
-        reg_make_label: "Vehicle Make", reg_model_label: "Vehicle Model", reg_engine_label: "Engine Number", reg_color_label: "Vehicle Color",
-        regBtn: "Create Registration", registerSuccess: "Registration created successfully!",
-        simulateAll: "Simulate All Now",
-        aqiMapTitle: "Interactive Air Quality Map", aqiDetailTitle: "Air Quality Details",
-        aqiLocation: "Location", aqiText: "AQI", aqiPollutant: "Dominant Pollutant", 
-        locateBtn: "Locate Me", aqiClear: "Clear", searchPlaceholder: "Enter city or address",
+        regTitle: "Device Register", 
+        registeredTitle: "Registered Devices", 
+        myVehiclesTitle: "My Vehicles", 
+        rulesTitle: "Rules & Advice", 
+        globalTitle: "Global Emission Map", 
+        globalDesc: "Showing country average AQI values and high pollution areas.",
+        reg_plate_label: "License Plate", 
+        reg_device_label: "Device ID", 
+        reg_city_label: "City", 
+        reg_make_label: "Vehicle Make", 
+        reg_model_label: "Vehicle Model", 
+        reg_engine_label: "Engine Number", 
+        reg_color_label: "Vehicle Color",
+        regBtn: "Create Registration", 
+        registerSuccess: "Registration created successfully!",
+        quickReadBtn: "Read All Devices",
+        quickSimulateBtn: "Simulate All Trips",
+        aqiMapTitle: "Interactive Air Quality Map", 
+        aqiDetailTitle: "Air Quality Details",
+        globalAqiTitle: "Country AQI Averages",
+        aqiLocation: "Location", 
+        aqiText: "AQI", 
+        aqiPollutant: "Dominant Pollutant", 
+        locateBtn: "Locate Me", 
+        aqiClear: "Clear", 
+        searchPlaceholder: "Enter city or address",
         pollutantTitle: "Pollutant Details (µg/m³)",
         pollutantPlaceholder: "Click on the map or search for a location.",
         aqiNoData: "AQI data not available for this location.",
@@ -489,31 +549,51 @@ const translations = {
         advice1: "Check filters and catalytic converter.",
         advice2: "Routine maintenance.",
         advice3: "Reduce idling.",
-        loading: "Loading real AQI data...",
-        noHighPollution: "No locations with PM2.5 > 125 found in current view.",
+        loading: "Loading data...",
+        noHighPollution: "No high pollution areas found.",
         simulationDuration: "Simulation duration: 24 seconds",
         manualRead: "Manual Read",
-        simulateTrip: "Simulate Trip"
+        simulateTrip: "Simulate Trip",
+        readingAll: "Reading all devices...",
+        simulatingAll: "Simulating all trips..."
     },
     tr: {
         title: "Emisyon Simülatörü (Demo)",
         nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası" },
         homeTitle: "Hızlı Araç Emisyon Simülatörü",
         homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
-        lastReadLabel: "Son Okuma", behaviourLabel: "Sistem Davranışı",
+        lastReadLabel: "Son Okuma", 
+        behaviourLabel: "Sistem Davranışı",
+        vehicleStatusLabel: "Araç Durumu",
         behaviourText: "Bu demo, cihaz okumalarını ve trafik uygunluğunu simüle eder.",
         quickRegisterTitle: "Cihaz Kayıt",
         quickRegisterDesc: "Araçları yönetmek için Cihaz Kayıt sekmesini kullanın.",
-        regTitle: "Cihaz Kayıt", registeredTitle: "Kayıtlı Cihazlar", myVehiclesTitle: "Araçlarım", 
-        rulesTitle: "Kurallar & Öneriler", globalTitle: "Global Emisyon Sıcak Noktaları (Gerçek Veri)", 
-        globalDesc: "PM2.5 > 125 olan konumlar için gerçek HKİ verileri gösteriliyor. WAQI API verisi.",
-        reg_plate_label: "Plaka", reg_device_label: "Cihaz ID", reg_city_label: "Şehir", 
-        reg_make_label: "Araç Markası", reg_model_label: "Araç Modeli", reg_engine_label: "Motor Numarası", reg_color_label: "Araç Rengi",
-        regBtn: "Kayıt Oluştur", registerSuccess: "Kayıt başarıyla oluşturuldu!",
-        simulateAll: "Tümünü Simüle Et",
-        aqiMapTitle: "Etkileşimli Hava Kalitesi Haritası", aqiDetailTitle: "Hava Kalitesi Detayları",
-        aqiLocation: "Konum", aqiText: "HKİ", aqiPollutant: "Baskın Kirletici", 
-        locateBtn: "Konumumu Bul", aqiClear: "Temizle", searchPlaceholder: "Şehir veya adres girin",
+        regTitle: "Cihaz Kayıt", 
+        registeredTitle: "Kayıtlı Cihazlar", 
+        myVehiclesTitle: "Araçlarım", 
+        rulesTitle: "Kurallar & Öneriler", 
+        globalTitle: "Global Emisyon Haritası", 
+        globalDesc: "Ülke ortalama HKİ değerleri ve yüksek kirlilik bölgeleri gösteriliyor.",
+        reg_plate_label: "Plaka", 
+        reg_device_label: "Cihaz ID", 
+        reg_city_label: "Şehir", 
+        reg_make_label: "Araç Markası", 
+        reg_model_label: "Araç Modeli", 
+        reg_engine_label: "Motor Numarası", 
+        reg_color_label: "Araç Rengi",
+        regBtn: "Kayıt Oluştur", 
+        registerSuccess: "Kayıt başarıyla oluşturuldu!",
+        quickReadBtn: "Tüm Cihazları Oku",
+        quickSimulateBtn: "Tüm Yolculukları Simüle Et",
+        aqiMapTitle: "Etkileşimli Hava Kalitesi Haritası", 
+        aqiDetailTitle: "Hava Kalitesi Detayları",
+        globalAqiTitle: "Ülke HKİ Ortalamaları",
+        aqiLocation: "Konum", 
+        aqiText: "HKİ", 
+        aqiPollutant: "Baskın Kirletici", 
+        locateBtn: "Konumumu Bul", 
+        aqiClear: "Temizle", 
+        searchPlaceholder: "Şehir veya adres girin",
         pollutantTitle: "Kirletici Detayları (µg/m³)",
         pollutantPlaceholder: "Haritaya tıklayın veya bir konum arayın.",
         aqiNoData: "Bu konum için HKİ verisi mevcut değil.",
@@ -538,11 +618,13 @@ const translations = {
         advice1: "Filtreleri ve katalitik konvertörü kontrol edin.",
         advice2: "Düzenli bakım.",
         advice3: "Rölantide çalışmayı azaltın.",
-        loading: "Gerçek HKİ verileri yükleniyor...",
-        noHighPollution: "Mevcut görünümde PM2.5 > 125 olan konum bulunamadı.",
+        loading: "Veriler yükleniyor...",
+        noHighPollution: "Yüksek kirlilik bölgesi bulunamadı.",
         simulationDuration: "Simülasyon süresi: 24 saniye",
         manualRead: "Manuel Okuma",
-        simulateTrip: "Yolculuk Simüle Et"
+        simulateTrip: "Yolculuk Simüle Et",
+        readingAll: "Tüm cihazlar okunuyor...",
+        simulatingAll: "Tüm yolculuklar simüle ediliyor..."
     }
 };
 
@@ -565,7 +647,9 @@ function initApp() {
     applyTranslations();
     renderRegistered();
     renderMyVehicles();
+    updateHomeScreen();
     startBackgroundSimulation();
+    loadCountryAQIData();
     show('home');
 }
 
@@ -607,6 +691,10 @@ function show(page) {
         } else if (page === 'aqi' && aqiMap) {
             aqiMap.invalidateSize();
         }
+        
+        if (page === 'home') {
+            updateHomeScreen();
+        }
     }, 100);
 }
 
@@ -617,6 +705,8 @@ function setLanguage(lang) {
         b.classList.toggle('active', b.dataset.lang === lang);
     });
     applyTranslations();
+    updateHomeScreen();
+    loadCountryAQIData();
 }
 
 function applyTranslations() {
@@ -633,6 +723,7 @@ function applyTranslations() {
     document.getElementById('home-title').textContent = t.homeTitle;
     document.getElementById('home-desc').textContent = t.homeDesc;
     document.getElementById('lastReadLabel').textContent = t.lastReadLabel;
+    document.getElementById('vehicleStatusLabel').textContent = t.vehicleStatusLabel;
     document.getElementById('behaviourLabel').textContent = t.behaviourLabel;
     document.getElementById('behaviourText').textContent = t.behaviourText;
     document.getElementById('quickRegisterTitle').textContent = t.quickRegisterTitle;
@@ -655,11 +746,14 @@ function applyTranslations() {
 
     document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
     document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
+    document.getElementById('globalAqiTitle').textContent = t.globalAqiTitle;
     document.getElementById('aqiLocateBtn').textContent = t.locateBtn;
     document.getElementById('aqiClearBtn').textContent = t.aqiClear;
     document.getElementById('pollutantTitle').textContent = t.pollutantTitle;
     document.getElementById('pollutantsPlaceholder').textContent = t.pollutantPlaceholder;
     document.getElementById('aqiAddressInput').placeholder = t.searchPlaceholder;
+    document.getElementById('quickReadBtn').textContent = t.quickReadBtn;
+    document.getElementById('quickSimulateBtn').textContent = t.quickSimulateBtn;
 
     document.getElementById('rule1').textContent = t.rule1;
     document.getElementById('rule2').textContent = t.rule2;
@@ -671,6 +765,108 @@ function applyTranslations() {
 
     renderRegistered();
     renderMyVehicles();
+}
+
+// Ana ekrana hızlı işlem butonları
+function quickReadAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickReadBtn').textContent = t.readingAll;
+    document.getElementById('quickReadBtn').disabled = true;
+    
+    setTimeout(() => {
+        for (let i = 0; i < reg.length; i++) {
+            simulateDeviceRead(i);
+        }
+        updateHomeScreen();
+        document.getElementById('quickReadBtn').textContent = t.quickReadBtn;
+        document.getElementById('quickReadBtn').disabled = false;
+    }, 1000);
+}
+
+function quickSimulateAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickSimulateBtn').textContent = t.simulatingAll;
+    document.getElementById('quickSimulateBtn').disabled = true;
+    
+    let completed = 0;
+    const total = reg.length;
+    
+    reg.forEach((vehicle, idx) => {
+        simulateTrip(idx);
+        
+        // Her simülasyon 24 saniye sürüyor
+        setTimeout(() => {
+            completed++;
+            if (completed === total) {
+                document.getElementById('quickSimulateBtn').textContent = t.quickSimulateBtn;
+                document.getElementById('quickSimulateBtn').disabled = false;
+                updateHomeScreen();
+            }
+        }, 24000);
+    });
+}
+
+function updateHomeScreen() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        document.getElementById('vehicleStatus').innerHTML = `<div class="muted">${t.noVehicles}</div>`;
+        return;
+    }
+    
+    let statusHTML = '';
+    let allowed = 0, limited = 0, banned = 0;
+    
+    reg.forEach(vehicle => {
+        if (vehicle.lastRead) {
+            const statusClass = getStatusClass(vehicle.lastRead.status);
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="${statusClass}">${vehicle.lastRead.status}</span>
+                    <div class="muted" style="font-size: 12px;">PM2.5: ${vehicle.lastRead.pm25}</div>
+                </div>
+            `;
+            
+            if (vehicle.lastRead.status.includes('ALLOWED') && !vehicle.lastRead.status.includes('NOT')) allowed++;
+            else if (vehicle.lastRead.status.includes('LIMITED')) limited++;
+            else if (vehicle.lastRead.status.includes('NOT ALLOWED') || vehicle.lastRead.status.includes('BANNED')) banned++;
+        } else {
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="muted">No reading</span>
+                </div>
+            `;
+        }
+    });
+    
+    // Özet istatistik
+    const summary = `
+        <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
+            <strong>Summary:</strong> 
+            <span style="color: green;">${allowed} Allowed</span> | 
+            <span style="color: orange;">${limited} Limited</span> | 
+            <span style="color: red;">${banned} Banned</span>
+        </div>
+    `;
+    
+    document.getElementById('vehicleStatus').innerHTML = summary + statusHTML;
 }
 
 function registerDevice() {
@@ -708,6 +904,7 @@ function registerDevice() {
     saveRegistry(reg);
     renderRegistered();
     renderMyVehicles();
+    updateHomeScreen();
     
     // Clear form
     document.getElementById('reg_plate').value = '';
@@ -834,6 +1031,7 @@ function getStatusClass(status) {
 
 window.forceRead = function(idx) {
     simulateDeviceRead(idx);
+    updateHomeScreen();
 }
 
 window.simulateTrip = function(idx) {
@@ -847,6 +1045,11 @@ window.simulateTrip = function(idx) {
         steps: 8, 
         interval: 3000
     });
+    
+    // 24 saniye sonra ana ekranı güncelle
+    setTimeout(() => {
+        updateHomeScreen();
+    }, 24000);
 }
 
 function simulateDeviceRead(index, opts = {}) {
@@ -921,12 +1124,52 @@ function startBackgroundSimulation() {
             if (Math.random() < 0.5) simulateDeviceRead(i);
         }
         renderMyVehicles();
+        updateHomeScreen();
     }, 20000);
 }
 
-// Kalan kodlar (initGlobalMap, initAqiMap, AQI fonksiyonları) önceki gibi kalacak
-// Bu kısım uzun olduğu için kısaltıyorum, önceki fonksiyonlar aynen kalacak
+// Ülke AQI verilerini yükle
+function loadCountryAQIData() {
+    const countryData = [
+        { country: "Turkey", aqi: 65, cities: ["Istanbul", "Ankara", "Izmir"] },
+        { country: "Germany", aqi: 45, cities: ["Berlin", "Munich", "Hamburg"] },
+        { country: "France", aqi: 52, cities: ["Paris", "Lyon", "Marseille"] },
+        { country: "Italy", aqi: 68, cities: ["Rome", "Milan", "Naples"] },
+        { country: "Spain", aqi: 58, cities: ["Madrid", "Barcelona", "Valencia"] },
+        { country: "UK", aqi: 48, cities: ["London", "Manchester", "Birmingham"] },
+        { country: "USA", aqi: 72, cities: ["New York", "Los Angeles", "Chicago"] },
+        { country: "China", aqi: 156, cities: ["Beijing", "Shanghai", "Guangzhou"] },
+        { country: "India", aqi: 189, cities: ["Delhi", "Mumbai", "Bangalore"] },
+        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] }
+    ];
 
+    const container = document.getElementById('countryAqiList');
+    const t = translations[currentLang] || translations.en;
+    
+    let html = '';
+    countryData.forEach(country => {
+        const color = getColorForAQI(country.aqi);
+        html += `
+            <div class="country-aqi-item">
+                <span>${country.country}</span>
+                <span class="aqi-value" style="color: ${color};">${country.aqi}</span>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getColorForAQI(aqi) {
+    if (aqi <= 50) return 'green';
+    if (aqi <= 100) return 'yellow';
+    if (aqi <= 150) return 'orange';
+    if (aqi <= 200) return 'red';
+    if (aqi <= 300) return 'purple';
+    return 'maroon';
+}
+
+// Global harita fonksiyonları
 function initGlobalMap() {
     if (globalMap) {
         globalMap.invalidateSize();
@@ -939,130 +1182,56 @@ function initGlobalMap() {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(globalMap);
     
-    // Gerçek AQI verilerini yükle
-    loadRealAQIData();
+    // Ülke AQI verilerini haritaya ekle
+    addCountryAQIToMap();
 }
 
-async function loadRealAQIData() {
-    const loadingElement = document.getElementById('globalLoading');
-    const summaryElement = document.getElementById('globalSummary');
-    const t = translations[currentLang] || translations.en;
-    
-    loadingElement.style.display = 'block';
-    summaryElement.innerHTML = '<div class="muted">Loading real AQI data from WAQI API...</div>';
-    
-    try {
-        // Dünya çapında büyük şehirlerin koordinatları
-        const majorCities = [
-            {name: 'Delhi', lat: 28.6139, lon: 77.2090},
-            {name: 'Beijing', lat: 39.9042, lon: 116.4074},
-            {name: 'Moscow', lat: 55.7558, lon: 37.6173},
-            {name: 'Istanbul', lat: 41.0082, lon: 28.9784},
-            {name: 'Tokyo', lat: 35.6762, lon: 139.6503},
-            {name: 'Mexico City', lat: 19.4326, lon: -99.1332},
-            {name: 'Cairo', lat: 30.0444, lon: 31.2357},
-            {name: 'London', lat: 51.5074, lon: -0.1278},
-            {name: 'New York', lat: 40.7128, lon: -74.0060},
-            {name: 'Sao Paulo', lat: -23.5505, lon: -46.6333}
-        ];
+function addCountryAQIToMap() {
+    const countryAQIData = {
+        "Turkey": { lat: 39.9334, lon: 32.8597, aqi: 65 },
+        "Germany": { lat: 52.5200, lon: 13.4050, aqi: 45 },
+        "France": { lat: 48.8566, lon: 2.3522, aqi: 52 },
+        "Italy": { lat: 41.9028, lon: 12.4964, aqi: 68 },
+        "Spain": { lat: 40.4168, lon: -3.7038, aqi: 58 },
+        "UK": { lat: 51.5074, lon: -0.1278, aqi: 48 },
+        "USA": { lat: 38.9072, lon: -77.0369, aqi: 72 },
+        "China": { lat: 39.9042, lon: 116.4074, aqi: 156 },
+        "India": { lat: 28.6139, lon: 77.2090, aqi: 189 },
+        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 }
+    };
+
+    Object.entries(countryAQIData).forEach(([country, data]) => {
+        const color = getColorForAQI(data.aqi);
+        const radius = Math.max(100000, data.aqi * 2000); // AQI'ye göre boyut
         
-        let highPollutionCount = 0;
+        const circle = L.circle([data.lat, data.lon], {
+            radius: radius,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.5
+        }).addTo(globalMap);
         
-        for (const city of majorCities) {
-            try {
-                const response = await fetch(`https://api.waqi.info/feed/geo:${city.lat};${city.lon}/?token=${WAQI_TOKEN}`);
-                const data = await response.json();
-                
-                if (data.status === "ok" && data.data) {
-                    const aqi = data.data.aqi;
-                    const pm25 = data.data.iaqi?.pm25?.v;
-                    
-                    if (pm25 && pm25 > 125) {
-                        highPollutionCount++;
-                        const color = getColorForPM25(pm25);
-                        const marker = L.circle([city.lat, city.lon], {
-                            radius: 100000,
-                            color: color,
-                            fillColor: color,
-                            fillOpacity: 0.6
-                        }).addTo(globalMap);
-                        
-                        marker.bindPopup(`
-                            <strong>${city.name}</strong><br>
-                            AQI: ${aqi || 'N/A'}<br>
-                            PM2.5: ${pm25} µg/m³<br>
-                            ${getAQILevelText(aqi)}
-                        `);
-                    }
-                }
-            } catch (error) {
-                console.error(`Error fetching data for ${city.name}:`, error);
-            }
-        }
-        
-        loadingElement.style.display = 'none';
-        
-        if (highPollutionCount > 0) {
-            summaryElement.innerHTML = `<div class="muted">Found ${highPollutionCount} locations with PM2.5 > 125 µg/m³. Click on circles for details.</div>`;
-        } else {
-            summaryElement.innerHTML = `<div class="muted">${t.noHighPollution}</div>`;
-        }
-        
-    } catch (error) {
-        loadingElement.style.display = 'none';
-        summaryElement.innerHTML = '<div class="muted" style="color: red;">Error loading AQI data. Using simulated data instead.</div>';
-        // Hata durumunda simüle edilmiş verileri göster
-        showSimulatedHotspots();
-    }
+        circle.bindPopup(`
+            <strong>${country}</strong><br>
+            Average AQI: <strong style="color: ${color}">${data.aqi}</strong><br>
+            ${getAQILevelText(data.aqi)}
+        `);
+    });
+
+    document.getElementById('globalSummary').innerHTML = 
+        '<div class="muted">Showing country average AQI values. Click on circles for details.</div>';
 }
 
 function getAQILevelText(aqi) {
-    if (!aqi) return 'No data';
-    if (aqi <= 50) return 'Good';
-    if (aqi <= 100) return 'Moderate';
-    if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
-    if (aqi <= 200) return 'Unhealthy';
-    if (aqi <= 300) return 'Very Unhealthy';
-    return 'Hazardous';
+    if (aqi <= 50) return 'Air Quality: Good';
+    if (aqi <= 100) return 'Air Quality: Moderate';
+    if (aqi <= 150) return 'Air Quality: Unhealthy for Sensitive Groups';
+    if (aqi <= 200) return 'Air Quality: Unhealthy';
+    if (aqi <= 300) return 'Air Quality: Very Unhealthy';
+    return 'Air Quality: Hazardous';
 }
 
-function showSimulatedHotspots() {
-    const hotspots = [
-        {name: 'Delhi, India', lat: 28.7041, lon: 77.1025, pm25: 320},
-        {name: 'Beijing, China', lat: 39.9042, lon: 116.4074, pm25: 280},
-        {name: 'Lahore, Pakistan', lat: 31.5204, lon: 74.3587, pm25: 260},
-        {name: 'Dhaka, Bangladesh', lat: 23.8103, lon: 90.4125, pm25: 240},
-        {name: 'Karachi, Pakistan', lat: 24.8607, lon: 67.0011, pm25: 220},
-        {name: 'Ulaanbaatar, Mongolia', lat: 47.8864, lon: 106.9057, pm25: 300},
-        {name: 'Mexico City, Mexico', lat: 19.4326, lon: -99.1332, pm25: 180},
-        {name: 'Silesia, Poland (industrial)', lat: 50.3, lon: 18.7, pm25: 190},
-        {name: 'Kabul, Afghanistan', lat: 34.555, lon: 69.207, pm25: 160}
-    ];
-    
-    hotspots.forEach(h => {
-        if (h.pm25 >= 125) {
-            const color = getColorForPM25(h.pm25);
-            const marker = L.circle([h.lat, h.lon], {
-                radius: Math.min(50000, h.pm25 * 300),
-                color: color,
-                fillColor: color,
-                fillOpacity: 0.5
-            }).addTo(globalMap);
-            marker.bindPopup(`<strong>${h.name}</strong><br>Simulated PM2.5: ${h.pm25}`);
-        }
-    });
-}
-
-function getColorForPM25(v) {
-    if (v <= 50) return 'green';
-    if (v <= 100) return 'yellow';
-    if (v <= 150) return 'orange';
-    if (v <= 200) return 'red';
-    if (v <= 300) return 'purple';
-    return 'maroon';
-}
-
-// AQI haritası fonksiyonları önceki gibi kalacak
+// Kalan AQI haritası fonksiyonları önceki gibi kalacak
 function initAqiMap() {
     if (aqiMap) {
         aqiMap.invalidateSize();
