@@ -9,10 +9,28 @@
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
 #controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:12px; background:#f4f4f4; }
 #addressWrapper { flex:1; position:relative; }
-#addressInput { width:100%; padding:8px 50px 8px 10px; font-size:15px; border:1px solid #ccc; border-radius:6px; }
-#clearBtn { position:absolute; right:5px; top:50%; transform:translateY(-50%); padding:5px 10px; border-radius:6px; border:1px solid #bbb; background:white; cursor:pointer; }
-#locateBtn { padding:8px 12px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; margin-left:5px; }
-#resultList { position:absolute; left:0; right:0; top:44px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:6px; z-index:1000; max-height:400px; overflow:auto; display:none; font-size:14px; }
+#addressInput { 
+  width:100%; 
+  padding:6px 40px 6px 10px; /* daha kompakt */
+  font-size:14px; 
+  border:1px solid #ccc; 
+  border-radius:6px; 
+  height:32px;
+}
+#clearBtn { 
+  position:absolute; 
+  right:5px; 
+  top:50%; 
+  transform:translateY(-50%); 
+  padding:3px 8px; 
+  font-size:12px; 
+  border-radius:6px; 
+  border:1px solid #bbb; 
+  background:white; 
+  cursor:pointer; 
+}
+#locateBtn { padding:6px 10px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; margin-left:5px; height:32px; }
+#resultList { position:absolute; left:0; right:0; top:34px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:6px; z-index:1000; max-height:400px; overflow:auto; display:none; font-size:14px; }
 .resultItem { padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer; }
 .resultItem:hover { background:#f0f7ff; }
 #map { height:60vh; }
