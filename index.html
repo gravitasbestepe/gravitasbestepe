@@ -170,7 +170,7 @@ const translations = {
         quickRegisterDesc: "Use the Device Register tab to manage vehicles.",
         registerSuccess: "Registration created (demo).", simulateAll: "Simulate All Now",
         aqiMapTitle: "Interactive Air Quality Map", aqiDetailTitle: "Air Quality Details",
-        aqiLocation: "Location", aqiText: "AQI", aqiPollutant: "Dominant Pollutant", locateBtn: "Locate Me",
+        aqiLocation: "Location", aqiText: "AQI", aqiPollutant: "Dominant Pollutant", locateBtn: "Locate Me", aqiClear: "Clear",
         pollutantTitle: "Pollutant Details (µg/m³)",
         pollutantPlaceholder: "Click on the map or search for a location.",
         aqiNoData: "AQI data not available for this location.",
@@ -196,7 +196,7 @@ const translations = {
         quickRegisterDesc: "Araçları yönetmek için Cihaz Kayıt sekmesini kullanın.",
         registerSuccess: "Kayıt oluşturuldu (demo).", simulateAll: "Tümünü Simüle Et",
         aqiMapTitle: "Etkileşimli Hava Kalitesi Haritası", aqiDetailTitle: "Hava Kalitesi Detayları",
-        aqiLocation: "Konum", aqiText: "HKİ", aqiPollutant: "Baskın Kirletici", locateBtn: "Konumumu Bul",
+        aqiLocation: "Konum", aqiText: "HKİ", aqiPollutant: "Baskın Kirletici", locateBtn: "Konumumu Bul", aqiClear: "Temizle",
         pollutantTitle: "Kirletici Detayları (µg/m³)",
         pollutantPlaceholder: "Haritaya tıklayın veya bir konum arayın.",
         aqiNoData: "Bu konum için HKİ verisi mevcut değil.",
@@ -222,7 +222,7 @@ const translations = {
         quickRegisterDesc: "Verwenden Sie den Geräte-Register-Tab, um Fahrzeuge zu verwalten.",
         registerSuccess: "Registrierung erstellt (Demo).", simulateAll: "Jetzt simulieren",
         aqiMapTitle: "Interaktive Luftqualitätskarte", aqiDetailTitle: "Luftqualitätsdetails",
-        aqiLocation: "Ort", aqiText: "AQI", aqiPollutant: "Dominanter Schadstoff", locateBtn: "Standort finden",
+        aqiLocation: "Ort", aqiText: "AQI", aqiPollutant: "Dominanter Schadstoff", locateBtn: "Standort finden", aqiClear: "Löschen",
         pollutantTitle: "Schadstoffdetails (µg/m³)",
         pollutantPlaceholder: "Klicken Sie auf die Karte oder suchen Sie nach einem Ort.",
         aqiNoData: "AQI-Daten für diesen Standort nicht verfügbar.",
@@ -248,7 +248,7 @@ const translations = {
         quickRegisterDesc: "Используйте вкладку «Регистрация устройства» для управления транспортными средствами.",
         registerSuccess: "Регистрация создана (демо).", simulateAll: "Симулировать всё",
         aqiMapTitle: "Интерактивная карта качества воздуха", aqiDetailTitle: "Детали качества воздуха",
-        aqiLocation: "Местоположение", aqiText: "AQI", aqiPollutant: "Основной загрязнитель", locateBtn: "Найти меня",
+        aqiLocation: "Местоположение", aqiText: "AQI", aqiPollutant: "Основной загрязнитель", locateBtn: "Найти меня", aqiClear: "Очистить",
         pollutantTitle: "Детали загрязнителей (мкг/м³)",
         pollutantPlaceholder: "Нажмите на карту или найдите местоположение.",
         aqiNoData: "Данные AQI для этого местоположения недоступны.",
@@ -326,11 +326,16 @@ function applyTranslations(){
     document.getElementById('rulesTitle').textContent = t.rulesTitle;
     document.getElementById('globalTitle').textContent = t.globalTitle;
     document.getElementById('globalDesc').textContent = t.globalDesc;
+
+    // AQI Page çevirileri güncellendi
     document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
     document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
     document.getElementById('aqiLocateBtn').textContent = t.locateBtn;
+    document.getElementById('aqiClearBtn').textContent = t.aqiClear; // 'Clear' butonu
     document.getElementById('pollutantTitle').textContent = t.pollutantTitle;
     document.getElementById('pollutantsPlaceholder').textContent = t.pollutantPlaceholder;
+    document.getElementById('aqiAddressInput').placeholder = 'Enter city or address'; // Placeholder sabit kalabilir
+
     resetAqiDetails(document.getElementById('aqiAddressInput').value || '—');
 }
 
@@ -462,7 +467,7 @@ let globalMap = null;
 function initGlobalMap(){
     if(globalMap) return;
     globalMap = L.map('globalMap').setView([20,0],2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(globalMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(globalMap); // Tile Layer eklendi
     const hotspots = [
         {name:'Delhi, India', lat:28.7041, lon:77.1025, pm25: 320},
         {name:'Beijing, China', lat:39.9042, lon:116.4074, pm25: 280},
@@ -495,7 +500,6 @@ function getColorForPM25(v){
     return 'maroon';
 }
 
-// AQI Map (Yeni Sekme)
 let aqiMap = null;
 let aqiMarker = null;
 
@@ -513,8 +517,8 @@ const detailMaskMsg=document.getElementById('detailMaskMsg');
 
 function initAqiMap(){
     if(aqiMap) return;
-    aqiMap=L.map('aqiMap').setView([39.925,32.866],6); // Ankara/Turkey default
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(aqiMap);
+    aqiMap=L.map('aqiMap').setView([39.925,32.866],6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(aqiMap); // Tile Layer eklendi
     
     aqiMap.on('click',function(e){
         const lat=e.latlng.lat;
@@ -535,12 +539,12 @@ function setAqiMarker(lat,lon){
 }
 
 async function nominatimSearch(q){
-    const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});
+    const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':lang}});
     return res.json();
 }
 
 async function nominatimReverse(lat,lon){
-    const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'en'}});
+    const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':lang}});
     return res.json();
 }
 
@@ -550,7 +554,7 @@ function renderAqiResults(items){
     items.forEach(item=>{
         const div=document.createElement('div');
         div.className='resultItem';
-        div.innerHTML=`<strong>${item.display_name}</strong>`;
+        div.innerHTML=`${item.display_name}`;
         div.tabIndex=0;
         div.addEventListener('click',()=>selectAqiResult(item));
         div.addEventListener('keydown',(e)=>{if(e.key==='Enter')selectAqiResult(item);});
@@ -608,8 +612,15 @@ function updateAqiUI(data,label){
     if(data && data.iaqi){
         pollutantKeys.forEach(k=>{
             if(data.iaqi[k]){
+                const value = data.iaqi[k].v;
+                let quality = '—';
+                if(k === 'pm25' || k === 'pm10' || k === 'o3' || k === 'no2' || k === 'so2' || k === 'co'){
+                    if(value <= 50) quality = '(Good)';
+                    else if(value <= 100) quality = '(Moderate)';
+                    else quality = '(High)';
+                }
                 const li=document.createElement('li');
-                li.innerHTML=`<strong>${k.toUpperCase()}</strong>: ${data.iaqi[k].v} <span class="muted">${data.iaqi[k].v <= 50 ? ' (Good)' : data.iaqi[k].v <= 100 ? ' (Moderate)' : ' (High)'}</span>`;
+                li.innerHTML=`<strong>${k.toUpperCase()}</strong>: ${value} <span class="muted">${quality}</span>`;
                 pollutantsList.appendChild(li);
             }
         });
@@ -639,6 +650,7 @@ async function goToAqiLocation(lat,lon,label){
     fetchAqiData(lat,lon,label);
 }
 
+// Adres araması ve otomatik tamamlama işlevi düzeltildi
 aqiAddressInput.addEventListener('input',debounce(async()=>{
     const q=aqiAddressInput.value;
     if(!q){ aqiResultList.style.display="none"; return;}
@@ -646,6 +658,7 @@ aqiAddressInput.addEventListener('input',debounce(async()=>{
     renderAqiResults(results);
 },300));
 
+// Konumumu Bul (Locate Me) işlevi düzeltildi
 aqiLocateBtn.addEventListener('click',()=>{
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(async pos=>{
@@ -655,8 +668,9 @@ aqiLocateBtn.addEventListener('click',()=>{
             const label=rev && rev.display_name?rev.display_name:`Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
             aqiAddressInput.value = label;
             goToAqiLocation(lat,lon,label);
-        },err=>alert("Unable to get your location."));
-    }else alert("Geolocation not supported.");
+            aqiResultList.style.display = 'none';
+        },err=>alert("Unable to get your location. Please ensure location services are enabled."));
+    }else alert("Geolocation not supported by this browser/device.");
 });
 
 aqiClearBtn.addEventListener('click',()=>{
