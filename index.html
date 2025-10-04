@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GravinAir - Araç Emisyon Sistemi</title>
+<title>Global Emission Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-  #controls { display:flex; gap:6px; align-items:center; padding:8px; background:#f4f4f4; flex-wrap:wrap; }
-  #map { height:50vh; margin:10px 0; }
-  #vehicleList, #adminPanel { padding:10px; background:white; margin:10px; border-radius:5px; }
-  input, button { padding:5px; margin:2px; }
-  table { border-collapse:collapse; width:100%; }
-  th, td { border:1px solid #ccc; padding:4px; text-align:center; }
+body { font-family: Arial; margin:0; padding:0; background:#fafafa; color:#222; }
+#controls { display:flex; gap:6px; align-items:center; padding:8px; background:#f4f4f4; flex-wrap:wrap; }
+#map { height:50vh; margin:10px 0; }
+#vehicleList, #adminPanel { padding:10px; background:white; margin:10px; border-radius:5px; }
+input, button { padding:5px; margin:2px; }
+table { border-collapse:collapse; width:100%; }
+th, td { border:1px solid #ccc; padding:4px; text-align:center; }
 </style>
 </head>
 <body>
@@ -65,7 +65,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // Map
-const map = L.map('map').setView([39.925,32.866], 2);
+const map = L.map('map').setView([0,0],2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 
 // Login
@@ -80,7 +80,6 @@ loginBtn.addEventListener("click", async ()=>{
   }catch(err){console.error(err);}
 });
 
-// Auth State
 onAuthStateChanged(auth,user=>{
   if(user) userInfo.textContent = "Hoşgeldin: " + user.displayName;
   else userInfo.textContent = "Henüz giriş yapılmadı";
@@ -119,8 +118,8 @@ async function loadVehicles(){
     tbody.appendChild(tr);
 
     // Map marker (simüle rastgele koordinat)
-    const lat =  Math.random()*140-70; // -70/+70
-    const lon = Math.random()*360-180; // -180/+180
+    const lat =  Math.random()*140-70; 
+    const lon = Math.random()*360-180; 
     L.circle([lat,lon],{radius:v.emission*50,color:"red"}).addTo(map)
       .bindPopup(`Plaka: ${v.plate}<br>Emisyon: ${v.emission} g/km<br>Şehir: ${v.city}`);
   });
