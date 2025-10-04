@@ -7,11 +7,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-#controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px; background:#f4f4f4; }
+#controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:8px; background:#f4f4f4; }
 #addressWrapper { flex:1; position:relative; min-width:200px; }
 #addressInput { 
   width:100%; 
-  padding:5px 40px 5px 8px; 
+  padding:5px 38px 5px 8px; 
   font-size:13px; 
   border:1px solid #ccc; 
   border-radius:5px; 
@@ -84,7 +84,7 @@ const maskMsg=document.getElementById('maskMsg');
 function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setTimeout(()=>fn.apply(this,args),wait);};}
 
 async function nominatimSearch(q){
-    const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=20&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});
+    const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=25&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});
     return res.json();
 }
 
@@ -170,7 +170,7 @@ addressInput.addEventListener('input',debounce(async()=>{
     if(!q)return;
     const results=await nominatimSearch(q);
     renderResults(results);
-},300));
+},250));
 
 locateBtn.addEventListener('click',()=>{
     if(navigator.geolocation){
