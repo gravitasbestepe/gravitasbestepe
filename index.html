@@ -6,20 +6,22 @@
 <title>Emission Simulator</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
+/* CSS Stilleri önceki gibi korundu, haritaların boyutları sabit. */
 :root{--bg:#fafafa;--card:#fff;--muted:#666}
 body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222}
 header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0b5;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
 header h1{font-size:18px;margin:0}
 nav{display:flex;gap:8px;align-items:center}
-nav button{background:transparent;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
-nav button.active{background:rgba(255,255,255,.9)}
+nav button{background:transparent;border:0;padding:8px 10px;border-radius:6px;cursor:pointer; color: white;}
+nav button.active{background:rgba(255,255,255,.9); color: #222;}
 .lang-select{margin-left:auto;display:flex;gap:8px;align-items:center}
-.lang-btn{padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer}
-.lang-btn.active{background:white}
+.lang-btn{padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer; color: white;}
+.lang-btn.active{background:white; color: #222;}
 main{padding:12px}
 .grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
 .card{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 16px rgba(12,12,12,.04)}
-#map,#globalMap,#nationalMap, #aqiMap {height:420px;border-radius:8px}
+/* Harita boyutları korundu */
+#map,#globalMap,#nationalMap, #aqiMap {height:420px;border-radius:8px} 
 #aqiControls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:8px 0; border-bottom:1px solid #eee; margin-bottom: 8px;}
 #addressWrapper { flex:1; position:relative; min-width:180px; }
 #aqiAddressInput { width:100%; padding:5px 38px 5px 8px; font-size:13px; border:1px solid #ccc; border-radius:5px; height:28px; box-sizing:border-box;}
@@ -168,22 +170,16 @@ const translations = {
         behaviourText: "This demo simulates device readings and traffic eligibility.",
         quickRegisterTitle: "Device Registration",
         quickRegisterDesc: "Use the Device Register tab to manage vehicles.",
+        regTitle: "Device Register", registeredTitle: "Registered Devices", myVehiclesTitle: "My Vehicles", rulesTitle: "Rules & Advice", globalTitle: "Global Emission Hotspots (Simulated)", globalDesc: "Showing simulated dangerous hotspots around the world. Not real data — demo only.",
+        reg_plate_label: "Plate", reg_device_label: "Device ID", reg_city_label: "City", regBtn: "Create Register",
         registerSuccess: "Registration created (demo).", simulateAll: "Simulate All Now",
         aqiMapTitle: "Interactive Air Quality Map", aqiDetailTitle: "Air Quality Details",
         aqiLocation: "Location", aqiText: "AQI", aqiPollutant: "Dominant Pollutant", locateBtn: "Locate Me", aqiClear: "Clear",
         pollutantTitle: "Pollutant Details (µg/m³)",
         pollutantPlaceholder: "Click on the map or search for a location.",
         aqiNoData: "AQI data not available for this location.",
-        aqiWarning_good: "✅ Air quality is good for everyone.",
-        aqiWarning_moderate: "⚠️ Moderate. Sensitive people should take care.",
-        aqiWarning_usg: "⚠️ Unhealthy for sensitive groups. Limit outdoor activity.",
-        aqiWarning_unhealthy: "❌ Unhealthy. Avoid outdoor exercise.",
-        aqiWarning_v_unhealthy: "☠️ Very unhealthy. Everyone should stay indoors.",
-        aqiWarning_hazardous: "🚫 Hazardous. Stay indoors.",
-        aqiMask_usg: "Consider wearing a mask if you have respiratory conditions.",
-        aqiMask_unhealthy: "Wear a mask if going outside.",
-        aqiMask_v_unhealthy: "Use a high-quality mask if you must go out.",
-        aqiMask_hazardous: "Wear a mask and use air purifier.",
+        aqiWarning_good: "✅ Air quality is good for everyone.", aqiWarning_moderate: "⚠️ Moderate. Sensitive people should take care.", aqiWarning_usg: "⚠️ Unhealthy for sensitive groups. Limit outdoor activity.", aqiWarning_unhealthy: "❌ Unhealthy. Avoid outdoor exercise.", aqiWarning_v_unhealthy: "☠️ Very unhealthy. Everyone should stay indoors.", aqiWarning_hazardous: "🚫 Hazardous. Stay indoors.",
+        aqiMask_usg: "Consider wearing a mask if you have respiratory conditions.", aqiMask_unhealthy: "Wear a mask if going outside.", aqiMask_v_unhealthy: "Use a high-quality mask if you must go out.", aqiMask_hazardous: "Wear a mask and use air purifier.",
     },
     tr: {
         title: "Emisyon Simülatörü (Demo)",
@@ -194,22 +190,16 @@ const translations = {
         behaviourText: "Bu demo, cihaz okumalarını ve trafik uygunluğunu simüle eder.",
         quickRegisterTitle: "Cihaz Kayıt",
         quickRegisterDesc: "Araçları yönetmek için Cihaz Kayıt sekmesini kullanın.",
+        regTitle: "Cihaz Kayıt", registeredTitle: "Kayıtlı Cihazlar", myVehiclesTitle: "Araçlarım", rulesTitle: "Kurallar & Öneriler", globalTitle: "Global Emisyon Sıcak Noktaları (Simüle)", globalDesc: "Dünya genelindeki simüle tehlikeli sıcak noktalar gösteriliyor. Gerçek veri değildir — sadece demo.",
+        reg_plate_label: "Plaka", reg_device_label: "Cihaz ID", reg_city_label: "Şehir", regBtn: "Kayıt Oluştur",
         registerSuccess: "Kayıt oluşturuldu (demo).", simulateAll: "Tümünü Simüle Et",
         aqiMapTitle: "Etkileşimli Hava Kalitesi Haritası", aqiDetailTitle: "Hava Kalitesi Detayları",
         aqiLocation: "Konum", aqiText: "HKİ", aqiPollutant: "Baskın Kirletici", locateBtn: "Konumumu Bul", aqiClear: "Temizle",
         pollutantTitle: "Kirletici Detayları (µg/m³)",
         pollutantPlaceholder: "Haritaya tıklayın veya bir konum arayın.",
         aqiNoData: "Bu konum için HKİ verisi mevcut değil.",
-        aqiWarning_good: "✅ Hava kalitesi herkes için iyi.",
-        aqiWarning_moderate: "⚠️ Orta. Hassas kişilerin dikkatli olması gerekir.",
-        aqiWarning_usg: "⚠️ Hassas gruplar için sağlıksız. Dışarıdaki aktiviteleri sınırlayın.",
-        aqiWarning_unhealthy: "❌ Sağlıksız. Dışarıda egzersiz yapmaktan kaçının.",
-        aqiWarning_v_unhealthy: "☠️ Çok sağlıksız. Herkes içeride kalmalı.",
-        aqiWarning_hazardous: "🚫 Tehlikeli. İçeride kalın.",
-        aqiMask_usg: "Solunum rahatsızlığınız varsa maske takmayı düşünün.",
-        aqiMask_unhealthy: "Dışarı çıkacaksanız maske takın.",
-        aqiMask_v_unhealthy: "Dışarı çıkmanız gerekiyorsa yüksek kaliteli maske kullanın.",
-        aqiMask_hazardous: "Maske takın ve hava temizleyici kullanın.",
+        aqiWarning_good: "✅ Hava kalitesi herkes için iyi.", aqiWarning_moderate: "⚠️ Orta. Hassas kişilerin dikkatli olması gerekir.", aqiWarning_usg: "⚠️ Hassas gruplar için sağlıksız. Dışarıdaki aktiviteleri sınırlayın.", aqiWarning_unhealthy: "❌ Sağlıksız. Dışarıda egzersiz yapmaktan kaçının.", aqiWarning_v_unhealthy: "☠️ Çok sağlıksız. Herkes içeride kalmalı.", aqiWarning_hazardous: "🚫 Tehlikeli. İçeride kalın.",
+        aqiMask_usg: "Solunum rahatsızlığınız varsa maske takmayı düşünün.", aqiMask_unhealthy: "Dışarı çıkacaksanız maske takın.", aqiMask_v_unhealthy: "Dışarı çıkmanız gerekiyorsa yüksek kaliteli maske kullanın.", aqiMask_hazardous: "Maske takın ve hava temizleyici kullanın.",
     },
     de: { 
         title: "Emissionssimulator (Demo)",
@@ -220,22 +210,16 @@ const translations = {
         behaviourText: "Dieses Demo simuliert Geräteablesungen und Verkehrstauglichkeit.",
         quickRegisterTitle: "Gerät registrieren",
         quickRegisterDesc: "Verwenden Sie den Geräte-Register-Tab, um Fahrzeuge zu verwalten.",
+        regTitle: "Gerät registrieren", registeredTitle: "Registrierte Geräte", myVehiclesTitle: "Meine Fahrzeuge", rulesTitle: "Regeln & Tipps", globalTitle: "Globale Emissions-Hotspots (Simuliert)", globalDesc: "Anzeige simulierter gefährlicher Hotspots weltweit. Keine echten Daten – nur Demo.",
+        reg_plate_label: "Kennzeichen", reg_device_label: "Geräte-ID", reg_city_label: "Stadt", regBtn: "Registrierung erstellen",
         registerSuccess: "Registrierung erstellt (Demo).", simulateAll: "Jetzt simulieren",
         aqiMapTitle: "Interaktive Luftqualitätskarte", aqiDetailTitle: "Luftqualitätsdetails",
         aqiLocation: "Ort", aqiText: "AQI", aqiPollutant: "Dominanter Schadstoff", locateBtn: "Standort finden", aqiClear: "Löschen",
         pollutantTitle: "Schadstoffdetails (µg/m³)",
         pollutantPlaceholder: "Klicken Sie auf die Karte oder suchen Sie nach einem Ort.",
         aqiNoData: "AQI-Daten für diesen Standort nicht verfügbar.",
-        aqiWarning_good: "✅ Luftqualität ist gut für alle.",
-        aqiWarning_moderate: "⚠️ Mäßig. Empfindliche Personen sollten vorsichtig sein.",
-        aqiWarning_usg: "⚠️ Ungesund für empfindliche Gruppen. Begrenzen Sie Aktivitäten im Freien.",
-        aqiWarning_unhealthy: "❌ Ungesund. Vermeiden Sie Sport im Freien.",
-        aqiWarning_v_unhealthy: "☠️ Sehr ungesund. Alle sollten drinnen bleiben.",
-        aqiWarning_hazardous: "🚫 Gefährlich. Drinnen bleiben.",
-        aqiMask_usg: "Erwägen Sie das Tragen einer Maske, wenn Sie Atemwegserkrankungen haben.",
-        aqiMask_unhealthy: "Tragen Sie eine Maske, wenn Sie nach draußen gehen.",
-        aqiMask_v_unhealthy: "Verwenden Sie eine hochwertige Maske, wenn Sie raus müssen.",
-        aqiMask_hazardous: "Tragen Sie eine Maske und verwenden Sie einen Luftreiniger.",
+        aqiWarning_good: "✅ Luftqualität ist gut für alle.", aqiWarning_moderate: "⚠️ Mäßig. Empfindliche Personen sollten vorsichtig sein.", aqiWarning_usg: "⚠️ Ungesund für empfindliche Gruppen. Begrenzen Sie Aktivitäten im Freien.", aqiWarning_unhealthy: "❌ Ungesund. Vermeiden Sie Sport im Freien.", aqiWarning_v_unhealthy: "☠️ Sehr ungesund. Alle sollten drinnen bleiben.", aqiWarning_hazardous: "🚫 Gefährlich. Drinnen bleiben.",
+        aqiMask_usg: "Erwägen Sie das Tragen einer Maske, wenn Sie Atemwegserkrankungen haben.", aqiMask_unhealthy: "Tragen Sie eine Maske, wenn Sie nach draußen gehen.", aqiMask_v_unhealthy: "Verwenden Sie eine hochwertige Maske, wenn Sie raus müssen.", aqiMask_hazardous: "Tragen Sie eine Maske und verwenden Sie einen Luftreiniger.",
     },
     ru: { 
         title: "Симулятор выбросов (демо)",
@@ -246,26 +230,20 @@ const translations = {
         behaviourText: "Демо симулирует показания устройств и допустимость в трафике.",
         quickRegisterTitle: "Регистрация устройства",
         quickRegisterDesc: "Используйте вкладку «Регистрация устройства» для управления транспортными средствами.",
+        regTitle: "Регистрация устройства", registeredTitle: "Зарегистрированные устройства", myVehiclesTitle: "Мои авто", rulesTitle: "Правила и советы", globalTitle: "Глобальные горячие точки выбросов (симуляция)", globalDesc: "Показаны симулированные опасные горячие точки по всему миру. Не реальные данные — только демо.",
+        reg_plate_label: "Номерной знак", reg_device_label: "Идентификатор устройства", reg_city_label: "Город", regBtn: "Создать регистрацию",
         registerSuccess: "Регистрация создана (демо).", simulateAll: "Симулировать всё",
         aqiMapTitle: "Интерактивная карта качества воздуха", aqiDetailTitle: "Детали качества воздуха",
         aqiLocation: "Местоположение", aqiText: "AQI", aqiPollutant: "Основной загрязнитель", locateBtn: "Найти меня", aqiClear: "Очистить",
         pollutantTitle: "Детали загрязнителей (мкг/м³)",
         pollutantPlaceholder: "Нажмите на карту или найдите местоположение.",
         aqiNoData: "Данные AQI для этого местоположения недоступны.",
-        aqiWarning_good: "✅ Качество воздуха хорошее для всех.",
-        aqiWarning_moderate: "⚠️ Умеренное. Чувствительным людям следует быть осторожными.",
-        aqiWarning_usg: "⚠️ Нездоровое для чувствительных групп. Ограничьте активность на улице.",
-        aqiWarning_unhealthy: "❌ Нездоровое. Избегайте физических упражнений на улице.",
-        aqiWarning_v_unhealthy: "☠️ Очень нездоровое. Всем следует оставаться в помещении.",
-        aqiWarning_hazardous: "🚫 Опасно. Оставайтесь в помещении.",
-        aqiMask_usg: "Подумайте о ношении маски, если у вас есть заболевания дыхательных путей.",
-        aqiMask_unhealthy: "Носите маску, если выходите на улицу.",
-        aqiMask_v_unhealthy: "Используйте высококачественную маску, если вам необходимо выйти.",
-        aqiMask_hazardous: "Носите маску и используйте очиститель воздуха.",
+        aqiWarning_good: "✅ Качество воздуха хорошее для всех.", aqiWarning_moderate: "⚠️ Умеренное. Чувствительным людям следует быть осторожными.", aqiWarning_usg: "⚠️ Нездоровое для чувствительных групп. Ограничьте активность на улице.", aqiWarning_unhealthy: "❌ Нездоровое. Избегайте физических упражнений на улице.", aqiWarning_v_unhealthy: "☠️ Очень нездоровое. Всем следует оставаться в помещении.", aqiWarning_hazardous: "🚫 Опасно. Оставайтесь в помещении.",
+        aqiMask_usg: "Подумайте о ношении маски, если у вас есть заболевания дыхательных путей.", aqiMask_unhealthy: "Носите маску, если выходите на улицу.", aqiMask_v_unhealthy: "Используйте высококачественную маску, если вам необходимо выйти.", aqiMask_hazardous: "Носите маску и используйте очиститель воздуха.",
     }
 };
 
-// Varsayılan dilin 'en' olması sağlandı.
+// **Düzeltme 2:** Varsayılan dilin 'en' olması sağlandı.
 let lang = localStorage.getItem('site_lang') || 'en';
 
 const pages = {
@@ -282,7 +260,7 @@ function show(page){
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-' + page).classList.add('active');
     
-    // Haritaların görünürlük güncellemesi zorlandı
+    // **Düzeltme 3:** Haritaların görünürlük güncellemesi zorlandı
     if (page === 'global') {
         setTimeout(() => { initGlobalMap(); if (window.globalMap) window.globalMap.invalidateSize(); }, 200);
     } else if (page === 'aqi') {
@@ -305,10 +283,13 @@ function setLanguage(l){
 document.querySelectorAll('.lang-btn').forEach(b => {
     b.addEventListener('click', ()=>setLanguage(b.dataset.lang));
 });
+// İlk yüklemede dil ayarının uygulanması
 setLanguage(lang);
 
 function applyTranslations(){
     const t = translations[lang] || translations.en;
+    
+    // **Düzeltme 2:** Tüm önemli metinlerin çevrilmesi sağlandı (Rusça dahil).
     document.getElementById('title').textContent = t.title;
     document.getElementById('nav-home').textContent = t.nav.home;
     document.getElementById('nav-register').textContent = t.nav.register;
@@ -323,7 +304,12 @@ function applyTranslations(){
     document.getElementById('behaviourText').textContent = t.behaviourText;
     document.getElementById('quickRegisterTitle').textContent = t.quickRegisterTitle;
     document.getElementById('quickRegisterDesc').textContent = t.quickRegisterDesc;
+    
     document.getElementById('regTitle').textContent = t.regTitle;
+    document.getElementById('reg_plate_label').textContent = t.reg_plate_label;
+    document.getElementById('reg_device_label').textContent = t.reg_device_label;
+    document.getElementById('reg_city_label').textContent = t.reg_city_label;
+    document.getElementById('regBtn').textContent = t.regBtn;
     document.getElementById('registeredTitle').textContent = t.registeredTitle;
     document.getElementById('myVehiclesTitle').textContent = t.myVehiclesTitle;
     document.getElementById('rulesTitle').textContent = t.rulesTitle;
@@ -340,6 +326,8 @@ function applyTranslations(){
     document.getElementById('aqiAddressInput').placeholder = 'Enter city or address'; 
 
     resetAqiDetails(document.getElementById('aqiAddressInput').value || '—');
+    renderRegistered(); // Kayıt listesi başlıkları güncellensin
+    renderMyVehicles(); // Araç listesi başlıkları güncellensin
 }
 
 function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setTimeout(()=>fn.apply(this,args),wait);};}
@@ -381,20 +369,36 @@ function renderMyVehicles(){
         cont.appendChild(box);
     });
 }
+// **Düzeltme 1:** Kayıt oluşturma işlevi düzeltildi
 document.getElementById('regBtn').addEventListener('click', ()=>{
     const plate = document.getElementById('reg_plate').value.trim();
     const device = document.getElementById('reg_device').value.trim();
     const city = document.getElementById('reg_city').value.trim();
     if(!plate || !device){ alert('Plate and device required'); return; }
+    
     const reg = loadRegistry();
+    // Kontrol: Zaten kayıtlı mı? (Opsiyonel ama iyi bir pratik)
+    if (reg.some(r => r.device === device)) {
+        alert("Device ID already registered.");
+        return;
+    }
+
     reg.push({ plate, device, city, created: Date.now(), lastRead: null });
     saveRegistry(reg);
     renderRegistered();
     renderMyVehicles();
+    
+    // Alanları temizle
+    document.getElementById('reg_plate').value = '';
+    document.getElementById('reg_device').value = '';
+    document.getElementById('reg_city').value = '';
+    
     alert(translations[lang].registerSuccess);
     const idx = reg.length - 1;
+    // Yeni kayıt için ilk simülasyonu başlat
     gradualChange(idx, { start: 20, target: Math.round(Math.random()*140+10), steps: 6, interval: 2500 });
 });
+
 window.forceRead = function(btn){
     const idx = parseInt(btn.dataset.idx);
     simulateDeviceRead(idx);
@@ -468,15 +472,20 @@ function startBackgroundSimulation(){
 
 let globalMap = null;
 function initGlobalMap(){
-    if(globalMap) return;
+    // Haritanın zaten başlatılıp başlatılmadığını kontrol et
+    if(globalMap) {
+        globalMap.invalidateSize(); // Harita boyutu değiştiyse yenile
+        return;
+    }
+    
+    // **Düzeltme 3:** Harita başlatma ve Tile Layer eklendi
     globalMap = L.map('globalMap').setView([20,0],2);
-    // Harita görünürlüğü için Tile Layer eklendi
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
         maxZoom:19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(globalMap);
     
-    // Global Hotspot listesi PM2.5 > 150 olanlar için güncellendi
+    // PM2.5 > 150 olan sıcak noktalar için işaretleme
     const hotspots = [
         {name:'Delhi, India', lat:28.7041, lon:77.1025, pm25: 320},
         {name:'Beijing, China', lat:39.9042, lon:116.4074, pm25: 280},
@@ -486,13 +495,12 @@ function initGlobalMap(){
         {name:'Ulaanbaatar, Mongolia', lat:47.8864, lon:106.9057, pm25: 300},
         {name:'Mexico City, Mexico', lat:19.4326, lon:-99.1332, pm25: 180},
         {name:'Silesia, Poland (industrial)', lat:50.3, lon:18.7, pm25: 190},
-        // PM2.5 > 150 olan diğer bölgeler eklenebilir. Örneğin:
         {name:'Kabul, Afghanistan', lat:34.555, lon:69.207, pm25: 160},
-        {name:'Cairo, Egypt', lat:30.044, lon:31.235, pm25: 170},
+        {name:'Istanbul, Turkey', lat:41.0, lon:28.97, pm25: 120}, // Bu 150 altında, işaretlenmeyecek
     ];
     
     hotspots.forEach(h=>{
-        if (h.pm25 > 150) { // Sadece 150 üstü işaretlensin
+        if (h.pm25 >= 150) { // Sadece 150 ve üstü işaretlensin
             const color = getColorForPM25(h.pm25);
             const marker = L.circle([h.lat,h.lon], {
                 radius: Math.min(50000, h.pm25*300),
@@ -501,7 +509,7 @@ function initGlobalMap(){
             marker.bindPopup(`<strong>${h.name}</strong><br>Simulated PM2.5: ${h.pm25}`);
         }
     });
-    document.getElementById('globalSummary').innerHTML = '<div class="muted">Hotspots shown are simulated and only for demo purposes (PM2.5 > 150).</div>';
+    document.getElementById('globalSummary').innerHTML = '<div class="muted">Hotspots shown are simulated and only for demo purposes (PM2.5 >= 150).</div>';
 }
 function getColorForPM25(v){
     if(v<=50) return 'green';
@@ -528,9 +536,13 @@ const detailWarningMsg=document.getElementById('detailWarningMsg');
 const detailMaskMsg=document.getElementById('detailMaskMsg');
 
 function initAqiMap(){
-    if(aqiMap) return;
+    if(aqiMap) {
+        aqiMap.invalidateSize(); // Harita boyutu değiştiyse yenile
+        return;
+    }
+    
+    // **Düzeltme 3:** Harita başlatma ve Tile Layer eklendi
     aqiMap=L.map('aqiMap').setView([39.925,32.866],6);
-    // Harita görünürlüğü için Tile Layer eklendi
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
         maxZoom:19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -572,6 +584,7 @@ function renderAqiResults(items){
         div.className='resultItem';
         div.innerHTML=`${item.display_name}`;
         div.tabIndex=0;
+        // **Düzeltme 4:** Sonuç listesindeki öğeye tıklama işlevi eklendi
         div.addEventListener('click',()=>selectAqiResult(item));
         div.addEventListener('keydown',(e)=>{if(e.key==='Enter')selectAqiResult(item);});
         aqiResultList.appendChild(div);
@@ -649,7 +662,7 @@ async function fetchAqiData(lat,lon,label){
         const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
         const resp=await res.json();
         if(resp.status==="ok"){
-            updateAqiUI(resp.data,label);
+            updateAqiUI(resp.data.iaqi,resp.data.city.name); // AQI API'dan gelen şehir adını kullan
         } else {
             updateAqiUI(null, label);
             alert(translations[lang].aqiNoData);
@@ -666,7 +679,7 @@ async function goToAqiLocation(lat,lon,label){
     fetchAqiData(lat,lon,label);
 }
 
-// Adres araması ve otomatik tamamlama işlevi
+// **Düzeltme 4:** Adres araması ve otomatik tamamlama işlevi
 aqiAddressInput.addEventListener('input',debounce(async()=>{
     const q=aqiAddressInput.value;
     if(!q){ aqiResultList.style.display="none"; return;}
@@ -674,7 +687,7 @@ aqiAddressInput.addEventListener('input',debounce(async()=>{
     renderAqiResults(results);
 },300));
 
-// Konumumu Bul (Locate Me) işlevi
+// **Düzeltme 5:** Konumumu Bul (Locate Me) işlevi düzeltildi
 aqiLocateBtn.addEventListener('click',()=>{
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(async pos=>{
