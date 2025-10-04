@@ -7,8 +7,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-#controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:8px; background:#f4f4f4; }
-#addressWrapper { flex:1; position:relative; min-width:200px; }
+
+#controls {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:nowrap;
+  padding:8px;
+  background:#f4f4f4;
+}
+
+#addressWrapper {
+  flex:1 1 auto;
+  position:relative;
+  min-width:200px;
+  max-width:calc(100% - 120px);
+}
+
 #addressInput { 
   width:100%; 
   padding:5px 38px 5px 8px; 
@@ -16,7 +31,9 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
   border:1px solid #ccc; 
   border-radius:5px; 
   height:28px;
+  box-sizing:border-box;
 }
+
 #clearBtn { 
   position:absolute; 
   right:3px; 
@@ -29,10 +46,38 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
   background:white; 
   cursor:pointer; 
 }
-#locateBtn { padding:5px 10px; cursor:pointer; border-radius:5px; border:1px solid #bbb; background:white; height:28px; }
-#resultList { position:absolute; left:0; right:0; top:30px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:5px; z-index:1000; max-height:300px; overflow:auto; display:none; font-size:13px; }
-.resultItem { padding:6px 8px; border-bottom:1px solid #eee; cursor:pointer; }
+
+#locateBtn { 
+  padding:5px 12px; 
+  cursor:pointer; 
+  border-radius:5px; 
+  border:1px solid #bbb; 
+  background:white; 
+  height:28px; 
+  flex-shrink:0;
+}
+
+#resultList {
+  position:absolute; 
+  left:0; right:0; top:30px; 
+  background:white; 
+  box-shadow:0 4px 12px rgba(0,0,0,.08); 
+  border-radius:5px; 
+  z-index:1000; 
+  max-height:300px; 
+  overflow:auto; 
+  display:none; 
+  font-size:13px;
+}
+
+.resultItem { 
+  padding:6px 8px; 
+  border-bottom:1px solid #eee; 
+  cursor:pointer; 
+}
+
 .resultItem:hover { background:#f0f7ff; }
+
 #map { height:60vh; }
 #aqiDetails { padding:10px; background:white; }
 .aqi-bar { height:18px; width:100%; background:#ddd; margin:4px 0; border-radius:5px; overflow:hidden; }
@@ -44,10 +89,10 @@ ul#pollutants { margin:0; padding-left:18px; font-size:12px; }
 <div id="controls">
   <div id="addressWrapper">
     <input id="addressInput" placeholder="Enter city, street, school, or address" autocomplete="off" />
-    <button id="clearBtn">Clear</button>
+    <button id="clearBtn">×</button>
     <div id="resultList"></div>
   </div>
-  <button id="locateBtn">Locate Me</button>
+  <button id="locateBtn">📍 Locate Me</button>
 </div>
 <div id="map"></div>
 <div id="aqiDetails">
@@ -94,7 +139,8 @@ function renderResults(items){
     items.forEach(item=>{
         const div=document.createElement('div');
         div.className='resultItem';
-        div.innerHTML=`<strong>${item.display_name}</strong>`;
+        const display=item.display_name.split(",").map(s=>s.trim()).join(",<br>");
+        div.innerHTML=`<strong>${display}</strong>`;
         div.tabIndex=0;
         div.dataset.lat=item.lat;
         div.dataset.lon=item.lon;
