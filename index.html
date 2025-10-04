@@ -38,25 +38,21 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-// ==== CONFIG ====
-const TOKEN = "a43de1db3b12f4be6be52aaa9afc6ca9ffb3b26b"; // Senin token
+const TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38"; 
 
-// ==== MAP INIT ====
-const map = L.map('map').setView([39.925, 32.866], 6); // Türkiye başlangıç
+const map = L.map('map').setView([39.925, 32.866], 6); 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
 }).addTo(map);
 
 let marker = null;
 
-// ==== HELPER FUNCTIONS ====
 function updateAQIUI(data, label) {
   document.getElementById("locationLabel").textContent = "Location: " + label;
   const aqi = data.aqi;
   document.getElementById("aqiText").textContent = "AQI: " + aqi;
   document.getElementById("dominantPollutant").textContent = "Dominant Pollutant: " + data.dominentpol.toUpperCase();
   
-  // Renkli bar
   const aqiFill = document.getElementById("aqiBar");
   let color = "green";
   if (aqi <= 50) color="green";
@@ -69,7 +65,6 @@ function updateAQIUI(data, label) {
   aqiFill.style.width = Math.min(aqi,500)/500*100 + "%";
   aqiFill.textContent = aqi;
 
-  // Detaylar
   const pollutants = document.getElementById("pollutants");
   pollutants.innerHTML = "";
   const keys = ["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
@@ -104,8 +99,6 @@ function fetchAQI(lat, lon, label) {
   });
 }
 
-// ==== EVENTS ====
-// Locate me
 document.getElementById("locateBtn").addEventListener("click", ()=>{
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
@@ -121,7 +114,6 @@ document.getElementById("locateBtn").addEventListener("click", ()=>{
   } else alert("Geolocation not supported.");
 });
 
-// Map click
 map.on('click', function(e){
   const lat = e.latlng.lat;
   const lon = e.latlng.lng;
@@ -130,11 +122,9 @@ map.on('click', function(e){
   fetchAQI(lat, lon, `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);
 });
 
-// Address search
 document.getElementById("searchBtn").addEventListener("click", ()=>{
   const query = document.getElementById("addressInput").value;
   if(!query) return alert("Please enter a city or address.");
-  // Nominatim search
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
   .then(res=>res.json())
   .then(data=>{
