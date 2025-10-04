@@ -265,6 +265,7 @@ const translations = {
     }
 };
 
+// Varsayılan dilin 'en' olması sağlandı.
 let lang = localStorage.getItem('site_lang') || 'en';
 
 const pages = {
@@ -280,6 +281,8 @@ function show(page){
     pages[page].style.display = 'block';
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
     document.getElementById('nav-' + page).classList.add('active');
+    
+    // Haritaların görünürlük güncellemesi zorlandı
     if (page === 'global') {
         setTimeout(() => { initGlobalMap(); if (window.globalMap) window.globalMap.invalidateSize(); }, 200);
     } else if (page === 'aqi') {
@@ -327,14 +330,14 @@ function applyTranslations(){
     document.getElementById('globalTitle').textContent = t.globalTitle;
     document.getElementById('globalDesc').textContent = t.globalDesc;
 
-    // AQI Page çevirileri güncellendi
+    // AQI Page çevirileri
     document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
     document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
     document.getElementById('aqiLocateBtn').textContent = t.locateBtn;
-    document.getElementById('aqiClearBtn').textContent = t.aqiClear; // 'Clear' butonu
+    document.getElementById('aqiClearBtn').textContent = t.aqiClear; 
     document.getElementById('pollutantTitle').textContent = t.pollutantTitle;
     document.getElementById('pollutantsPlaceholder').textContent = t.pollutantPlaceholder;
-    document.getElementById('aqiAddressInput').placeholder = 'Enter city or address'; // Placeholder sabit kalabilir
+    document.getElementById('aqiAddressInput').placeholder = 'Enter city or address'; 
 
     resetAqiDetails(document.getElementById('aqiAddressInput').value || '—');
 }
@@ -467,7 +470,13 @@ let globalMap = null;
 function initGlobalMap(){
     if(globalMap) return;
     globalMap = L.map('globalMap').setView([20,0],2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(globalMap); // Tile Layer eklendi
+    // Harita görünürlüğü için Tile Layer eklendi
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(globalMap);
+    
+    // Global Hotspot listesi PM2.5 > 150 olanlar için güncellendi
     const hotspots = [
         {name:'Delhi, India', lat:28.7041, lon:77.1025, pm25: 320},
         {name:'Beijing, China', lat:39.9042, lon:116.4074, pm25: 280},
@@ -477,19 +486,22 @@ function initGlobalMap(){
         {name:'Ulaanbaatar, Mongolia', lat:47.8864, lon:106.9057, pm25: 300},
         {name:'Mexico City, Mexico', lat:19.4326, lon:-99.1332, pm25: 180},
         {name:'Silesia, Poland (industrial)', lat:50.3, lon:18.7, pm25: 190},
-        {name:'Los Angeles, USA (urban)', lat:34.05, lon:-118.24, pm25: 110},
-        {name:'Moscow, Russia', lat:55.7558, lon:37.6176, pm25: 100},
-        {name:'Istanbul, Turkey', lat:41.0, lon:28.97, pm25: 120}
+        // PM2.5 > 150 olan diğer bölgeler eklenebilir. Örneğin:
+        {name:'Kabul, Afghanistan', lat:34.555, lon:69.207, pm25: 160},
+        {name:'Cairo, Egypt', lat:30.044, lon:31.235, pm25: 170},
     ];
+    
     hotspots.forEach(h=>{
-        const color = getColorForPM25(h.pm25);
-        const marker = L.circle([h.lat,h.lon], {
-            radius: Math.min(50000, h.pm25*300),
-            color, fillColor: color, fillOpacity:0.5
-        }).addTo(globalMap);
-        marker.bindPopup(`<strong>${h.name}</strong><br>Simulated PM2.5: ${h.pm25}`);
+        if (h.pm25 > 150) { // Sadece 150 üstü işaretlensin
+            const color = getColorForPM25(h.pm25);
+            const marker = L.circle([h.lat,h.lon], {
+                radius: Math.min(50000, h.pm25*300),
+                color, fillColor: color, fillOpacity:0.5
+            }).addTo(globalMap);
+            marker.bindPopup(`<strong>${h.name}</strong><br>Simulated PM2.5: ${h.pm25}`);
+        }
     });
-    document.getElementById('globalSummary').innerHTML = '<div class="muted">Hotspots shown are simulated and only for demo purposes.</div>';
+    document.getElementById('globalSummary').innerHTML = '<div class="muted">Hotspots shown are simulated and only for demo purposes (PM2.5 > 150).</div>';
 }
 function getColorForPM25(v){
     if(v<=50) return 'green';
@@ -518,7 +530,11 @@ const detailMaskMsg=document.getElementById('detailMaskMsg');
 function initAqiMap(){
     if(aqiMap) return;
     aqiMap=L.map('aqiMap').setView([39.925,32.866],6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(aqiMap); // Tile Layer eklendi
+    // Harita görünürlüğü için Tile Layer eklendi
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(aqiMap);
     
     aqiMap.on('click',function(e){
         const lat=e.latlng.lat;
@@ -650,7 +666,7 @@ async function goToAqiLocation(lat,lon,label){
     fetchAqiData(lat,lon,label);
 }
 
-// Adres araması ve otomatik tamamlama işlevi düzeltildi
+// Adres araması ve otomatik tamamlama işlevi
 aqiAddressInput.addEventListener('input',debounce(async()=>{
     const q=aqiAddressInput.value;
     if(!q){ aqiResultList.style.display="none"; return;}
@@ -658,7 +674,7 @@ aqiAddressInput.addEventListener('input',debounce(async()=>{
     renderAqiResults(results);
 },300));
 
-// Konumumu Bul (Locate Me) işlevi düzeltildi
+// Konumumu Bul (Locate Me) işlevi
 aqiLocateBtn.addEventListener('click',()=>{
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(async pos=>{
