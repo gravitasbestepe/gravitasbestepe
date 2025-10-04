@@ -180,4 +180,72 @@ onAuthStateChanged(auth, user=>{
 async function saveVehicleToFirebase(data){
   try{
     await addDoc(collection(db,'vehicles'), data);
-    console.log('
+    console.log('Saved to Firebase', data);
+  }catch(e){ console.error('Firebase save error', e);}
+}
+
+// Quick Register override
+const oldQuickRegister = document.getElementById('registerVehicleBtn').onclick;
+document.getElementById('registerVehicleBtn').onclick = function(){
+  const plate = document.getElementById('plateInput').value.trim();
+  const device = document.getElementById('deviceInput').value.trim();
+  const model = document.getElementById('modelInput').value.trim();
+  if(!plate || !device) return alert('Plate & Device required');
+  const data = { plate, device, model, ts:Date.now() };
+  saveVehicleToFirebase(data);
+  if(oldQuickRegister) oldQuickRegister();
+};
+
+// Load vehicles from Firebase
+async function loadVehiclesFromFirebase(){
+  const snapshot = await getDocs(collection(db,'vehicles'));
+  const arr = [];
+  snapshot.forEach(doc=>arr.push(doc.data()));
+  const container = document.getElementById('myVehicles');
+  container.innerHTML = '';
+  arr.forEach(v=>{
+    const div = document.createElement('div');
+    div.className='resultItem';
+    div.textContent = `${v.plate} | ${v.device} | ${v.model||'N/A'}`;
+    container.appendChild(div);
+  });
+  console.log('Vehicles from Firebase:', arr);
+}
+loadVehiclesFromFirebase();
+
+/* ---------------- SPA Navigation ---------------- */
+const pages = ['home','register','vehicle','rules','global'];
+pages.forEach(p=>{
+  document.getElementById('nav-'+p).addEventListener('click',()=>{
+    pages.forEach(x=>document.getElementById('page-'+x).style.display='none');
+    document.getElementById('page-'+p).style.display='block';
+    pages.forEach(x=>document.getElementById('nav-'+x).classList.remove('active'));
+    document.getElementById('nav-'+p).classList.add('active');
+    if(p==='vehicle') loadVehiclesFromFirebase();
+  });
+});
+
+/* ---------------- Quick Simulator ---------------- */
+window.simulateAllReadsNow = function(){
+  const now = new Date();
+  document.getElementById('lastRead').textContent = `Simulated Reading at ${now.toLocaleTimeString()}`;
+  document.getElementById('behaviourText').textContent = 'No traffic restriction in demo mode.';
+};
+
+/* ---------------- Global Map ---------------- */
+const globalMap = L.map('globalMap').setView([20,0],2);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OSM'}).addTo(globalMap);
+const hotspots=[
+  {lat:40.7,lon:-74,name:'NYC',aqi:120},
+  {lat:31.2,lon:121.5,name:'Shanghai',aqi:160},
+  {lat:19.0,lon:72.8,name:'Mumbai',aqi:140},
+  {lat:39.9,lon:116.4,name:'Beijing',aqi:180}
+];
+hotspots.forEach(h=>{
+  const color=h.aqi>150?'red':h.aqi>100?'orange':'green';
+  L.circle([h.lat,h.lon],{radius:50000,color:color,fillOpacity:0.5}).bindPopup(`${h.name}: AQI ${h.aqi}`).addTo(globalMap);
+});
+document.getElementById('globalSummary').textContent = 'Red=Very High, Orange=Moderate, Green=Low AQI.';
+</script>
+</body>
+</html>
