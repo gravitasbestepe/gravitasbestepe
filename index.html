@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Air Quality Checker</title>
+<title>Air Quality Tracker</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-  body { font-family: Arial; margin:0; padding:0; }
-  #map { height: 60vh; }
+  body { font-family: Arial, sans-serif; margin:0; padding:0; }
+  #mapGlobal, #mapLocal { height: 40vh; margin-bottom:10px; }
   #controls { padding:10px; background:#f4f4f4; }
-  #aqiDetails { padding:10px; }
-  .aqi-bar { height:20px; width:100%; background:#ddd; margin:5px 0; border-radius:5px; overflow:hidden; }
-  .aqi-fill { height:100%; width:0%; background:green; text-align:center; color:white; font-weight:bold; }
+  #deviceAgency, #myBeacons, #rulesAdvice { padding:10px; border-top:1px solid #ccc; }
+  select { padding:5px; margin-left:5px; }
   button { padding:5px 10px; margin-left:5px; cursor:pointer; }
 </style>
 </head>
@@ -27,116 +26,98 @@
   </select>
 </div>
 
-<div id="map"></div>
+<h2>Global Emission Map</h2>
+<div id="mapGlobal"></div>
 
-<div id="aqiDetails">
-  <h3 id="locationLabel">Location: </h3>
-  <div class="aqi-bar"><div id="aqiBar" class="aqi-fill"></div></div>
-  <p id="aqiText">AQI: </p>
-  <p id="dominantPollutant"></p>
-  <h4>Details:</h4>
-  <ul id="pollutants"></ul>
-  <p id="warningMsg" style="color:red; font-weight:bold;"></p>
+<h2>Local Map</h2>
+<div id="mapLocal"></div>
+
+<div id="deviceAgency">
+  <h3>Device Agency</h3>
+  <p>Manage your devices here.</p>
+</div>
+
+<div id="myBeacons">
+  <h3>My Beacons</h3>
+  <p>Track your beacons.</p>
+</div>
+
+<div id="rulesAdvice">
+  <h3>Rules & Advice</h3>
+  <p>Air quality advice will appear here.</p>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38";
 
-const map = L.map('map').setView([39.925, 32.866], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-let marker = null;
+const mapGlobal = L.map('mapGlobal').setView([20,0], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(mapGlobal);
 
-function updateAQIUI(data, label) {
-  document.getElementById("locationLabel").textContent = "Location: " + label;
-  const aqi = data.aqi;
-  document.getElementById("aqiText").textContent = "AQI: " + aqi;
-  document.getElementById("dominantPollutant").textContent = "Dominant Pollutant: " + data.dominentpol.toUpperCase();
-  
-  const aqiFill = document.getElementById("aqiBar");
-  let color="green";
-  if(aqi<=50) color="green";
-  else if(aqi<=100) color="yellow";
-  else if(aqi<=150) color="orange";
-  else if(aqi<=200) color="red";
-  else if(aqi<=300) color="purple";
-  else color="maroon";
-  aqiFill.style.background=color;
-  aqiFill.style.width=Math.min(aqi,500)/500*100+"%";
-  aqiFill.textContent=aqi;
+const dangerousLocations = [
+  {lat:40.7128, lon:-74.006, aqi:180, name:"New York"},
+  {lat:39.9042, lon:116.407, aqi:220, name:"Beijing"},
+  {lat:28.6139, lon:77.209, aqi:160, name:"Delhi"},
+  {lat:-23.5505, lon:-46.6333, aqi:170, name:"Sao Paulo"}
+];
 
-  const pollutants=document.getElementById("pollutants");
-  pollutants.innerHTML="";
-  const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
-  keys.forEach(k=>{
-    if(data.iaqi[k]){
-      let li=document.createElement("li");
-      li.textContent=k.toUpperCase()+": "+data.iaqi[k].v;
-      pollutants.appendChild(li);
-    }
-  });
+dangerousLocations.forEach(loc => {
+  L.circle([loc.lat, loc.lon], {
+    color:'red',
+    fillColor:'red',
+    fillOpacity:0.6,
+    radius:50000
+  }).addTo(mapGlobal).bindPopup(`${loc.name} AQI: ${loc.aqi}`);
+});
 
-  let warning="";
-  if(aqi>150) warning="Air quality is unhealthy. Limit outdoor activities.";
-  else if(aqi>100) warning="Air quality is moderate. Sensitive groups should take care.";
-  document.getElementById("warningMsg").textContent=warning;
+const mapLocal = L.map('mapLocal').setView([39.925, 32.866], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(mapLocal);
+let localMarker = null;
+
+function updateLocalMarker(lat, lon, label){
+  if(localMarker) mapLocal.removeLayer(localMarker);
+  localMarker = L.marker([lat, lon]).addTo(mapLocal).bindPopup(label).openPopup();
+  mapLocal.setView([lat, lon], 12);
 }
 
-function fetchAQI(lat, lon, label){
-  fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${TOKEN}`)
-  .then(res=>res.json())
-  .then(resp=>{
-    if(resp.status==="ok") updateAQIUI(resp.data,label);
-    else alert("AQI data not available for this location.");
-  }).catch(err=>{ alert("Error fetching AQI data."); console.error(err); });
-}
-
-// Locate me
 document.getElementById("locateBtn").addEventListener("click", ()=>{
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
-      const lat=pos.coords.latitude;
-      const lon=pos.coords.longitude;
-      if(marker) map.removeLayer(marker);
-      marker = L.marker([lat, lon]).addTo(map);
-      map.setView([lat, lon], 12);
-      fetchAQI(lat, lon, "Your Location");
-    }, err=>alert("Unable to get your location."));
-  } else alert("Geolocation not supported.");
+      updateLocalMarker(pos.coords.latitude, pos.coords.longitude, "Your Location");
+    },()=>alert("Unable to get location"));
+  } else alert("Geolocation not supported");
 });
 
-// Map click
-map.on('click', e=>{
-  const lat=e.latlng.lat;
-  const lon=e.latlng.lng;
-  if(marker) map.removeLayer(marker);
-  marker = L.marker([lat, lon]).addTo(map);
-  fetchAQI(lat, lon, `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);
+mapLocal.on('click', e=>{
+  updateLocalMarker(e.latlng.lat, e.latlng.lng, `Selected Point (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})`);
 });
 
-// Address search
 document.getElementById("searchBtn").addEventListener("click", ()=>{
-  const query=document.getElementById("addressInput").value;
-  if(!query) return alert("Please enter a city or address.");
+  const query = document.getElementById("addressInput").value;
+  if(!query) return alert("Enter a city or address");
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
   .then(res=>res.json())
   .then(data=>{
-    if(data.length>0){
-      const loc=data[0];
-      const lat=parseFloat(loc.lat);
-      const lon=parseFloat(loc.lon);
-      if(marker) map.removeLayer(marker);
-      marker = L.marker([lat, lon]).addTo(map);
-      map.setView([lat, lon], 12);
-      fetchAQI(lat, lon, loc.display_name);
-    } else alert("Location not found.");
-  }).catch(err=>{ alert("Error searching location."); console.error(err); });
+    if(data && data.length>0){
+      const loc = data[0];
+      updateLocalMarker(parseFloat(loc.lat), parseFloat(loc.lon), loc.display_name);
+    } else alert("Location not found");
+  }).catch(()=>alert("Error searching location"));
 });
 
-// Language selection (basit)
 document.getElementById("langSelect").addEventListener("change", e=>{
-  const val=e.target.value;
-  alert("Language changed to: " + val);
+  const val = e.target.value;
+  if(val==="tr"){
+    document.querySelector("#deviceAgency h3").textContent="Cihaz Yönetimi";
+    document.querySelector("#myBeacons h3").textContent="Benim Beacons";
+    document.querySelector("#rulesAdvice h3").textContent="Kurallar & Tavsiyeler";
+    document.querySelector("#rulesAdvice p").textContent="Hava kalitesi tavsiyeleri burada görünecek.";
+  } else {
+    document.querySelector("#deviceAgency h3").textContent="Device Agency";
+    document.querySelector("#myBeacons h3").textContent="My Beacons";
+    document.querySelector("#rulesAdvice h3").textContent="Rules & Advice";
+    document.querySelector("#rulesAdvice p").textContent="Air quality advice will appear here.";
+  }
 });
 </script>
 </body>
