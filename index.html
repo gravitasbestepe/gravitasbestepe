@@ -1,177 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Air Quality Checker — Autocomplete & Detailed Address</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Quality Checker</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-  #controls { padding:12px; background:#f4f4f4; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  #addressWrapper { position:relative; max-width:720px; width:100%; }
-  #addressInput { width:100%; padding:8px 10px; font-size:15px; border:1px solid #ccc; border-radius:6px; }
-  #searchBtn, #locateBtn { padding:8px 12px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; }
-  #resultList { position:absolute; left:0; right:0; top:44px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:6px; z-index:1000; max-height:260px; overflow:auto; display:none; }
-  .resultItem { padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer; }
-  .resultItem:hover { background:#f0f7ff; }
-  #map { height:60vh; }
-  #aqiDetails { padding:12px; background:white; }
-  .aqi-bar { height:20px; width:100%; background:#ddd; margin:5px 0; border-radius:5px; overflow:hidden; }
-  .aqi-fill { height:100%; width:0%; background:green; text-align:center; color:white; font-weight:bold; }
-  ul#pollutants { margin:0; padding-left:18px; }
-  .small { font-size:13px; color:#555; margin:0; }
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
+#controls { padding:12px; background:#f4f4f4; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+#addressWrapper { position:relative; max-width:720px; width:100%; }
+#addressInput { width:100%; padding:8px 10px; font-size:15px; border:1px solid #ccc; border-radius:6px; }
+#searchBtn, #locateBtn, #clearBtn { padding:8px 12px; cursor:pointer; border-radius:6px; border:1px solid #bbb; background:white; }
+#resultList { position:absolute; left:0; right:0; top:44px; background:white; box-shadow:0 4px 12px rgba(0,0,0,.08); border-radius:6px; z-index:1000; max-height:260px; overflow:auto; display:none; }
+.resultItem { padding:8px 10px; border-bottom:1px solid #eee; cursor:pointer; }
+.resultItem:hover { background:#f0f7ff; }
+#map { height:60vh; }
+#aqiDetails { padding:12px; background:white; }
+.aqi-bar { height:20px; width:100%; background:#ddd; margin:5px 0; border-radius:5px; overflow:hidden; }
+.aqi-fill { height:100%; width:0%; background:green; text-align:center; color:white; font-weight:bold; }
+ul#pollutants { margin:0; padding-left:18px; }
 </style>
 </head>
 <body>
-
 <div id="controls">
-  <div id="addressWrapper">
-    <input id="addressInput" placeholder="Enter city, street or address (try: Istiklal Cad, Ankara)" autocomplete="off" />
-    <div id="resultList" role="listbox"></div>
-  </div>
-  <button id="locateBtn">Locate Me</button>
-  <button id="clearBtn">Clear</button>
+<div id="addressWrapper">
+<input id="addressInput" placeholder="Enter city, street or address" autocomplete="off" />
+<div id="resultList"></div>
 </div>
-
+<button id="locateBtn">Locate Me</button>
+<button id="clearBtn">Clear</button>
+</div>
 <div id="map"></div>
-
 <div id="aqiDetails">
-  <h3 id="locationLabel">Location: —</h3>
-  <div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
-  <p id="aqiText">AQI: —</p>
-  <p id="dominantPollutant">Dominant Pollutant: —</p>
-  <h4>Details:</h4>
-  <ul id="pollutants"></ul>
-  <p id="warningMsg" style="color:#b22222; font-weight:bold;"></p>
-  <p class="small">Note: Results come from open public APIs (Nominatim & WAQI). For heavy/prod use, replace with a commercial geocoding/AQI provider.</p>
+<h3 id="locationLabel">Location: —</h3>
+<div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
+<p id="aqiText">AQI: —</p>
+<p id="dominantPollutant">Dominant Pollutant: —</p>
+<h4>Details:</h4>
+<ul id="pollutants"></ul>
+<p id="warningMsg" style="color:#b22222; font-weight:bold;"></p>
 </div>
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-/* ---------- CONFIG ---------- */
-const WAQI_TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38"; // your token (keep it secret-ish)
+const WAQI_TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38";
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
-
-/* ---------- MAP SETUP ---------- */
 const map = L.map('map').setView([39.925, 32.866], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 let marker = null;
-
-/* ---------- DOM ---------- */
 const addressInput = document.getElementById('addressInput');
 const resultList = document.getElementById('resultList');
 const locateBtn = document.getElementById('locateBtn');
 const clearBtn = document.getElementById('clearBtn');
-
 const locationLabel = document.getElementById('locationLabel');
 const aqiBar = document.getElementById('aqiBar');
 const aqiText = document.getElementById('aqiText');
 const dominantPollutant = document.getElementById('dominantPollutant');
 const pollutantsEl = document.getElementById('pollutants');
 const warningMsg = document.getElementById('warningMsg');
-
-/* ---------- UTIL: debounce ---------- */
-function debounce(fn, wait) {
-  let t;
-  return function(...args) {
-    clearTimeout(t);
-    t = setTimeout(()=>fn.apply(this, args), wait);
-  };
-}
-
-/* ---------- AUTOCOMPLETE (Nominatim) ---------- */
-async function nominatimSearch(q) {
-  const url = `${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-  if(!res.ok) throw new Error('Geocoder error');
-  return res.json();
-}
-
-function renderResults(items) {
-  resultList.innerHTML = "";
-  if(!items || items.length === 0) { resultList.style.display = "none"; return; }
-  items.forEach(item=>{
-    const div = document.createElement('div');
-    div.className = 'resultItem';
-    // Show the display_name (already detailed). Could shorten if too long.
-    div.textContent = item.display_name;
-    div.tabIndex = 0;
-    div.dataset.lat = item.lat;
-    div.dataset.lon = item.lon;
-    div.dataset.display = item.display_name;
-    div.addEventListener('click', ()=> selectResult(item));
-    div.addEventListener('keydown', (e)=> { if(e.key === 'Enter') selectResult(item); });
-    resultList.appendChild(div);
-  });
-  resultList.style.display = 'block';
-}
-
-async function selectResult(item) {
-  resultList.style.display = 'none';
-  addressInput.value = item.display_name;
-  const lat = parseFloat(item.lat);
-  const lon = parseFloat(item.lon);
-  goToLocation(lat, lon, item.display_name);
-}
-
-/* ---------- Reverse Geocode for Locate Me ---------- */
-async function nominatimReverse(lat, lon) {
-  const url = `${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' }});
-  if(!res.ok) throw new Error('Reverse geocode failed');
-  return res.json();
-}
-
-/* ---------- Map + Marker handling ---------- */
-function setMarker(lat, lon, label) {
-  if(marker) map.removeLayer(marker);
-  marker = L.marker([lat, lon]).addTo(map);
-  map.setView([lat, lon], 13);
-}
-
-/* ---------- AQI fetch & UI ---------- */
-function updateAQIUI(data, label) {
-  locationLabel.textContent = "Location: " + (label || '—');
-  const aqi = data && data.aqi ? data.aqi : null;
-  aqiText.textContent = "AQI: " + (aqi !== null ? aqi : '—');
-  dominantPollutant.textContent = "Dominant Pollutant: " + ((data && data.dominentpol) ? data.dominentpol.toUpperCase() : '—');
-
-  // color rule
-  let color = "green";
-  if (aqi === null) color = "#999";
-  else if (aqi <= 50) color = "green";
-  else if (aqi <= 100) color = "yellow";
-  else if (aqi <= 150) color = "orange";
-  else if (aqi <= 200) color = "red";
-  else if (aqi <= 300) color = "purple";
-  else color = "maroon";
-  aqiBar.style.background = color;
-  aqiBar.style.width = (aqi === null ? 0 : Math.min(aqi,500)/500*100) + "%";
-  aqiBar.textContent = (aqi === null ? '—' : aqi);
-
-  // pollutants
-  pollutantsEl.innerHTML = "";
-  const keys = ["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
-  if (data && data.iaqi) {
-    keys.forEach(k=>{
-      if(data.iaqi[k]) {
-        const li = document.createElement('li');
-        li.textContent = `${k.toUpperCase()}: ${data.iaqi[k].v}`;
-        pollutantsEl.appendChild(li);
-      }
-    });
-  }
-
-  // Expanded health warnings — applies to all respiratory illnesses and heart disease
-  let warning = "";
-  if(aqi === null) {
-    warning = "";
-  } else if (aqi <= 50) {
-    warning = "✅ Air quality is good. Suitable for everyone, including those with respiratory or heart conditions.";
-  } else if (aqi <= 100) {
-    warning = "⚠️ Moderate. People with asthma, COPD, bronchitis, emphysema, pulmonary fibrosis, allergic rhinitis, or heart disease should limit prolonged outdoor exertion.";
-  } else if (aqi <= 150) {
-    warning = "⚠️ Unhealthy for sensitive groups. People with any chronic lung disease, severe asthma, heart disease, children, elderly and pregnant women should minimize outdoor activities.";
-  } else if (aqi <= 200) {
-    warning = "❌ Unhealthy. Avoid outdoor exercise. People with breathing problems (all chronic respiratory diseases) and heart conditions should stay indoors and use filtered air if possible.";
-  } else if
+function debounce(fn, wait){let t; return function(...args){clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),wait);};}
+async function nominatimSearch(q){const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});return res.json();}
+function renderResults(items){resultList.innerHTML="";if(!items||items.length===0){resultList.style.display="none";return;}items.forEach(item=>{const div=document.createElement('div');div.className='resultItem';div.textContent=item.display_name;div.tabIndex=0;div.dataset.lat=item.lat;div.dataset.lon=item.lon;div.dataset.display=item.display_name;div.addEventListener('click',()=>selectResult(item));div.addEventListener('keydown',(e)=>{if(e.key==='Enter')selectResult(item);});resultList.appendChild(div);});resultList.style.display='block';}
+async function selectResult(item){resultList.style.display='none';addressInput.value=item.display_name;goToLocation(parseFloat(item.lat),parseFloat(item.lon),item.display_name);}
+async function nominatimReverse(lat,lon){const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'en'}});return res.json();}
+function setMarker(lat,lon){if(marker)map.removeLayer(marker);marker=L.marker([lat,lon]).addTo(map);map.setView([lat,lon],13);}
+function updateAQIUI(data,label){locationLabel.textContent="Location: "+(label||'—');const aqi=data&&data.aqi?data.aqi:null;aqiText.textContent="AQI: "+(aqi!==null?aqi:'—');dominantPollutant.textContent="Dominant Pollutant: "+((data&&data.dominentpol)?data.dominentpol.toUpperCase():'—');let color="green";if(aqi===null)color="#999";else if(aqi<=50)color="green";else if(aqi<=100)color="yellow";else if(aqi<=150)color="orange";else if(aqi<=200)color="red";else if(aqi<=300)color="purple";else color="maroon";aqiBar.style.background=color;aqiBar.style.width=(aqi===null?0:Math.min(aqi,500)/500*100)+"%";aqiBar.textContent=(aqi===null?'—':aqi);pollutantsEl.innerHTML="";const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];if(data&&data.iaqi){keys.forEach(k=>{if(data.iaqi[k]){const li=document.createElement('li');li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;pollutantsEl.appendChild(li);}})}let warning="";if(aqi===null)warning="";else if(aqi<=50)warning="✅ Air quality is good. Suitable for everyone, including those with respiratory or heart conditions.";else if(aqi<=100)warning="⚠️ Moderate. People with asthma, COPD, bronchitis, emphysema, pulmonary fibrosis, allergic rhinitis, or heart disease should limit prolonged outdoor exertion.";else if(aqi<=150)warning="⚠️ Unhealthy for sensitive groups. People with any chronic lung disease, severe asthma, heart disease, children, elderly and pregnant women should minimize outdoor activities.";else if(aqi<=200)warning="❌ Unhealthy. Avoid outdoor exercise. People with breathing problems (all chronic respiratory diseases) and heart conditions should stay indoors and use filtered air if possible.";else if(aqi<=300)warning="☠️ Very unhealthy. Everyone, especially people with lung or heart problems, should stay indoors and use masks or air purifiers if necessary.";else warning="🚫 Hazardous air quality. Stay indoors, keep windows closed. High risk for all respiratory and heart patients.";warningMsg.textContent=warning;}
+async function fetchAQI(lat,lon,label){try{const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);const resp=await res.json();if(resp.status==="ok")updateAQIUI(resp.data,label);else alert("AQI data not available for this location.");}catch(err){alert("Error fetching AQI data.");console.error(err);}}
+async function goToLocation(lat,lon,label){setMarker(lat,lon);fetchAQI(lat,lon,label);}
+addressInput.addEventListener('input',debounce(async()=>{const q=addressInput.value;if(!q)return;const results=await nominatimSearch(q);renderResults(results);},400));
+locateBtn.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude;const lon=pos.coords.longitude;const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;goToLocation(lat,lon,label);},err=>alert("Unable to get your location."));}else alert("Geolocation not supported.");});
+clearBtn.addEventListener('click',()=>{addressInput.value="";resultList.style.display="none";});
+map.on('click',function(e){const lat=e.latlng.lat;const lon=e.latlng.lng;goToLocation(lat,lon,`Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);});
+</script>
+</body>
+</html>
