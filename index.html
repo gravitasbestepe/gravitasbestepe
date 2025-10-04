@@ -1,125 +1,175 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Air Quality Checker</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Air Quality + Araç Emisyon Simülatörü</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; color:#222; }
-
-#controls {
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-wrap:nowrap;
-  padding:8px;
-  background:#f4f4f4;
-}
-
-#addressWrapper {
-  flex:1 1 auto;
-  position:relative;
-  min-width:200px;
-  max-width:calc(100% - 120px);
-}
-
-#addressInput { 
-  width:100%; 
-  padding:5px 38px 5px 8px; 
-  font-size:13px; 
-  border:1px solid #ccc; 
-  border-radius:5px; 
-  height:28px;
-  box-sizing:border-box;
-}
-
-#clearBtn { 
-  position:absolute; 
-  right:3px; 
-  top:50%; 
-  transform:translateY(-50%); 
-  padding:2px 6px; 
-  font-size:12px; 
-  border-radius:5px; 
-  border:1px solid #bbb; 
-  background:white; 
-  cursor:pointer; 
-}
-
-#locateBtn { 
-  padding:5px 12px; 
-  cursor:pointer; 
-  border-radius:5px; 
-  border:1px solid #bbb; 
-  background:white; 
-  height:28px; 
-  flex-shrink:0;
-}
-
-#resultList {
-  position:absolute; 
-  left:0; right:0; top:30px; 
-  background:white; 
-  box-shadow:0 4px 12px rgba(0,0,0,.08); 
-  border-radius:5px; 
-  z-index:1000; 
-  max-height:300px; 
-  overflow:auto; 
-  display:none; 
-  font-size:13px;
-}
-
-.resultItem { 
-  padding:6px 8px; 
-  border-bottom:1px solid #eee; 
-  cursor:pointer; 
-}
-
-.resultItem:hover { background:#f0f7ff; }
-
-#map { height:60vh; }
-#aqiDetails { padding:10px; background:white; }
-.aqi-bar { height:18px; width:100%; background:#ddd; margin:4px 0; border-radius:5px; overflow:hidden; }
-.aqi-fill { height:100%; width:0%; background:green; text-align:center; color:white; font-weight:bold; font-size:12px; }
-ul#pollutants { margin:0; padding-left:18px; font-size:12px; }
+  :root{--bg:#fafafa;--card:#fff;--muted:#666}
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222}
+  header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0b5;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  header h1{font-size:18px;margin:0}
+  nav{display:flex;gap:8px}
+  nav button{background:transparent;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
+  nav button.active{background:rgba(255,255,255,.9)}
+  main{padding:12px}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
+  .card{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 16px rgba(12,12,12,.04)}
+  #map{height:420px;border-radius:8px}
+  #controls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;padding:8px;background:#f4f4f4;border-radius:8px}
+  #addressInput{flex:1;padding:6px;border-radius:6px;border:1px solid #ccc}
+  #resultList{position:absolute;left:0;right:0;top:36px;background:white;box-shadow:0 6px 18px rgba(0,0,0,.08);border-radius:6px;z-index:1000;max-height:220px;overflow:auto;display:none}
+  .resultItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer}
+  .resultItem:hover{background:#f0f7ff}
+  .aqi-bar{height:18px;width:100%;background:#ddd;margin:4px 0;border-radius:5px;overflow:hidden}
+  .aqi-fill{height:100%;width:0%;background:green;text-align:center;color:white;font-weight:bold;font-size:12px}
+  label{font-size:13px;color:var(--muted)}
+  .muted{color:var(--muted);font-size:13px}
+  .btn{display:inline-block;padding:8px 10px;border-radius:6px;border:1px solid #bbb;background:white;cursor:pointer}
+  .danger{background:#ffdddd;border-color:#ff9999}
+  /* Small screens */
+  @media(max-width:900px){.grid{grid-template-columns:1fr}#map{height:300px}}
 </style>
 </head>
 <body>
-<div id="controls">
-  <div id="addressWrapper">
-    <input id="addressInput" placeholder="Enter city, street, school, or address" autocomplete="off" />
-    <button id="clearBtn">×</button>
-    <div id="resultList"></div>
-  </div>
-  <button id="locateBtn">📍 Locate Me</button>
-</div>
-<div id="map"></div>
-<div id="aqiDetails">
-<h3 id="locationLabel">Location: —</h3>
-<div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
-<p id="aqiText">AQI: —</p>
-<p id="dominantPollutant">Dominant Pollutant: —</p>
-<h4>Pollutants:</h4>
-<ul id="pollutants"></ul>
-<p id="warningMsg" style="color:#b22222; font-weight:bold;"></p>
-<p id="maskMsg" style="color:#0000aa; font-weight:bold;"></p>
-<p id="healthWarning" style="color:#8B0000; font-weight:bold;"></p>
-</div>
+<header>
+  <h1>Emisyon Simülatörü — Trafiğe Uygunluk (demo)</h1>
+  <nav>
+    <button id="nav-home" class="active">Anasayfa</button>
+    <button id="nav-register">Cihaz Kayıt</button>
+    <button id="nav-vehicle">Araçlarım</button>
+    <button id="nav-rules">Kurallar & Öneriler</button>
+    <button id="nav-admin">Ulusal Görünüm</button>
+  </nav>
+</header>
+<main>
+  <!-- SPA bölümleri -->
+  <section id="page-home">
+    <div class="grid">
+      <div class="card">
+        <div id="controls">
+          <div style="position:relative;flex:1">
+            <input id="addressInput" placeholder="Şehir, sokak, okul veya adres girin" autocomplete="off" />
+            <div id="resultList"></div>
+          </div>
+          <button id="locateBtn" class="btn">📍 Konumumu Bul</button>
+        </div>
+        <div id="map" style="margin-top:10px"></div>
+        <div style="margin-top:10px">
+          <h3 id="locationLabel">Konum: —</h3>
+          <div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
+          <p id="aqiText">AQI: —</p>
+          <p id="dominantPollutant">Baskın Kirletici: —</p>
+          <h4>Kirleticiler:</h4>
+          <ul id="pollutants"></ul>
+          <p id="warningMsg" style="color:#b22222;font-weight:bold"></p>
+          <p id="maskMsg" style="color:#0000aa;font-weight:bold"></p>
+          <p id="healthWarning" style="color:#8B0000;font-weight:bold"></p>
+        </div>
+      </div>
+      <aside class="card">
+        <h3>Hızlı Araç Emisyon Simülatörü</h3>
+        <p class="muted">Bu demo sistemde kullanıcılar aracı ve cihaza ait bir kayıt oluşturur. Sistem kısa aralıklarla (simülasyon) emisyon okuması gönderir ve "Trafiğe Uygun" kararını verir.</p>
+        <hr />
+        <label>Plaka (ör: 34ABC34)</label>
+        <input id="plateInput" placeholder="Plaka girin" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+        <label>Cihaz ID (ör: DEV-0001)</label>
+        <input id="deviceInput" placeholder="Cihaz ID girin" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+        <label>Model (isteğe bağlı)</label>
+        <input id="modelInput" placeholder="Araç modeli" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+        <button id="registerVehicleBtn" class="btn" style="width:100%;margin-top:6px">Araç & Cihaz Kaydet</button>
+        <hr />
+        <h4>Son Okuma</h4>
+        <div id="lastRead" class="muted">Henüz kayıtlı okuma yok.</div>
+        <hr />
+        <h4>Uygulama Davranışı</h4>
+        <p class="muted">Sistem, cihaz verisini simüle eder. Emisyon eşiklerine göre "Trafiğe Uygun / Uygun Değil" etiketi verir. Ayrıca öneriler gösterir.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section id="page-register" style="display:none">
+    <div class="card">
+      <h2>Cihaz Kayıt</h2>
+      <p class="muted">Gerçekte buradan cihaz seri numarası ve araç bilgisi toplanır. Demo: localStorage kullanılır.</p>
+      <label>Plaka</label>
+      <input id="reg_plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+      <label>Cihaz ID</label>
+      <input id="reg_device" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+      <label>Yer (şehir)</label>
+      <input id="reg_city" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc" />
+      <button id="regBtn" class="btn">Kayıt Oluştur</button>
+      <hr />
+      <h3>Kayıtlı Cihazlar</h3>
+      <div id="registeredList"></div>
+    </div>
+  </section>
+
+  <section id="page-vehicle" style="display:none">
+    <div class="card">
+      <h2>Araçlarım</h2>
+      <p class="muted">Kayıtlı araçlar ve en son emisyon durumları.</p>
+      <div id="myVehicles"></div>
+    </div>
+  </section>
+
+  <section id="page-rules" style="display:none">
+    <div class="card">
+      <h2>Kurallar & Ne Yapmalı?</h2>
+      <ul>
+        <li>PM2.5 &gt; 150 ise <strong>trafikten men</strong> önerilir.</li>
+        <li>PM2.5 100-150 arası ise <em>kısıtlı</em> (ör: belirli saatler dışında çıkışa izin verilmeyebilir).</li>
+        <li>PM2.5 &lt;= 100 ise normal trafik izni verilir.</li>
+      </ul>
+      <h3>Öneriler</h3>
+      <ol>
+        <li>Filtre ve katalizör kontrolü.</li>
+        <li>Rutin bakım ve yağ değişimi.</li>
+        <li>Gereksiz rölantiyi azalt.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="page-admin" style="display:none">
+    <div class="card">
+      <h2>Ulusal Görünüm (Sahte / Simüle)</h2>
+      <p class="muted">İllere göre rastgele simüle edilmiş cihaz verileri. Gerçekte merkezi bir API ile gelir.</p>
+      <div id="nationalMap" style="height:480px;border-radius:8px"></div>
+      <div style="margin-top:8px" id="nationalSummary"></div>
+    </div>
+  </section>
+</main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+// --- Mevcut WAQI ve Nominatim kodunun çoğunu yeniden kullanıyoruz (kısaltılmış) ---
 const WAQI_TOKEN="9263e25a74b0d93c30387fa753ec876f19869d38";
 const NOMINATIM_BASE="https://nominatim.openstreetmap.org";
+
+// Basit SPA navigation
+const pages={home:document.getElementById('page-home'),register:document.getElementById('page-register'),vehicle:document.getElementById('page-vehicle'),rules:document.getElementById('page-rules'),admin:document.getElementById('page-admin')};
+function show(page){Object.values(pages).forEach(p=>p.style.display='none');pages[page].style.display='block';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+page).classList.add('active');}
+document.getElementById('nav-home').addEventListener('click',()=>show('home'));
+document.getElementById('nav-register').addEventListener('click',()=>show('register'));
+document.getElementById('nav-vehicle').addEventListener('click',()=>show('vehicle'));
+document.getElementById('nav-rules').addEventListener('click',()=>show('rules'));
+document.getElementById('nav-admin').addEventListener('click',()=>show('admin'));
+
+// --- Nominatim helper ---
+async function nominatimSearch(q){const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'tr'}});return res.json();}
+async function nominatimReverse(lat,lon){const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'tr'}});return res.json();}
+
+// Map (home)
 const map=L.map('map').setView([39.925,32.866],6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 let marker=null;
+function setMarker(lat,lon){if(marker) marker.setLatLng([lat,lon]); else marker=L.marker([lat,lon]).addTo(map);map.setView([lat,lon],13);} 
 
+// UI elemanları
 const addressInput=document.getElementById('addressInput');
 const resultList=document.getElementById('resultList');
 const locateBtn=document.getElementById('locateBtn');
-const clearBtn=document.getElementById('clearBtn');
-const locationLabel=document.getElementById('locationLabel');
 const aqiBar=document.getElementById('aqiBar');
 const aqiText=document.getElementById('aqiText');
 const dominantPollutant=document.getElementById('dominantPollutant');
@@ -130,135 +180,85 @@ const healthWarningEl=document.getElementById('healthWarning');
 
 function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setTimeout(()=>fn.apply(this,args),wait);};}
 
-async function nominatimSearch(q){
-    const res=await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=25&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'en'}});
-    return res.json();
+addressInput.addEventListener('input',debounce(async function(){const q=addressInput.value;if(!q){resultList.style.display='none';return;}const res=await nominatimSearch(q);renderResults(res);},250));
+
+function renderResults(items){resultList.innerHTML='';if(!items||items.length===0){resultList.style.display='none';return;}items.forEach(item=>{const div=document.createElement('div');div.className='resultItem';div.innerHTML=`<strong>${item.display_name}</strong>`;div.addEventListener('click',()=>{selectResult(item)});resultList.appendChild(div);});resultList.style.display='block';}
+async function selectResult(item){resultList.style.display='none';addressInput.value=item.display_name;const lat=parseFloat(item.lat),lon=parseFloat(item.lon);setMarker(lat,lon);fetchAQI(lat,lon,item.display_name);}
+
+locateBtn.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Konum (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setMarker(lat,lon);fetchAQI(lat,lon,label);},err=>alert('Konuma erişilemiyor.'))}else alert('Geolocation desteklenmiyor.');});
+
+async function fetchAQI(lat,lon,label){try{const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);const resp=await res.json();if(resp.status==='ok') updateAQIUI(resp.data,label);else updateAQIUI(null,label);}catch(err){console.error(err);updateAQIUI(null,label);} }
+
+function updateAQIUI(data,label){document.getElementById('locationLabel').textContent='Konum: '+(label||'—');const aqi=data&&data.aqi?data.aqi:null;aqiText.textContent='AQI: '+(aqi!==null?aqi:'—');dominantPollutant.textContent='Baskın Kirletici: '+((data&&data.dominentpol)?data.dominentpol.toUpperCase():'—');let color='green';if(aqi===null) color='#999';else if(aqi<=50) color='green';else if(aqi<=100) color='yellow';else if(aqi<=150) color='orange';else if(aqi<=200) color='red';else if(aqi<=300) color='purple';else color='maroon';aqiBar.style.background=color;aqiBar.style.width=(aqi===null?0:Math.min(aqi,500)/500*100)+'%';aqiBar.textContent=(aqi===null?'—':aqi);pollutantsEl.innerHTML='';const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];if(data&&data.iaqi){keys.forEach(k=>{if(data.iaqi[k]){const li=document.createElement('li');li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;pollutantsEl.appendChild(li);}})}
+// not: cihaz emisyon simülasyonu ayrı
 }
 
-function renderResults(items){
-    resultList.innerHTML="";
-    if(!items||items.length===0){resultList.style.display="none";return;}
-    items.forEach(item=>{
-        const div=document.createElement('div');
-        div.className='resultItem';
-        const display=item.display_name.split(",").map(s=>s.trim()).join(",<br>");
-        div.innerHTML=`<strong>${display}</strong>`;
-        div.tabIndex=0;
-        div.dataset.lat=item.lat;
-        div.dataset.lon=item.lon;
-        div.dataset.display=item.display_name;
-        div.addEventListener('click',()=>selectResult(item));
-        div.addEventListener('keydown',(e)=>{if(e.key==='Enter')selectResult(item);});
-        resultList.appendChild(div);
-    });
-    resultList.style.display='block';
-}
+// --- Basit kayıt / cihaz simülasyonu ---
+function loadRegistry(){try{return JSON.parse(localStorage.getItem('emission_registry')||'[]')}catch(e){return []}}
+function saveRegistry(reg){localStorage.setItem('emission_registry',JSON.stringify(reg));}
 
-async function selectResult(item){
-    resultList.style.display='none';
-    addressInput.value=item.display_name;
-    goToLocation(parseFloat(item.lat),parseFloat(item.lon),item.display_name);
-}
+function renderRegistered(){const list=document.getElementById('registeredList');const reg=loadRegistry();if(reg.length===0){list.innerHTML='<div class="muted">Kayıtlı cihaz yok.</div>';return;}list.innerHTML='';reg.forEach(r=>{const div=document.createElement('div');div.style.padding='8px';div.style.borderBottom='1px solid #eee';div.innerHTML=`<strong>${r.plate}</strong> — ${r.device} <div class="muted">${r.city||''}</div>`;list.appendChild(div);});}
 
-async function nominatimReverse(lat,lon){
-    const res=await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,{headers:{'Accept-Language':'en'}});
-    return res.json();
-}
+// register form
+document.getElementById('regBtn').addEventListener('click',()=>{const plate=document.getElementById('reg_plate').value.trim();const device=document.getElementById('reg_device').value.trim();const city=document.getElementById('reg_city').value.trim();if(!plate||!device){alert('Plaka ve cihaz ID gerekli');return;}const reg=loadRegistry();reg.push({plate,device,city,created:Date.now(),lastRead:null});saveRegistry(reg);renderRegistered();document.getElementById('reg_plate').value='';document.getElementById('reg_device').value='';document.getElementById('reg_city').value='';alert('Kayıt oluşturuldu (demo).');});
 
-function setMarker(lat,lon){
-    if(marker) marker.setLatLng([lat,lon]);
-    else marker=L.marker([lat,lon]).addTo(map);
-    map.setView([lat,lon],15);
-}
+// hızlı kayıt butonu (aside)
+document.getElementById('registerVehicleBtn').addEventListener('click',()=>{const plate=document.getElementById('plateInput').value.trim();const device=document.getElementById('deviceInput').value.trim();const model=document.getElementById('modelInput').value.trim();if(!plate||!device){alert('Plaka ve cihaz girin');return;}const reg=loadRegistry();reg.push({plate,device,model,created:Date.now(),lastRead:null});saveRegistry(reg);document.getElementById('lastRead').textContent='Kayıt oluşturuldu: '+plate;document.getElementById('plateInput').value='';document.getElementById('deviceInput').value='';document.getElementById('modelInput').value='';renderRegistered();renderMyVehicles();});
 
-function updateAQIUI(data,label){
-    locationLabel.textContent="Location: "+(label||'—');
-    const aqi=data&&data.aqi?data.aqi:null;
-    aqiText.textContent="AQI: "+(aqi!==null?aqi:'—');
-    dominantPollutant.textContent="Dominant Pollutant: "+((data&&data.dominentpol)?data.dominentpol.toUpperCase():'—');
+// Araçlarım sayfası
+function renderMyVehicles(){const cont=document.getElementById('myVehicles');const reg=loadRegistry();if(reg.length===0){cont.innerHTML='<div class="muted">Kayıtlı araç yok.</div>';return;}cont.innerHTML='';reg.forEach((r,idx)=>{const box=document.createElement('div');box.style.border='1px solid #eee';box.style.padding='8px';box.style.borderRadius='6px';box.style.marginBottom='8px';const last=r.lastRead?`<div>Son PM2.5: <strong>${r.lastRead.pm25}</strong> — Durum: <strong>${r.lastRead.status}</strong></div>`:'<div class="muted">Henüz okuma yok.</div>';box.innerHTML=`<strong>${r.plate}</strong> — ${r.device}<div class="muted">${r.model||''} ${r.city?'- '+r.city:''}</div>${last}<div style="margin-top:8px"><button class="btn" data-idx="${idx}" onclick="forceRead(this)">Manuel Okuma Al</button> <button class="btn" data-idx="${idx}" onclick="simulateTrip(this)">Simüle Seyahat</button></div>`;cont.appendChild(box);});}
 
-    let color="green";
-    if(aqi===null) color="#999";
-    else if(aqi<=50) color="green";
-    else if(aqi<=100) color="yellow";
-    else if(aqi<=150) color="orange";
-    else if(aqi<=200) color="red";
-    else if(aqi<=300) color="purple";
-    else color="maroon";
+window.forceRead = function(btn){const idx=parseInt(btn.dataset.idx);simulateDeviceRead(idx);}
+window.simulateTrip = function(btn){const idx=parseInt(btn.dataset.idx);const reg=loadRegistry();if(!reg[idx])return;const current=reg[idx];
+// a travel increases chance of high emissions
+simulateDeviceRead(idx, {multiply:1.5});}
 
-    aqiBar.style.background=color;
-    aqiBar.style.width=(aqi===null?0:Math.min(aqi,500)/500*100)+"%";
-    aqiBar.textContent=(aqi===null?'—':aqi);
+// cihaz okuması simülasyonu
+function simulateDeviceRead(index, opts={}){const reg=loadRegistry();if(!reg[index]) return;const basePM25 = Math.round( Math.random()*180 );const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply||1) ));const pm10 = Math.round(pm25 * (0.6 + Math.random()*0.8));const co = (Math.random()*6).toFixed(2);
+const status = decideStatus(pm25);
+const read = {ts:Date.now(),pm25,pm10,co,status};reg[index].lastRead=read;saveRegistry(reg);renderMyVehicles();document.getElementById('lastRead').innerHTML=`${reg[index].plate} — PM2.5: ${pm25} — ${status}`;}
 
-    pollutantsEl.innerHTML="";
-    const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
-    if(data&&data.iaqi){
-        keys.forEach(k=>{
-            if(data.iaqi[k]){
-                const li=document.createElement('li');
-                li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;
-                pollutantsEl.appendChild(li);
-            }
-        });
+function decideStatus(pm25){if(pm25>150) return 'TRAFİĞE UYGUN DEĞİL';if(pm25>100) return 'SINIRLI (KISITLI SAAT)';return 'TRAFİĞE UYGUN';}
+
+// periyodik simülasyon: kayıtlı her cihaza rastgele okuma gönder
+function startBackgroundSimulation(){// demo: her 20s de bir tüm kayıtları güncelle
+  setInterval(()=>{
+    const reg=loadRegistry();if(!reg.length) return;for(let i=0;i<reg.length;i++){ // biraz rastgelelik
+      if(Math.random()<0.6) simulateDeviceRead(i);
     }
-
-    let warning="",mask="",healthWarning="";
-    if(aqi===null){warning="";mask="";healthWarning="";}
-    else if(aqi<=50){warning="✅ Air quality is good for everyone."; mask=""; healthWarning="";}
-    else if(aqi<=100){warning="⚠️ Moderate. Sensitive people should be cautious."; mask=""; healthWarning="⚠️ People with COPD, asthma, or bronchitis should take care.";}
-    else if(aqi<=150){warning="⚠️ Unhealthy for sensitive groups. Limit outdoor activity."; mask="Consider wearing a mask if you have respiratory conditions."; healthWarning="⚠️ COPD, bronchitis, and asthma patients should avoid going outside.";}
-    else if(aqi<=200){warning="❌ Unhealthy. Avoid outdoor exercise."; mask="Wear a mask if going outside."; healthWarning="❌ People with COPD, asthma, bronchitis should stay indoors.";}
-    else if(aqi<=300){warning="☠️ Very unhealthy. Everyone should stay indoors."; mask="Use a high-quality mask if you must go out."; healthWarning="☠️ Everyone including COPD, bronchitis, asthma patients should stay indoors.";}
-    else{warning="🚫 Hazardous. Stay indoors."; mask="Wear a mask and use air purifier."; healthWarning="🚫 People with COPD, asthma, bronchitis, and all sensitive groups should not go outside.";}
-
-    warningMsg.textContent=warning;
-    maskMsg.textContent=mask;
-    healthWarningEl.textContent = healthWarning;
+    renderMyVehicles();
+  },20000);
 }
 
-async function fetchAQI(lat,lon,label){
-    try{
-        const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
-        const resp=await res.json();
-        if(resp.status==="ok") updateAQIUI(resp.data,label);
-        else alert("AQI data not available for this location.");
-    }catch(err){alert("Error fetching AQI data."); console.error(err);}
-}
+// --- Ulusal görünüm (sahte) ---
+const provinces=[
+  {name:'İstanbul',lat:41.01,lon:28.97},
+  {name:'Ankara',lat:39.92,lon:32.86},
+  {name:'İzmir',lat:38.42,lon:27.14},
+  {name:'Bursa',lat:40.19,lon:29.06},
+  {name:'Antalya',lat:36.88,lon:30.70},
+  {name:'Adana',lat:36.99,lon:35.32},
+  {name:'Samsun',lat:41.28,lon:36.33}
+];
+function setupNationalMap(){const nmap=L.map('nationalMap').setView([39.0,35.0],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(nmap);provinces.forEach(p=>{const fakePM25=Math.round( Math.random()*240 );const color=getColorForPM25(fakePM25);const marker=L.circleMarker([p.lat,p.lon],{radius:12,color:color,fillColor:color,fillOpacity:0.7}).addTo(nmap);marker.bindPopup(`<strong>${p.name}</strong><br>PM2.5 (sahte): ${fakePM25}`);});document.getElementById('nationalSummary').innerHTML=`<div class="muted">Toplam iller: ${provinces.length}. Bu gösterim tamamen simülasyon amaçlı.</div>`;}
+function getColorForPM25(v){if(v<=50) return 'green'; if(v<=100) return 'yellow'; if(v<=150) return 'orange'; if(v<=200) return 'red'; if(v<=300) return 'purple'; return 'maroon';}
 
-async function goToLocation(lat,lon,label){setMarker(lat,lon); fetchAQI(lat,lon,label);}
+// küçük inits
+renderRegistered();renderMyVehicles();startBackgroundSimulation();setupNationalMap();
 
-addressInput.addEventListener('input',debounce(async()=>{
-    const q=addressInput.value;
-    if(!q)return;
-    const results=await nominatimSearch(q);
-    renderResults(results);
-},250));
+// göstergeler için örnek: tüm kayıtlı araçlar için 'trafik izni' sayısını hesapla
+function computeNationStatusSummary(){const reg=loadRegistry();let ok=0,limited=0,notok=0;reg.forEach(r=>{if(!r.lastRead) return; if(r.lastRead.pm25>150) notok++; else if(r.lastRead.pm25>100) limited++; else ok++;});return {ok,limited,notok};}
 
-locateBtn.addEventListener('click',()=>{
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(async pos=>{
-            const lat=pos.coords.latitude;
-            const lon=pos.coords.longitude;
-            const rev=await nominatimReverse(lat,lon);
-            const label=rev && rev.display_name?rev.display_name:`Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
-            goToLocation(lat,lon,label);
-        },err=>alert("Unable to get your location."));
-    }else alert("Geolocation not supported.");
-});
+// sayfa değişimlerinde map resize
+let homeMapInitialized=true;
+map.on('click', async function(e){const lat=e.latlng.lat;const lon=e.latlng.lng;try{const rev=await nominatimReverse(lat,lon);const label=rev && rev.display_name?rev.display_name:`Seçilen Nokta (${lat.toFixed(3)}, ${lon.toFixed(3)})`;setMarker(lat,lon);fetchAQI(lat,lon,label);}catch(e){setMarker(lat,lon);fetchAQI(lat,lon,`Seçilen Nokta (${lat.toFixed(3)}, ${lon.toFixed(3)})`);} });
 
-clearBtn.addEventListener('click',()=>{addressInput.value="";resultList.style.display="none";});
+// butonlar harici
+function simulateAllReadsNow(){const reg=loadRegistry();for(let i=0;i<reg.length;i++){simulateDeviceRead(i);}renderMyVehicles();}
 
-map.on('click', async function(e){
-    const lat = e.latlng.lat;
-    const lon = e.latlng.lng;
-    try {
-        const rev = await nominatimReverse(lat, lon);
-        const label = rev && rev.display_name ? rev.display_name : `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
-        goToLocation(lat, lon, label);
-    } catch(err) {
-        goToLocation(lat, lon, `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);
-    }
-});
+// export debug fonksiyonu window'a
+window.simulateAllReadsNow=simulateAllReadsNow;
+
 </script>
 </body>
 </html>
