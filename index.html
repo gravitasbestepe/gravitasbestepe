@@ -40,9 +40,9 @@ label{font-size:13px;color:var(--muted)}
     <button id="nav-vehicle">My Vehicles</button>
     <button id="nav-rules">Rules & Advice</button>
     <button id="nav-global">Global Emission Map</button>
+    <button id="nav-admin">Admin Panel</button>
   </nav>
-
-  <div class="lang-select" aria-hidden="false">
+  <div class="lang-select">
     <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
     <button class="lang-btn" data-lang="tr" id="lang-tr">TR</button>
     <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
@@ -65,7 +65,6 @@ label{font-size:13px;color:var(--muted)}
           <p class="muted" id="behaviourText">This demo simulates device readings and traffic eligibility.</p>
         </div>
       </div>
-
       <aside class="card">
         <h3 id="quickSimTitle">Quick Register</h3>
         <label id="plateLabel">Plate (e.g. 34ABC34)</label>
@@ -75,24 +74,20 @@ label{font-size:13px;color:var(--muted)}
         <label id="modelLabel">Model (optional)</label>
         <input id="modelInput" placeholder="Model" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
         <button id="registerVehicleBtn" class="btn" style="width:100%;margin-top:6px">Register Vehicle</button>
-        <hr/>
-        <div id="miniActions">
-          <button class="btn" onclick="simulateAllReadsNow()">Simulate All Now</button>
-        </div>
       </aside>
     </div>
   </section>
 
-  <!-- REGISTER -->
+  <!-- REGISTER PAGE -->
   <section id="page-register" style="display:none">
     <div class="card">
       <h2 id="regTitle">Device Register</h2>
       <label id="reg_plate_label">Plate</label>
-      <input id="reg_plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <input id="reg_plate"/>
       <label id="reg_device_label">Device ID</label>
-      <input id="reg_device" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <input id="reg_device"/>
       <label id="reg_city_label">City</label>
-      <input id="reg_city" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <input id="reg_city"/>
       <button id="regBtn" class="btn">Create Register</button>
       <hr/>
       <h3 id="registeredTitle">Registered Devices</h3>
@@ -129,26 +124,38 @@ label{font-size:13px;color:var(--muted)}
   <!-- GLOBAL MAP -->
   <section id="page-global" style="display:none">
     <div class="card">
-      <h2 id="globalTitle">Global Emission Hotspots (Simulated)</h2>
-      <p class="muted" id="globalDesc">Showing simulated dangerous hotspots around the world. Not real data — demo only.</p>
-      <div id="globalMap"></div>
-      <div id="globalSummary" style="margin-top:8px" class="muted"></div>
+      <h2 id="globalTitle">Global Emission Hotspots</h2>
+      <div id="globalMap" style="height:400px"></div>
+      <div id="globalSummary" class="muted"></div>
     </div>
   </section>
+
+  <!-- ADMIN LOGIN -->
+  <section id="page-admin" style="display:none">
+    <div class="card">
+      <h2>Admin Login</h2>
+      <label>Email</label>
+      <input id="adminEmail" style="width:100%;padding:6px;margin:4px 0;border-radius:6px;border:1px solid #ccc"/>
+      <label>Password</label>
+      <input type="password" id="adminPass" style="width:100%;padding:6px;margin:4px 0;border-radius:6px;border:1px solid #ccc"/>
+      <button id="adminLoginBtn" class="btn">Login</button>
+      <div id="adminMsg" class="muted"></div>
+    </div>
+  </section>
+
 </main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="module">
-/* ---------------- Firebase & Firestore ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAPz1mkEVT0QG_COEQxZti5l6b2dQkII54",
   authDomain: "gravinair-a9928.firebaseapp.com",
   projectId: "gravinair-a9928",
-  storageBucket: "gravinair-a9928.appspot.com",
+  storageBucket: "gravinair-a9928.firebasestorage.app",
   messagingSenderId: "402929247815",
   appId: "1:402929247815:web:08962ac9a8bf9331267362"
 };
@@ -156,96 +163,73 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 
-// Google login button demo
-const loginBtn = document.createElement('button');
-loginBtn.textContent = 'Google Login';
-loginBtn.className = 'btn';
-loginBtn.style.marginLeft = '12px';
-document.querySelector('header nav').appendChild(loginBtn);
-
-loginBtn.addEventListener('click', async ()=>{
-  try{
-    const result = await signInWithPopup(auth, provider);
-    alert('Welcome ' + result.user.displayName);
-  }catch(err){ console.error(err); }
-});
-
-onAuthStateChanged(auth, user=>{
-  if(user) console.log('Signed in as', user.email);
-});
-
-// Firestore save
-async function saveVehicleToFirebase(data){
-  try{
-    await addDoc(collection(db,'vehicles'), data);
-    console.log('Saved to Firebase', data);
-  }catch(e){ console.error('Firebase save error', e);}
-}
-
-// Quick Register override
-const oldQuickRegister = document.getElementById('registerVehicleBtn').onclick;
-document.getElementById('registerVehicleBtn').onclick = function(){
-  const plate = document.getElementById('plateInput').value.trim();
-  const device = document.getElementById('deviceInput').value.trim();
-  const model = document.getElementById('modelInput').value.trim();
-  if(!plate || !device) return alert('Plate & Device required');
-  const data = { plate, device, model, ts:Date.now() };
-  saveVehicleToFirebase(data);
-  if(oldQuickRegister) oldQuickRegister();
+/* ------------------ SPA NAV ------------------ */
+const pages = {
+  home: document.getElementById('page-home'),
+  register: document.getElementById('page-register'),
+  vehicle: document.getElementById('page-vehicle'),
+  rules: document.getElementById('page-rules'),
+  global: document.getElementById('page-global'),
+  admin: document.getElementById('page-admin')
 };
 
-// Load vehicles from Firebase
-async function loadVehiclesFromFirebase(){
-  const snapshot = await getDocs(collection(db,'vehicles'));
-  const arr = [];
-  snapshot.forEach(doc=>arr.push(doc.data()));
-  const container = document.getElementById('myVehicles');
-  container.innerHTML = '';
-  arr.forEach(v=>{
-    const div = document.createElement('div');
-    div.className='resultItem';
-    div.textContent = `${v.plate} | ${v.device} | ${v.model||'N/A'}`;
-    container.appendChild(div);
-  });
-  console.log('Vehicles from Firebase:', arr);
-}
-loadVehiclesFromFirebase();
-
-/* ---------------- SPA Navigation ---------------- */
-const pages = ['home','register','vehicle','rules','global'];
-pages.forEach(p=>{
-  document.getElementById('nav-'+p).addEventListener('click',()=>{
-    pages.forEach(x=>document.getElementById('page-'+x).style.display='none');
-    document.getElementById('page-'+p).style.display='block';
-    pages.forEach(x=>document.getElementById('nav-'+x).classList.remove('active'));
-    document.getElementById('nav-'+p).classList.add('active');
-    if(p==='vehicle') loadVehiclesFromFirebase();
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    Object.values(pages).forEach(p=>p.style.display='none');
+    pages[btn.id.replace('nav-','')] && (pages[btn.id.replace('nav-','')].style.display='block');
   });
 });
 
-/* ---------------- Quick Simulator ---------------- */
-window.simulateAllReadsNow = function(){
-  const now = new Date();
-  document.getElementById('lastRead').textContent = `Simulated Reading at ${now.toLocaleTimeString()}`;
-  document.getElementById('behaviourText').textContent = 'No traffic restriction in demo mode.';
-};
+/* ------------------ LANGUAGE ------------------ */
+document.querySelectorAll('.lang-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.lang-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    alert("Language changed: "+b.dataset.lang+" (demo only, texts not translated yet)");
+  });
+});
 
-/* ---------------- Global Map ---------------- */
-const globalMap = L.map('globalMap').setView([20,0],2);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OSM'}).addTo(globalMap);
-const hotspots=[
-  {lat:40.7,lon:-74,name:'NYC',aqi:120},
-  {lat:31.2,lon:121.5,name:'Shanghai',aqi:160},
-  {lat:19.0,lon:72.8,name:'Mumbai',aqi:140},
-  {lat:39.9,lon:116.4,name:'Beijing',aqi:180}
+/* ------------------ VEHICLE REGISTER ------------------ */
+document.getElementById('registerVehicleBtn').addEventListener('click', async ()=>{
+  const plate=document.getElementById('plateInput').value.trim();
+  const device=document.getElementById('deviceInput').value.trim();
+  const model=document.getElementById('modelInput').value.trim();
+  if(!plate||!device){alert("Plate & Device required");return;}
+  try{
+    await addDoc(collection(db,'vehicles'),{plate,device,model,createdAt:Date.now()});
+    alert("Vehicle registered!");
+    document.getElementById('plateInput').value='';
+    document.getElementById('deviceInput').value='';
+    document.getElementById('modelInput').value='';
+  }catch(e){console.error(e);alert("Error registering vehicle")}
+});
+
+/* ------------------ ADMIN LOGIN ------------------ */
+document.getElementById('adminLoginBtn').addEventListener('click', async ()=>{
+  const email=document.getElementById('adminEmail').value;
+  const pass=document.getElementById('adminPass').value;
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+    document.getElementById('adminMsg').innerText="Login successful!";
+    alert("Admin logged in, now you can manage vehicles (demo).");
+  }catch(e){document.getElementById('adminMsg').innerText="Login failed! "+e.message}
+});
+
+/* ------------------ GLOBAL MAP ------------------ */
+const map = L.map('globalMap').setView([20,0],2);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+
+// demo points
+const demoPoints=[
+  {lat:39.9,lon:32.8,city:"Ankara",pm25:160},
+  {lat:41,lon:28.9,city:"Istanbul",pm25:140},
+  {lat:43.6,lon:1.44,city:"Toulouse",pm25:180},
 ];
-hotspots.forEach(h=>{
-  const color=h.aqi>150?'red':h.aqi>100?'orange':'green';
-  L.circle([h.lat,h.lon],{radius:50000,color:color,fillOpacity:0.5}).bindPopup(`${h.name}: AQI ${h.aqi}`).addTo(globalMap);
+demoPoints.forEach(p=>{
+  const color=p.pm25>150?'red':p.pm25>100?'orange':'green';
+  L.circleMarker([p.lat,p.lon],{radius:8,color,color,fillOpacity:0.6}).bindPopup(p.city+": "+p.pm25).addTo(map);
 });
-document.getElementById('globalSummary').textContent = 'Red=Very High, Orange=Moderate, Green=Low AQI.';
 </script>
 </body>
 </html>
