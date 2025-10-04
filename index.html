@@ -100,10 +100,11 @@ ul#pollutants { margin:0; padding-left:18px; font-size:12px; }
 <div class="aqi-bar"><div id="aqiBar" class="aqi-fill">—</div></div>
 <p id="aqiText">AQI: —</p>
 <p id="dominantPollutant">Dominant Pollutant: —</p>
-<h4>Details:</h4>
+<h4>Pollutants:</h4>
 <ul id="pollutants"></ul>
 <p id="warningMsg" style="color:#b22222; font-weight:bold;"></p>
 <p id="maskMsg" style="color:#0000aa; font-weight:bold;"></p>
+<p id="healthWarning" style="color:#8B0000; font-weight:bold;"></p>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -125,6 +126,7 @@ const dominantPollutant=document.getElementById('dominantPollutant');
 const pollutantsEl=document.getElementById('pollutants');
 const warningMsg=document.getElementById('warningMsg');
 const maskMsg=document.getElementById('maskMsg');
+const healthWarningEl=document.getElementById('healthWarning');
 
 function debounce(fn,wait){let t;return function(...args){clearTimeout(t);t=setTimeout(()=>fn.apply(this,args),wait);};}
 
@@ -164,8 +166,8 @@ async function nominatimReverse(lat,lon){
 }
 
 function setMarker(lat,lon){
-    if(marker)map.removeLayer(marker);
-    marker=L.marker([lat,lon]).addTo(map);
+    if(marker) marker.setLatLng([lat,lon]);
+    else marker=L.marker([lat,lon]).addTo(map);
     map.setView([lat,lon],15);
 }
 
@@ -174,42 +176,56 @@ function updateAQIUI(data,label){
     const aqi=data&&data.aqi?data.aqi:null;
     aqiText.textContent="AQI: "+(aqi!==null?aqi:'—');
     dominantPollutant.textContent="Dominant Pollutant: "+((data&&data.dominentpol)?data.dominentpol.toUpperCase():'—');
+
     let color="green";
-    if(aqi===null)color="#999";
-    else if(aqi<=50)color="green";
-    else if(aqi<=100)color="yellow";
-    else if(aqi<=150)color="orange";
-    else if(aqi<=200)color="red";
-    else if(aqi<=300)color="purple";
+    if(aqi===null) color="#999";
+    else if(aqi<=50) color="green";
+    else if(aqi<=100) color="yellow";
+    else if(aqi<=150) color="orange";
+    else if(aqi<=200) color="red";
+    else if(aqi<=300) color="purple";
     else color="maroon";
+
     aqiBar.style.background=color;
     aqiBar.style.width=(aqi===null?0:Math.min(aqi,500)/500*100)+"%";
     aqiBar.textContent=(aqi===null?'—':aqi);
+
     pollutantsEl.innerHTML="";
     const keys=["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
-    if(data&&data.iaqi){keys.forEach(k=>{if(data.iaqi[k]){const li=document.createElement('li');li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;pollutantsEl.appendChild(li);}})}
-    let warning="",mask="";
-    if(aqi===null){warning="";mask="";}
-    else if(aqi<=50){warning="✅ Air quality is good for everyone.";mask="";}
-    else if(aqi<=100){warning="⚠️ Moderate. Sensitive people should take care.";mask="";}
-    else if(aqi<=150){warning="⚠️ Unhealthy for sensitive groups. Limit outdoor activity.";mask="Consider wearing a mask if you have respiratory conditions.";}
-    else if(aqi<=200){warning="❌ Unhealthy. Avoid outdoor exercise.";mask="Wear a mask if going outside.";}
-    else if(aqi<=300){warning="☠️ Very unhealthy. Everyone should stay indoors.";mask="Use a high-quality mask if you must go out.";}
-    else{warning="🚫 Hazardous. Stay indoors.";mask="Wear a mask and use air purifier.";}
+    if(data&&data.iaqi){
+        keys.forEach(k=>{
+            if(data.iaqi[k]){
+                const li=document.createElement('li');
+                li.textContent=`${k.toUpperCase()}: ${data.iaqi[k].v}`;
+                pollutantsEl.appendChild(li);
+            }
+        });
+    }
+
+    let warning="",mask="",healthWarning="";
+    if(aqi===null){warning="";mask="";healthWarning="";}
+    else if(aqi<=50){warning="✅ Air quality is good for everyone."; mask=""; healthWarning="";}
+    else if(aqi<=100){warning="⚠️ Moderate. Sensitive people should be cautious."; mask=""; healthWarning="⚠️ People with COPD, asthma, or bronchitis should take care.";}
+    else if(aqi<=150){warning="⚠️ Unhealthy for sensitive groups. Limit outdoor activity."; mask="Consider wearing a mask if you have respiratory conditions."; healthWarning="⚠️ COPD, bronchitis, and asthma patients should avoid going outside.";}
+    else if(aqi<=200){warning="❌ Unhealthy. Avoid outdoor exercise."; mask="Wear a mask if going outside."; healthWarning="❌ People with COPD, asthma, bronchitis should stay indoors.";}
+    else if(aqi<=300){warning="☠️ Very unhealthy. Everyone should stay indoors."; mask="Use a high-quality mask if you must go out."; healthWarning="☠️ Everyone including COPD, bronchitis, asthma patients should stay indoors.";}
+    else{warning="🚫 Hazardous. Stay indoors."; mask="Wear a mask and use air purifier."; healthWarning="🚫 People with COPD, asthma, bronchitis, and all sensitive groups should not go outside.";}
+
     warningMsg.textContent=warning;
     maskMsg.textContent=mask;
+    healthWarningEl.textContent = healthWarning;
 }
 
 async function fetchAQI(lat,lon,label){
     try{
         const res=await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
         const resp=await res.json();
-        if(resp.status==="ok")updateAQIUI(resp.data,label);
+        if(resp.status==="ok") updateAQIUI(resp.data,label);
         else alert("AQI data not available for this location.");
     }catch(err){alert("Error fetching AQI data."); console.error(err);}
 }
 
-async function goToLocation(lat,lon,label){setMarker(lat,lon);fetchAQI(lat,lon,label);}
+async function goToLocation(lat,lon,label){setMarker(lat,lon); fetchAQI(lat,lon,label);}
 
 addressInput.addEventListener('input',debounce(async()=>{
     const q=addressInput.value;
@@ -232,7 +248,6 @@ locateBtn.addEventListener('click',()=>{
 
 clearBtn.addEventListener('click',()=>{addressInput.value="";resultList.style.display="none";});
 
-// HARİTADAN TIKLAYINCA REVERSE GEOCODING VE AQI
 map.on('click', async function(e){
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
