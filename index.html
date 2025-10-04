@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air Quality Checker</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0;}
+  #map { height: 60vh; }
+  #controls { padding:10px; background:#f4f4f4; }
+  #aqiDetails { padding:10px; }
+  .aqi-bar { height:20px; width:100%; background:#ddd; margin:5px 0; border-radius:5px; overflow:hidden; }
+  .aqi-fill { height:100%; width:0%; background:green; text-align:center; color:white; font-weight:bold; }
+  button { padding:5px 10px; margin-left:5px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <input type="text" id="addressInput" placeholder="Enter city or address">
+  <button id="searchBtn">Search</button>
+  <button id="locateBtn">Locate Me</button>
+</div>
+
+<div id="map"></div>
+
+<div id="aqiDetails">
+  <h3 id="locationLabel">Location: </h3>
+  <div class="aqi-bar"><div id="aqiBar" class="aqi-fill"></div></div>
+  <p id="aqiText">AQI: </p>
+  <p id="dominantPollutant"></p>
+  <h4>Details:</h4>
+  <ul id="pollutants"></ul>
+  <p id="warningMsg" style="color:red; font-weight:bold;"></p>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+// ==== CONFIG ====
+const TOKEN = "a43de1db3b12f4be6be52aaa9afc6ca9ffb3b26b"; // Senin token
+
+// ==== MAP INIT ====
+const map = L.map('map').setView([39.925, 32.866], 6); // Türkiye başlangıç
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+}).addTo(map);
+
+let marker = null;
+
+// ==== HELPER FUNCTIONS ====
+function updateAQIUI(data, label) {
+  document.getElementById("locationLabel").textContent = "Location: " + label;
+  const aqi = data.aqi;
+  document.getElementById("aqiText").textContent = "AQI: " + aqi;
+  document.getElementById("dominantPollutant").textContent = "Dominant Pollutant: " + data.dominentpol.toUpperCase();
+  
+  // Renkli bar
+  const aqiFill = document.getElementById("aqiBar");
+  let color = "green";
+  if (aqi <= 50) color="green";
+  else if (aqi<=100) color="yellow";
+  else if (aqi<=150) color="orange";
+  else if (aqi<=200) color="red";
+  else if (aqi<=300) color="purple";
+  else color="maroon";
+  aqiFill.style.background = color;
+  aqiFill.style.width = Math.min(aqi,500)/500*100 + "%";
+  aqiFill.textContent = aqi;
+
+  // Detaylar
+  const pollutants = document.getElementById("pollutants");
+  pollutants.innerHTML = "";
+  const keys = ["co","h","no2","o3","p","pm10","pm25","so2","t","w"];
+  keys.forEach(k=>{
+    if(data.iaqi[k]) {
+      let li = document.createElement("li");
+      li.textContent = k.toUpperCase() + ": " + data.iaqi[k].v;
+      pollutants.appendChild(li);
+    }
+  });
+
+  // Uyarı
+  let warning = "";
+  if(aqi>150) warning="Air quality is unhealthy. Limit outdoor activities.";
+  else if(aqi>100) warning="Air quality is moderate. Sensitive groups should take care.";
+  document.getElementById("warningMsg").textContent = warning;
+}
+
+function fetchAQI(lat, lon, label) {
+  fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${TOKEN}`)
+  .then(res=>res.json())
+  .then(resp=>{
+    if(resp.status==="ok") {
+      updateAQIUI(resp.data, label);
+    } else {
+      alert("AQI data not available for this location.");
+    }
+  })
+  .catch(err=>{
+    alert("Error fetching AQI data.");
+    console.error(err);
+  });
+}
+
+// ==== EVENTS ====
+// Locate me
+document.getElementById("locateBtn").addEventListener("click", ()=>{
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      if(marker) map.removeLayer(marker);
+      marker = L.marker([lat, lon]).addTo(map);
+      map.setView([lat, lon], 12);
+      fetchAQI(lat, lon, "Your Location");
+    }, err=>{
+      alert("Unable to get your location.");
+    });
+  } else alert("Geolocation not supported.");
+});
+
+// Map click
+map.on('click', function(e){
+  const lat = e.latlng.lat;
+  const lon = e.latlng.lng;
+  if(marker) map.removeLayer(marker);
+  marker = L.marker([lat, lon]).addTo(map);
+  fetchAQI(lat, lon, `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);
+});
+
+// Address search
+document.getElementById("searchBtn").addEventListener("click", ()=>{
+  const query = document.getElementById("addressInput").value;
+  if(!query) return alert("Please enter a city or address.");
+  // Nominatim search
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+  .then(res=>res.json())
+  .then(data=>{
+    if(data && data.length>0){
+      const loc = data[0];
+      const lat = parseFloat(loc.lat);
+      const lon = parseFloat(loc.lon);
+      if(marker) map.removeLayer(marker);
+      marker = L.marker([lat, lon]).addTo(map);
+      map.setView([lat, lon], 12);
+      fetchAQI(lat, lon, loc.display_name);
+    } else alert("Location not found.");
+  })
+  .catch(err=>{ alert("Error searching location."); console.error(err); });
+});
+</script>
+</body>
+</html>
