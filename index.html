@@ -1,55 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global Emission Map</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Emission Simulator</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
-body { font-family: Arial; margin:0; padding:0; background:#fafafa; color:#222; }
-#controls { display:flex; gap:6px; align-items:center; padding:8px; background:#f4f4f4; flex-wrap:wrap; }
-#map { height:50vh; margin:10px 0; }
-#vehicleList, #adminPanel { padding:10px; background:white; margin:10px; border-radius:5px; }
-input, button { padding:5px; margin:2px; }
-table { border-collapse:collapse; width:100%; }
-th, td { border:1px solid #ccc; padding:4px; text-align:center; }
+:root{--bg:#fafafa;--card:#fff;--muted:#666}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222}
+header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0b5;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+nav{display:flex;gap:8px;align-items:center}
+nav button{background:transparent;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}
+nav button.active{background:rgba(255,255,255,.9)}
+.lang-select{margin-left:auto;display:flex;gap:8px;align-items:center}
+.lang-btn{padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;cursor:pointer}
+.lang-btn.active{background:white}
+main{padding:12px}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
+.card{background:var(--card);padding:10px;border-radius:8px;box-shadow:0 4px 16px rgba(12,12,12,.04)}
+#map,#globalMap,#nationalMap{height:420px;border-radius:8px}
+#controls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;padding:8px;background:#f4f4f4;border-radius:8px}
+#addressInput{flex:1;padding:6px;border-radius:6px;border:1px solid #ccc}
+.resultItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer}
+.aqi-bar{height:18px;width:100%;background:#ddd;margin:4px 0;border-radius:5px;overflow:hidden}
+.aqi-fill{height:100%;width:0%;background:green;text-align:center;color:white;font-weight:bold;font-size:12px}
+label{font-size:13px;color:var(--muted)}
+.muted{color:var(--muted);font-size:13px}
+.btn{display:inline-block;padding:8px 10px;border-radius:6px;border:1px solid #bbb;background:white;cursor:pointer}
+@media(max-width:900px){.grid{grid-template-columns:1fr}#map{height:300px}}
 </style>
 </head>
 <body>
+<header>
+  <h1 id="title">Emission Simulator (Demo)</h1>
+  <nav>
+    <button id="nav-home" class="active">Home</button>
+    <button id="nav-register">Device Register</button>
+    <button id="nav-vehicle">My Vehicles</button>
+    <button id="nav-rules">Rules & Advice</button>
+    <button id="nav-global">Global Emission Map</button>
+  </nav>
 
-<div id="controls">
-  <button id="googleLogin">Google ile Giriş</button>
-  <span id="userInfo">Henüz giriş yapılmadı</span>
-</div>
+  <div class="lang-select" aria-hidden="false">
+    <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
+    <button class="lang-btn" data-lang="tr" id="lang-tr">TR</button>
+    <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
+    <button class="lang-btn" data-lang="ru" id="lang-ru">RU</button>
+  </div>
+</header>
 
-<div id="vehicleList">
-  <h3>Araç Kayıt Formu</h3>
-  <input type="text" id="plate" placeholder="Plaka"/>
-  <input type="number" id="emission" placeholder="Emisyon (g/km)"/>
-  <input type="text" id="city" placeholder="Şehir"/>
-  <button id="addVehicle">Kaydet</button>
-  <p id="status"></p>
-</div>
+<main>
+  <!-- HOME -->
+  <section id="page-home">
+    <div class="grid">
+      <div class="card">
+        <h2 id="home-title">Quick Vehicle Emission Simulator</h2>
+        <p class="muted" id="home-desc">Register your device and get simulated emission readings here.</p>
+        <div style="margin-top:10px">
+          <h3 id="lastReadLabel">Last Reading</h3>
+          <div id="lastRead" class="muted">No readings yet.</div>
+          <hr/>
+          <h3 id="behaviourLabel">System Behaviour</h3>
+          <p class="muted" id="behaviourText">This demo simulates device readings and traffic eligibility.</p>
+        </div>
+      </div>
 
-<div id="adminPanel">
-  <h3>Admin Panel - Kayıtlı Araçlar</h3>
-  <table id="vehicleTable">
-    <thead>
-      <tr><th>Plaka</th><th>Emisyon</th><th>Şehir</th><th>Tarih</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <aside class="card">
+        <h3 id="quickSimTitle">Quick Register</h3>
+        <label id="plateLabel">Plate (e.g. 34ABC34)</label>
+        <input id="plateInput" placeholder="Enter plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+        <label id="deviceLabel">Device ID</label>
+        <input id="deviceInput" placeholder="Device ID" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+        <label id="modelLabel">Model (optional)</label>
+        <input id="modelInput" placeholder="Model" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+        <button id="registerVehicleBtn" class="btn" style="width:100%;margin-top:6px">Register Vehicle</button>
+        <hr/>
+        <div id="miniActions">
+          <button class="btn" onclick="simulateAllReadsNow()">Simulate All Now</button>
+        </div>
+      </aside>
+    </div>
+  </section>
 
-<div id="map"></div>
+  <!-- REGISTER -->
+  <section id="page-register" style="display:none">
+    <div class="card">
+      <h2 id="regTitle">Device Register</h2>
+      <label id="reg_plate_label">Plate</label>
+      <input id="reg_plate" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <label id="reg_device_label">Device ID</label>
+      <input id="reg_device" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <label id="reg_city_label">City</label>
+      <input id="reg_city" style="width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc"/>
+      <button id="regBtn" class="btn">Create Register</button>
+      <hr/>
+      <h3 id="registeredTitle">Registered Devices</h3>
+      <div id="registeredList"></div>
+    </div>
+  </section>
+
+  <!-- VEHICLES -->
+  <section id="page-vehicle" style="display:none">
+    <div class="card">
+      <h2 id="myVehiclesTitle">My Vehicles</h2>
+      <div id="myVehicles"></div>
+    </div>
+  </section>
+
+  <!-- RULES -->
+  <section id="page-rules" style="display:none">
+    <div class="card">
+      <h2 id="rulesTitle">Rules & Advice</h2>
+      <ul>
+        <li id="rule1">PM2.5 &gt; 150 => Traffic ban recommended.</li>
+        <li id="rule2">PM2.5 100-150 => Limited (restricted times).</li>
+        <li id="rule3">PM2.5 &lt;= 100 => Normal traffic permitted.</li>
+      </ul>
+      <h3 id="adviceTitle">Advice</h3>
+      <ol>
+        <li id="advice1">Check filters and catalytic converter.</li>
+        <li id="advice2">Routine maintenance.</li>
+        <li id="advice3">Reduce idling.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- GLOBAL MAP -->
+  <section id="page-global" style="display:none">
+    <div class="card">
+      <h2 id="globalTitle">Global Emission Hotspots (Simulated)</h2>
+      <p class="muted" id="globalDesc">Showing simulated dangerous hotspots around the world. Not real data — demo only.</p>
+      <div id="globalMap"></div>
+      <div id="globalSummary" style="margin-top:8px" class="muted"></div>
+    </div>
+  </section>
+</main>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="module">
+/* ---------------- Firebase & Firestore ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAPz1mkEVT0QG_COEQxZti5l6b2dQkII54",
   authDomain: "gravinair-a9928.firebaseapp.com",
@@ -64,69 +158,26 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Map
-const map = L.map('map').setView([0,0],2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+// Google login button demo
+const loginBtn = document.createElement('button');
+loginBtn.textContent = 'Google Login';
+loginBtn.className = 'btn';
+loginBtn.style.marginLeft = '12px';
+document.querySelector('header nav').appendChild(loginBtn);
 
-// Login
-const loginBtn = document.getElementById("googleLogin");
-const userInfo = document.getElementById("userInfo");
-
-loginBtn.addEventListener("click", async ()=>{
+loginBtn.addEventListener('click', async ()=>{
   try{
     const result = await signInWithPopup(auth, provider);
-    userInfo.textContent = "Hoşgeldin: " + result.user.displayName;
-    loadVehicles();
-  }catch(err){console.error(err);}
+    alert('Welcome ' + result.user.displayName);
+  }catch(err){ console.error(err); }
 });
 
-onAuthStateChanged(auth,user=>{
-  if(user) userInfo.textContent = "Hoşgeldin: " + user.displayName;
-  else userInfo.textContent = "Henüz giriş yapılmadı";
+onAuthStateChanged(auth, user=>{
+  if(user) console.log('Signed in as', user.email);
 });
 
-// Add Vehicle
-document.getElementById("addVehicle").addEventListener("click", async ()=>{
-  const plate = document.getElementById("plate").value.toUpperCase();
-  const emission = parseFloat(document.getElementById("emission").value);
-  const city = document.getElementById("city").value;
-  const status = document.getElementById("status");
-
-  if(!plate || isNaN(emission) || !city){ status.textContent="Lütfen tüm alanları doldur!"; return;}
-
+// Firestore save
+async function saveVehicleToFirebase(data){
   try{
-    await addDoc(collection(db,"vehicles"),{
-      plate, emission, city, date:new Date().toISOString()
-    });
-    status.textContent = "Araç kaydedildi!";
-    document.getElementById("plate").value="";
-    document.getElementById("emission").value="";
-    document.getElementById("city").value="";
-    loadVehicles();
-  }catch(err){console.error(err); status.textContent="Hata oluştu!";}
-});
-
-// Load Vehicles
-async function loadVehicles(){
-  const tbody = document.querySelector("#vehicleTable tbody");
-  tbody.innerHTML="";
-  const snapshot = await getDocs(collection(db,"vehicles"));
-  snapshot.forEach(doc=>{
-    const v = doc.data();
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${v.plate}</td><td>${v.emission}</td><td>${v.city}</td><td>${new Date(v.date).toLocaleString()}</td>`;
-    tbody.appendChild(tr);
-
-    // Map marker (simüle rastgele koordinat)
-    const lat =  Math.random()*140-70; 
-    const lon = Math.random()*360-180; 
-    L.circle([lat,lon],{radius:v.emission*50,color:"red"}).addTo(map)
-      .bindPopup(`Plaka: ${v.plate}<br>Emisyon: ${v.emission} g/km<br>Şehir: ${v.city}`);
-  });
-}
-
-// İlk yüklemede
-loadVehicles();
-</script>
-</body>
-</html>
+    await addDoc(collection(db,'vehicles'), data);
+    console.log('
