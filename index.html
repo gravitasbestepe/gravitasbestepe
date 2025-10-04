@@ -232,7 +232,18 @@ locateBtn.addEventListener('click',()=>{
 
 clearBtn.addEventListener('click',()=>{addressInput.value="";resultList.style.display="none";});
 
-map.on('click',function(e){const lat=e.latlng.lat;const lon=e.latlng.lng;goToLocation(lat,lon,`Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);});
+// HARİTADAN TIKLAYINCA REVERSE GEOCODING VE AQI
+map.on('click', async function(e){
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+    try {
+        const rev = await nominatimReverse(lat, lon);
+        const label = rev && rev.display_name ? rev.display_name : `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+        goToLocation(lat, lon, label);
+    } catch(err) {
+        goToLocation(lat, lon, `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`);
+    }
+});
 </script>
 </body>
 </html>
