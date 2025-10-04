@@ -587,6 +587,7 @@ let currentLang = localStorage.getItem('site_lang') || 'en';
 let globalMap = null;
 let aqiMap = null;
 let aqiMarker = null;
+let currentLocationLabel = "—";
 
 const pages = {
     home: document.getElementById('page-home'),
@@ -1004,9 +1005,20 @@ async function handleLocateMe() {
     navigator.geolocation.getCurrentPosition(async pos => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
-        const rev = await nominatimReverse(lat, lon);
-        const label = rev && rev.display_name ? rev.display_name : 
-            `Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+        
+        // Kullanıcının girdiği konum ismini kullan
+        const userInput = document.getElementById('aqiAddressInput').value;
+        let label;
+        
+        if (userInput && userInput.trim() !== '') {
+            // Kullanıcı bir konum girdiyse onu kullan
+            label = userInput;
+        } else {
+            // Konum girilmemişse coğrafi kodlama yap
+            const rev = await nominatimReverse(lat, lon);
+            label = rev && rev.display_name ? rev.display_name : 
+                `Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+        }
         
         document.getElementById('aqiAddressInput').value = label;
         goToAqiLocation(lat, lon, label);
@@ -1114,10 +1126,12 @@ async function fetchAqiData(lat, lon, label) {
     }
 }
 
-function updateAqiUI(data, label) {
+function updateAqiUI(data, userLabel) {
     const t = translations[currentLang] || translations.en;
-    const locationName = data && data.city ? data.city.name : label;
-    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${locationName || '—'}`;
+    
+    // Kullanıcının seçtiği/girdiği konum ismini kullan
+    const locationName = userLabel || (data && data.city ? data.city.name : '—');
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${locationName}`;
     
     const aqi = data && data.aqi ? data.aqi : null;
     document.getElementById('detailAqiText').textContent = `${t.aqiText}: ${aqi !== null ? aqi : '—'}`;
