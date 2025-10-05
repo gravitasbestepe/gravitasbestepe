@@ -431,50 +431,6 @@ footer {
     opacity: 0.9;
     font-weight: 500;
 }
-.sources-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-}
-.source-card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #ddd;
-    transition: all 0.3s ease;
-}
-.source-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0,0,0,0.12);
-}
-.source-card h3 {
-    margin: 0 0 12px 0;
-    color: var(--primary);
-    font-size: 18px;
-}
-.source-card p {
-    margin: 0 0 12px 0;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.5;
-}
-.source-link {
-    display: inline-block;
-    padding: 8px 16px;
-    background: var(--primary);
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-.source-link:hover {
-    background: var(--secondary);
-    transform: translateY(-1px);
-}
 @media (max-width: 900px) {
     .grid {
         grid-template-columns: 1fr;
@@ -496,9 +452,6 @@ footer {
     .vehicle-actions {
         flex-direction: column;
     }
-    .sources-grid {
-        grid-template-columns: 1fr;
-    }
 }
 </style>
 </head>
@@ -512,7 +465,6 @@ footer {
         <button id="nav-rules">Rules & Advice</button>
         <button id="nav-global">Global Emission Map</button>
         <button id="nav-aqi">Detailed AQI Map</button>
-        <button id="nav-sources">Sources</button>
     </nav>
     <div class="lang-select">
         <button class="lang-btn active" data-lang="en" id="lang-en">EN</button>
@@ -678,103 +630,6 @@ footer {
             </aside>
         </div>
     </section>
-
-    <section id="page-sources" style="display:none">
-        <div class="card">
-            <h2 id="sourcesTitle">Sources & References</h2>
-            <p class="muted" id="sourcesDesc">This application uses data and technologies from the following sources:</p>
-            
-            <div class="sources-grid">
-                <div class="source-card">
-                    <h3>🌍 NASA Data</h3>
-                    <p>Satellite air quality monitoring and atmospheric data from NASA's Earth observation programs.</p>
-                    <a href="https://www.nasa.gov/mission_pages/station/research/experiments/explorer/Investigation.html?#id=171" class="source-link" target="_blank">Visit NASA</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🏥 World Health Organization</h3>
-                    <p>Air pollution guidelines and health impact assessments for global air quality standards.</p>
-                    <a href="https://www.who.int/health-topics/air-pollution" class="source-link" target="_blank">Visit WHO</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>📡 ARSET - NASA</h3>
-                    <p>Applied Remote Sensing Training Program providing insights into air pollution measurement techniques.</p>
-                    <a href="https://appliedsciences.nasa.gov/what-we-do/capacity-building/arset" class="source-link" target="_blank">Visit ARSET</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🌫️ AirNow</h3>
-                    <p>Real-time air quality data and monitoring from the U.S. Environmental Protection Agency.</p>
-                    <a href="https://www.airnow.gov/" class="source-link" target="_blank">Visit AirNow</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🛰️ NASA WorldView</h3>
-                    <p>Satellite imagery and air quality visualization tools for global environmental monitoring.</p>
-                    <a href="https://worldview.earthdata.nasa.gov/" class="source-link" target="_blank">Visit WorldView</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🗺️ OpenStreetMap</h3>
-                    <p>Open-source mapping data and geocoding services for location-based features.</p>
-                    <a href="https://www.openstreetmap.org/" class="source-link" target="_blank">Visit OSM</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>📊 WAQI API</h3>
-                    <p>World Air Quality Index real-time API providing global air quality measurements.</p>
-                    <a href="https://waqi.info/" class="source-link" target="_blank">Visit WAQI</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🗺️ Leaflet Library</h3>
-                    <p>Open-source JavaScript library for interactive maps and location services.</p>
-                    <a href="https://leafletjs.com/" class="source-link" target="_blank">Visit Leaflet</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🔬 Scientific Research</h3>
-                    <p>Vehicle emission studies and air pollution research from peer-reviewed scientific publications.</p>
-                    <a href="https://www.sciencedirect.com/science/article/pii/S1352231020305889" class="source-link" target="_blank">View Research</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🌐 Geolocation API</h3>
-                    <p>Browser-based location services for user positioning and address lookup.</p>
-                    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API" class="source-link" target="_blank">View API Docs</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>💻 Development Tools</h3>
-                    <p>Visual Studio Code, GitHub, Vercel, and other development platforms used in this project.</p>
-                    <a href="https://code.visualstudio.com/" class="source-link" target="_blank">View Tools</a>
-                </div>
-                
-                <div class="source-card">
-                    <h3>🤖 AI Assistance</h3>
-                    <p>ChatGPT for code review, documentation, and development assistance.</p>
-                    <a href="https://chatgpt.com/" class="source-link" target="_blank">Visit ChatGPT</a>
-                </div>
-            </div>
-            
-            <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                <h3 style="color: var(--primary); margin-bottom: 15px;">Data Sources & Methodology</h3>
-                <p style="margin-bottom: 10px; line-height: 1.6;">
-                    <strong>Real-time Air Quality Data:</strong> Sourced from WAQI API which aggregates data from over 10,000 monitoring stations worldwide, including government monitoring networks and community-driven sensors.
-                </p>
-                <p style="margin-bottom: 10px; line-height: 1.6;">
-                    <strong>Satellite Data Integration:</strong> Incorporates NASA satellite observations for comprehensive global coverage, especially in areas with limited ground monitoring.
-                </p>
-                <p style="margin-bottom: 10px; line-height: 1.6;">
-                    <strong>Health Guidelines:</strong> Based on WHO air quality guidelines and EPA standards for particulate matter (PM2.5, PM10) and gaseous pollutants.
-                </p>
-                <p style="line-height: 1.6;">
-                    <strong>Vehicle Emission Simulation:</strong> Uses realistic emission factors based on real-world vehicle testing and environmental impact studies.
-                </p>
-            </div>
-        </div>
-    </section>
 </main>
 
 <footer>
@@ -791,7 +646,7 @@ const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 const translations = {
     en: {
         title: "GravInAir - Air Quality & Emission Monitor",
-        nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map", sources: "Sources" },
+        nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map" },
         homeTitle: "Quick Vehicle Emission Simulator",
         homeDesc: "Register your device and get simulated emission readings here.",
         lastReadLabel: "Last Reading", 
@@ -806,8 +661,6 @@ const translations = {
         rulesTitle: "Rules & Advice", 
         globalTitle: "Global Emission Map", 
         globalDesc: "Showing country average AQI values and high pollution areas.",
-        sourcesTitle: "Sources & References",
-        sourcesDesc: "This application uses data and technologies from the following sources:",
         reg_plate_label: "License Plate", 
         reg_device_label: "Device ID", 
         reg_city_label: "City", 
@@ -890,7 +743,7 @@ const translations = {
     },
     tr: {
         title: "GravInAir - Hava Kalitesi & Emisyon İzleyici",
-        nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası", sources: "Kaynaklar" },
+        nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası" },
         homeTitle: "Hızlı Araç Emisyon Simülatörü",
         homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
         lastReadLabel: "Son Okuma", 
@@ -905,8 +758,6 @@ const translations = {
         rulesTitle: "Kurallar & Öneriler", 
         globalTitle: "Global Emisyon Haritası", 
         globalDesc: "Ülke ortalama HKİ değerleri ve yüksek kirlilik bölgeleri gösteriliyor.",
-        sourcesTitle: "Kaynaklar & Referanslar",
-        sourcesDesc: "Bu uygulama aşağıdaki kaynaklardan veri ve teknolojiler kullanmaktadır:",
         reg_plate_label: "Plaka", 
         reg_device_label: "Cihaz ID", 
         reg_city_label: "Şehir", 
@@ -989,7 +840,7 @@ const translations = {
     },
     de: {
         title: "GravInAir - Luftqualitäts- & Emissionsmonitor",
-        nav: { home:"Startseite", register:"Geräteregistrierung", vehicle:"Meine Fahrzeuge", rules:"Regeln & Ratschläge", global:"Globale Emissionskarte", aqi: "Detaillierte AQI-Karte", sources: "Quellen" },
+        nav: { home:"Startseite", register:"Geräteregistrierung", vehicle:"Meine Fahrzeuge", rules:"Regeln & Ratschläge", global:"Globale Emissionskarte", aqi: "Detaillierte AQI-Karte" },
         homeTitle: "Schneller Fahrzeugemissionssimulator",
         homeDesc: "Registrieren Sie Ihr Gerät und erhalten Sie simulierte Emissionsmesswerte.",
         lastReadLabel: "Letzte Messung", 
@@ -1004,8 +855,6 @@ const translations = {
         rulesTitle: "Regeln & Ratschläge", 
         globalTitle: "Globale Emissionskarte", 
         globalDesc: "Zeigt durchschnittliche AQI-Werte pro Land und hochbelastete Gebiete.",
-        sourcesTitle: "Quellen & Referenzen",
-        sourcesDesc: "Diese Anwendung verwendet Daten und Technologien aus folgenden Quellen:",
         reg_plate_label: "Nummernschild", 
         reg_device_label: "Geräte-ID", 
         reg_city_label: "Stadt", 
@@ -1088,7 +937,7 @@ const translations = {
     },
     ru: {
         title: "GravInAir - Монитор качества воздуха и выбросов",
-        nav: { home:"Главная", register:"Регистрация устройств", vehicle:"Мои транспортные средства", rules:"Правила и рекомендации", global:"Глобальная карта выбросов", aqi: "Детальная карта AQI", sources: "Источники" },
+        nav: { home:"Главная", register:"Регистрация устройств", vehicle:"Мои транспортные средства", rules:"Правила и рекомендации", global:"Глобальная карта выбросов", aqi: "Детальная карта AQI" },
         homeTitle: "Быстрый симулятор выбросов транспортных средств",
         homeDesc: "Зарегистрируйте ваше устройство и получайте смоделированные показания выбросов.",
         lastReadLabel: "Последнее показание", 
@@ -1103,8 +952,6 @@ const translations = {
         rulesTitle: "Правила и рекомендации", 
         globalTitle: "Глобальная карта выбросов", 
         globalDesc: "Показаны средние значения AQI по странам и зоны с высоким уровнем загрязнения.",
-        sourcesTitle: "Источники и ссылки",
-        sourcesDesc: "Это приложение использует данные и технологии из следующих источников:",
         reg_plate_label: "Номерной знак", 
         reg_device_label: "ID устройства", 
         reg_city_label: "Город", 
@@ -1198,8 +1045,7 @@ const pages = {
     vehicle: document.getElementById('page-vehicle'),
     rules: document.getElementById('page-rules'),
     global: document.getElementById('page-global'),
-    aqi: document.getElementById('page-aqi'),
-    sources: document.getElementById('page-sources')
+    aqi: document.getElementById('page-aqi')
 };
 
 function initApp() {
@@ -1220,7 +1066,6 @@ function setupEventListeners() {
     document.getElementById('nav-rules').addEventListener('click', () => show('rules'));
     document.getElementById('nav-global').addEventListener('click', () => show('global'));
     document.getElementById('nav-aqi').addEventListener('click', () => show('aqi'));
-    document.getElementById('nav-sources').addEventListener('click', () => show('sources'));
 
     document.querySelectorAll('.lang-btn').forEach(b => {
         b.addEventListener('click', () => setLanguage(b.dataset.lang));
@@ -1280,7 +1125,6 @@ function applyTranslations() {
     document.getElementById('nav-rules').textContent = t.nav.rules;
     document.getElementById('nav-global').textContent = t.nav.global;
     document.getElementById('nav-aqi').textContent = t.nav.aqi;
-    document.getElementById('nav-sources').textContent = t.nav.sources;
     
     document.getElementById('home-title').textContent = t.homeTitle;
     document.getElementById('home-desc').textContent = t.homeDesc;
@@ -1305,8 +1149,6 @@ function applyTranslations() {
     document.getElementById('rulesTitle').textContent = t.rulesTitle;
     document.getElementById('globalTitle').textContent = t.globalTitle;
     document.getElementById('globalDesc').textContent = t.globalDesc;
-    document.getElementById('sourcesTitle').textContent = t.sourcesTitle;
-    document.getElementById('sourcesDesc').textContent = t.sourcesDesc;
 
     document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
     document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
