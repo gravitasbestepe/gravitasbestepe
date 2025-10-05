@@ -3,34 +3,49 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Emission Simulator</title>
+<title>GravInAir - Air Quality & Emission Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 :root {
     --bg: #fafafa;
     --card: #fff;
     --muted: #666;
-    --primary: #0b5;
+    --primary: #00A896;
+    --secondary: #028090;
+    --accent: #02C39A;
     --border: #ddd;
 }
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background: var(--bg);
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
     color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
-    background: var(--primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     flex-wrap: wrap;
 }
 header h1 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 0;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.logo {
+    font-weight: 800;
+    background: linear-gradient(45deg, #FFD166, #06D6A0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 nav {
     display: flex;
@@ -41,18 +56,21 @@ nav {
 nav button {
     background: transparent;
     border: 0;
-    padding: 8px 10px;
+    padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
     color: white;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 nav button:hover {
-    background: rgba(255,255,255,.1);
+    background: rgba(255,255,255,.15);
+    transform: translateY(-1px);
 }
 nav button.active {
     background: rgba(255,255,255,.9);
-    color: #222;
+    color: var(--secondary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .lang-select {
     margin-left: auto;
@@ -63,100 +81,129 @@ nav button.active {
 .lang-btn {
     padding: 6px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
     background: transparent;
     cursor: pointer;
     color: white;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    font-weight: 500;
 }
 .lang-btn:hover {
     background: rgba(255,255,255,.1);
+    transform: translateY(-1px);
 }
 .lang-btn.active {
     background: white;
-    color: #222;
+    color: var(--secondary);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 main {
-    padding: 12px;
+    padding: 16px;
+    flex: 1;
 }
 .grid {
     display: grid;
     grid-template-columns: 1fr 360px;
-    gap: 12px;
+    gap: 16px;
 }
 .card {
     background: var(--card);
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(12,12,12,.04);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     border: 1px solid var(--border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.12);
 }
 #map, #globalMap, #nationalMap, #aqiMap {
     height: 420px;
-    border-radius: 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 #aqiControls {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
     flex-wrap: wrap;
-    padding: 8px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #eee;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 #addressWrapper {
     flex: 1;
     position: relative;
-    min-width: 180px;
+    min-width: 200px;
 }
 #aqiAddressInput {
     width: 100%;
-    padding: 8px 38px 8px 12px;
+    padding: 10px 42px 10px 14px;
     font-size: 14px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    height: 40px;
+    border-radius: 8px;
+    height: 44px;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+    border: 1px solid #ddd;
+}
+#aqiAddressInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,168,150,0.1);
 }
 #aqiClearBtn {
     position: absolute;
-    right: 3px;
+    right: 4px;
     top: 50%;
     transform: translateY(-50%);
-    padding: 4px 8px;
+    padding: 6px 10px;
     font-size: 12px;
-    border-radius: 5px;
-    border: 1px solid #bbb;
-    background: white;
-    cursor: pointer;
-}
-#aqiLocateBtn {
-    padding: 8px 12px;
-    cursor: pointer;
     border-radius: 6px;
     border: 1px solid #bbb;
     background: white;
-    height: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+#aqiClearBtn:hover {
+    background: #f5f5f5;
+    transform: translateY(-50%) scale(1.05);
+}
+#aqiLocateBtn {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    background: white;
+    height: 44px;
     font-size: 14px;
     white-space: nowrap;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+#aqiLocateBtn:hover {
+    background: #f5f5f5;
+    transform: translateY(-1px);
 }
 #aqiResultList {
     position: absolute;
     left: 0;
     right: 0;
-    top: 42px;
+    top: 46px;
     background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
-    border-radius: 5px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    border-radius: 8px;
     z-index: 1000;
     max-height: 300px;
     overflow: auto;
     display: none;
     font-size: 14px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
 }
 .resultItem {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -165,12 +212,13 @@ main {
     background: #f0f7ff;
 }
 .aqi-bar {
-    height: 20px;
+    height: 24px;
     width: 100%;
-    background: #ddd;
-    margin: 8px 0;
-    border-radius: 5px;
+    background: #e9ecef;
+    margin: 12px 0;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 .aqi-fill {
     height: 100%;
@@ -179,15 +227,17 @@ main {
     text-align: center;
     color: white;
     font-weight: bold;
-    font-size: 12px;
-    line-height: 20px;
-    transition: width 0.3s ease;
+    font-size: 13px;
+    line-height: 24px;
+    transition: width 0.5s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 label {
     font-size: 14px;
     color: var(--muted);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    font-weight: 500;
 }
 .muted {
     color: var(--muted);
@@ -195,16 +245,20 @@ label {
 }
 .btn {
     display: inline-block;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
     border: 1px solid #bbb;
     background: white;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
 }
 .btn:hover {
     background: #f5f5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .btn-primary {
     background: var(--primary);
@@ -212,56 +266,100 @@ label {
     border-color: var(--primary);
 }
 .btn-primary:hover {
-    background: #0a4;
+    background: var(--secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2,128,144,0.3);
+}
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
 }
 .pollutant-list {
-    margin: 8px 0;
+    margin: 12px 0;
     padding-left: 0;
     font-size: 14px;
     list-style-type: none;
 }
 .pollutant-list li {
-    margin-bottom: 4px;
-    padding: 4px 0;
+    margin-bottom: 6px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
 }
 .input-field {
     width: 100%;
-    padding: 10px;
-    margin: 6px 0 12px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 12px;
+    margin: 8px 0 16px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
     font-size: 14px;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,168,150,0.1);
 }
 .vehicle-card {
     border: 1px solid #eee;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
     background: #fafafa;
+    transition: all 0.3s ease;
+    position: relative;
 }
 .vehicle-card:hover {
     background: #f5f5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 .status-allowed {
-    color: green;
+    color: #28a745;
     font-weight: bold;
 }
 .status-limited {
-    color: orange;
+    color: #ffc107;
     font-weight: bold;
 }
 .status-banned {
-    color: red;
+    color: #dc3545;
     font-weight: bold;
+}
+.vehicle-advice {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #856404;
+}
+.vehicle-advice h5 {
+    margin: 0 0 5px 0;
+    font-size: 13px;
+    color: #856404;
+}
+.vehicle-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
 }
 .color-preview {
     width: 20px;
     height: 20px;
-    border-radius: 3px;
+    border-radius: 4px;
     display: inline-block;
     margin-right: 8px;
     border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .loading {
     color: var(--muted);
@@ -269,14 +367,18 @@ label {
 }
 .quick-actions {
     display: flex;
-    gap: 8px;
-    margin: 12px 0;
+    gap: 12px;
+    margin: 16px 0;
     flex-wrap: wrap;
 }
 .country-aqi-item {
-    padding: 6px 8px;
+    padding: 8px 10px;
     border-bottom: 1px solid #eee;
     font-size: 13px;
+    transition: background-color 0.2s;
+}
+.country-aqi-item:hover {
+    background: #f8f9fa;
 }
 .country-aqi-item:last-child {
     border-bottom: none;
@@ -284,6 +386,22 @@ label {
 .aqi-value {
     font-weight: bold;
     float: right;
+}
+footer {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+}
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.copyright {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 500;
 }
 @media (max-width: 900px) {
     .grid {
@@ -303,12 +421,15 @@ label {
     .quick-actions {
         flex-direction: column;
     }
+    .vehicle-actions {
+        flex-direction: column;
+    }
 }
 </style>
 </head>
 <body>
 <header>
-    <h1 id="title">Emission Simulator</h1>
+    <h1><span class="logo">GravInAir</span> - Air Quality & Emission Monitor</h1>
     <nav>
         <button id="nav-home" class="active">Home</button>
         <button id="nav-register">Device Register</button>
@@ -381,7 +502,7 @@ label {
             <label id="reg_city_label">City</label>
             <input id="reg_city" class="input-field" placeholder="e.g., Istanbul"/>
             
-            <label id="reg_make_label">Vehicle Make</label>
+            <label id="reg_make_label">Brand</label>
             <input id="reg_make" class="input-field" placeholder="e.g., Toyota"/>
             
             <label id="reg_model_label">Vehicle Model</label>
@@ -482,6 +603,12 @@ label {
     </section>
 </main>
 
+<footer>
+    <div class="footer-content">
+        <div class="copyright">© 2025 GravInAir - All rights reserved</div>
+    </div>
+</footer>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const WAQI_TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38";
@@ -489,7 +616,7 @@ const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 
 const translations = {
     en: {
-        title: "Emission Simulator",
+        title: "GravInAir - Air Quality & Emission Monitor",
         nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map" },
         homeTitle: "Quick Vehicle Emission Simulator",
         homeDesc: "Register your device and get simulated emission readings here.",
@@ -508,7 +635,7 @@ const translations = {
         reg_plate_label: "License Plate", 
         reg_device_label: "Device ID", 
         reg_city_label: "City", 
-        reg_make_label: "Vehicle Make", 
+        reg_make_label: "Brand", 
         reg_model_label: "Vehicle Model", 
         reg_engine_label: "Engine Number", 
         reg_color_label: "Vehicle Color",
@@ -555,10 +682,21 @@ const translations = {
         manualRead: "Manual Read",
         simulateTrip: "Simulate Trip",
         readingAll: "Reading all devices...",
-        simulatingAll: "Simulating all trips..."
+        simulatingAll: "Simulating all trips...",
+        deleteVehicle: "Delete",
+        vehicleAdviceTitle: "Recommendations:",
+        vehicleAdviceGood: "✅ Your vehicle emissions are within acceptable limits.",
+        vehicleAdviceModerate: "⚠️ Consider regular maintenance and filter checks.",
+        vehicleAdvicePoor: "❌ High emissions detected. Recommended actions:",
+        vehicleAdviceList1: "• Check and replace air filters",
+        vehicleAdviceList2: "• Inspect catalytic converter",
+        vehicleAdviceList3: "• Schedule engine maintenance",
+        vehicleAdviceList4: "• Avoid unnecessary idling",
+        vehicleAdviceList5: "• Consider professional emission test",
+        deleteConfirm: "Are you sure you want to delete this vehicle?"
     },
     tr: {
-        title: "Emisyon Simülatörü",
+        title: "GravInAir - Hava Kalitesi & Emisyon İzleyici",
         nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası" },
         homeTitle: "Hızlı Araç Emisyon Simülatörü",
         homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
@@ -577,7 +715,7 @@ const translations = {
         reg_plate_label: "Plaka", 
         reg_device_label: "Cihaz ID", 
         reg_city_label: "Şehir", 
-        reg_make_label: "Araç Markası", 
+        reg_make_label: "Marka", 
         reg_model_label: "Araç Modeli", 
         reg_engine_label: "Motor Numarası", 
         reg_color_label: "Araç Rengi",
@@ -624,145 +762,18 @@ const translations = {
         manualRead: "Manuel Okuma",
         simulateTrip: "Yolculuk Simüle Et",
         readingAll: "Tüm cihazlar okunuyor...",
-        simulatingAll: "Tüm yolculuklar simüle ediliyor..."
-    },
-    de: {
-        title: "Emissionssimulator",
-        nav: { home:"Startseite", register:"Geräteregistrierung", vehicle:"Meine Fahrzeuge", rules:"Regeln & Ratschläge", global:"Globale Emissionskarte", aqi: "Detaillierte AQI-Karte" },
-        homeTitle: "Schneller Fahrzeugemissionssimulator",
-        homeDesc: "Registrieren Sie Ihr Gerät und erhalten Sie simulierte Emissionsmesswerte.",
-        lastReadLabel: "Letzte Messung", 
-        behaviourLabel: "Systemverhalten",
-        vehicleStatusLabel: "Fahrzeugstatus",
-        behaviourText: "Diese Demo simuliert Gerätemesswerte und Verkehrszulassung.",
-        quickRegisterTitle: "Geräteregistrierung",
-        quickRegisterDesc: "Verwenden Sie den Geräteregistrierungs-Tab, um Fahrzeuge zu verwalten.",
-        regTitle: "Geräteregistrierung", 
-        registeredTitle: "Registrierte Geräte", 
-        myVehiclesTitle: "Meine Fahrzeuge", 
-        rulesTitle: "Regeln & Ratschläge", 
-        globalTitle: "Globale Emissionskarte", 
-        globalDesc: "Zeigt durchschnittliche AQI-Werte pro Land und hochbelastete Gebiete.",
-        reg_plate_label: "Nummernschild", 
-        reg_device_label: "Geräte-ID", 
-        reg_city_label: "Stadt", 
-        reg_make_label: "Fahrzeugmarke", 
-        reg_model_label: "Fahrzeugmodell", 
-        reg_engine_label: "Motornummer", 
-        reg_color_label: "Fahrzeugfarbe",
-        regBtn: "Registrierung erstellen", 
-        registerSuccess: "Registrierung erfolgreich erstellt!",
-        quickReadBtn: "Alle Geräte auslesen",
-        quickSimulateBtn: "Alle Fahrten simulieren",
-        aqiMapTitle: "Interaktive Luftqualitätskarte", 
-        aqiDetailTitle: "Luftqualitätsdetails",
-        globalAqiTitle: "Durchschnittliche AQI-Werte pro Land",
-        aqiLocation: "Standort", 
-        aqiText: "AQI", 
-        aqiPollutant: "Dominantes Schadstoff", 
-        locateBtn: "Meinen Standort", 
-        aqiClear: "Löschen", 
-        searchPlaceholder: "Stadt oder Adresse eingeben",
-        pollutantTitle: "Schadstoffdetails (µg/m³)",
-        pollutantPlaceholder: "Klicken Sie auf die Karte oder suchen Sie nach einem Standort.",
-        aqiNoData: "AQI-Daten für diesen Standort nicht verfügbar.",
-        aqiWarning_good: "✅ Luftqualität ist gut für alle.", 
-        aqiWarning_moderate: "⚠️ Mäßig. Empfindliche Personen sollten vorsichtig sein.", 
-        aqiWarning_usg: "⚠️ Ungesund für empfindliche Gruppen. Begrenzen Sie Aktivitäten im Freien.", 
-        aqiWarning_unhealthy: "❌ Ungesund. Vermeiden Sie Bewegung im Freien.", 
-        aqiWarning_v_unhealthy: "☠️ Sehr ungesund. Jeder sollte drinnen bleiben.", 
-        aqiWarning_hazardous: "🚫 Gefährlich. Bleiben Sie drinnen.",
-        aqiMask_usg: "Erwägen Sie eine Maske zu tragen, wenn Sie Atemwegserkrankungen haben.", 
-        aqiMask_unhealthy: "Tragen Sie eine Maske, wenn Sie nach draußen gehen.", 
-        aqiMask_v_unhealthy: "Verwenden Sie eine hochwertige Maske, wenn Sie raus müssen.", 
-        aqiMask_hazardous: "Tragen Sie eine Maske und verwenden Sie einen Luftreiniger.",
-        noDevices: "Keine Geräte registriert.",
-        noVehicles: "Keine Fahrzeuge registriert.",
-        trafficAllowed: "VERKEHR ERLAUBT",
-        trafficLimited: "EINGESCHRÄNKT (BEGRENZTE ZEITEN)",
-        trafficBanned: "VERKEHR NICHT ERLAUBT",
-        rule1: "PM2.5 > 150 => Verkehrsverbot empfohlen.",
-        rule2: "PM2.5 100-150 => Eingeschränkt (begrenzte Zeiten).",
-        rule3: "PM2.5 <= 100 => Normaler Verkehr erlaubt.",
-        advice1: "Überprüfen Sie Filter und Katalysator.",
-        advice2: "Regelmäßige Wartung.",
-        advice3: "Leerlaufzeiten reduzieren.",
-        loading: "Daten werden geladen...",
-        noHighPollution: "Keine hochbelasteten Gebiete gefunden.",
-        simulationDuration: "Simulationsdauer: 24 Sekunden",
-        manualRead: "Manuelles Auslesen",
-        simulateTrip: "Fahrt simulieren",
-        readingAll: "Alle Geräte werden ausgelesen...",
-        simulatingAll: "Alle Fahrten werden simuliert..."
-    },
-    ru: {
-        title: "Симулятор выбросов",
-        nav: { home:"Главная", register:"Регистрация устройств", vehicle:"Мои транспортные средства", rules:"Правила и рекомендации", global:"Глобальная карта выбросов", aqi: "Детальная карта AQI" },
-        homeTitle: "Быстрый симулятор выбросов транспортных средств",
-        homeDesc: "Зарегистрируйте ваше устройство и получайте смоделированные показания выбросов.",
-        lastReadLabel: "Последнее показание", 
-        behaviourLabel: "Поведение системы",
-        vehicleStatusLabel: "Статус транспортного средства",
-        behaviourText: "Эта демонстрация имитирует показания устройств и допуск к движению.",
-        quickRegisterTitle: "Регистрация устройств",
-        quickRegisterDesc: "Используйте вкладку регистрации устройств для управления транспортными средствами.",
-        regTitle: "Регистрация устройств", 
-        registeredTitle: "Зарегистрированные устройства", 
-        myVehiclesTitle: "Мои транспортные средства", 
-        rulesTitle: "Правила и рекомендации", 
-        globalTitle: "Глобальная карта выбросов", 
-        globalDesc: "Показаны средние значения AQI по странам и зоны с высоким уровнем загрязнения.",
-        reg_plate_label: "Номерной знак", 
-        reg_device_label: "ID устройства", 
-        reg_city_label: "Город", 
-        reg_make_label: "Марка транспортного средства", 
-        reg_model_label: "Модель транспортного средства", 
-        reg_engine_label: "Номер двигателя", 
-        reg_color_label: "Цвет транспортного средства",
-        regBtn: "Создать регистрацию", 
-        registerSuccess: "Регистрация успешно создана!",
-        quickReadBtn: "Считать все устройства",
-        quickSimulateBtn: "Смоделировать все поездки",
-        aqiMapTitle: "Интерактивная карта качества воздуха", 
-        aqiDetailTitle: "Детали качества воздуха",
-        globalAqiTitle: "Средние значения AQI по странам",
-        aqiLocation: "Местоположение", 
-        aqiText: "AQI", 
-        aqiPollutant: "Основной загрязнитель", 
-        locateBtn: "Мое местоположение", 
-        aqiClear: "Очистить", 
-        searchPlaceholder: "Введите город или адрес",
-        pollutantTitle: "Детали загрязнителей (µg/m³)",
-        pollutantPlaceholder: "Нажмите на карту или выполните поиск местоположения.",
-        aqiNoData: "Данные AQI для этого местоположения недоступны.",
-        aqiWarning_good: "✅ Качество воздуха хорошее для всех.", 
-        aqiWarning_moderate: "⚠️ Умеренное. Чувствительные люди должны быть осторожны.", 
-        aqiWarning_usg: "⚠️ Нездорово для чувствительных групп. Ограничьте активность на улице.", 
-        aqiWarning_unhealthy: "❌ Нездорово. Избегайте физических упражнений на улице.", 
-        aqiWarning_v_unhealthy: "☠️ Очень нездорово. Всем следует оставаться в помещении.", 
-        aqiWarning_hazardous: "🚫 Опасно. Оставайтесь в помещении.",
-        aqiMask_usg: "Рассмотрите возможность ношения маски, если у вас есть респираторные заболевания.", 
-        aqiMask_unhealthy: "Надевайте маску при выходе на улицу.", 
-        aqiMask_v_unhealthy: "Используйте высококачественную маску, если вам необходимо выйти.", 
-        aqiMask_hazardous: "Наденьте маску и используйте очиститель воздуха.",
-        noDevices: "Нет зарегистрированных устройств.",
-        noVehicles: "Нет зарегистрированных транспортных средств.",
-        trafficAllowed: "ДВИЖЕНИЕ РАЗРЕШЕНО",
-        trafficLimited: "ОГРАНИЧЕНО (ОГРАНИЧЕННОЕ ВРЕМЯ)",
-        trafficBanned: "ДВИЖЕНИЕ ЗАПРЕЩЕНО",
-        rule1: "PM2.5 > 150 => Рекомендуется запрет движения.",
-        rule2: "PM2.5 100-150 => Ограничено (ограниченное время).",
-        rule3: "PM2.5 <= 100 => Разрешено обычное движение.",
-        advice1: "Проверьте фильтры и каталитический нейтрализатор.",
-        advice2: "Регулярное техническое обслуживание.",
-        advice3: "Уменьшите время работы на холостом ходу.",
-        loading: "Загрузка данных...",
-        noHighPollution: "Области с высоким уровнем загрязнения не найдены.",
-        simulationDuration: "Продолжительность симуляции: 24 секунды",
-        manualRead: "Ручное считывание",
-        simulateTrip: "Смоделировать поездку",
-        readingAll: "Считывание всех устройств...",
-        simulatingAll: "Моделирование всех поездок..."
+        simulatingAll: "Tüm yolculuklar simüle ediliyor...",
+        deleteVehicle: "Sil",
+        vehicleAdviceTitle: "Öneriler:",
+        vehicleAdviceGood: "✅ Aracınızın emisyonları kabul edilebilir sınırlar içinde.",
+        vehicleAdviceModerate: "⚠️ Düzenli bakım ve filtre kontrolleri yapmayı düşünün.",
+        vehicleAdvicePoor: "❌ Yüksek emisyon tespit edildi. Önerilen eylemler:",
+        vehicleAdviceList1: "• Hava filtrelerini kontrol edin ve değiştirin",
+        vehicleAdviceList2: "• Katalitik konvertörü kontrol edin",
+        vehicleAdviceList3: "• Motor bakımı planlayın",
+        vehicleAdviceList4: "• Gereksiz rölantiden kaçının",
+        vehicleAdviceList5: "• Profesyonel emisyon testi düşünün",
+        deleteConfirm: "Bu aracı silmek istediğinizden emin misiniz?"
     }
 };
 
@@ -905,7 +916,49 @@ function applyTranslations() {
     renderMyVehicles();
 }
 
-// Ana ekrana hızlı işlem butonları
+// Vehicle deletion function
+function deleteVehicle(index) {
+    const t = translations[currentLang] || translations.en;
+    if (confirm(t.deleteConfirm)) {
+        const reg = loadRegistry();
+        reg.splice(index, 1);
+        saveRegistry(reg);
+        renderMyVehicles();
+        renderRegistered();
+        updateHomeScreen();
+    }
+}
+
+// Get vehicle advice based on PM2.5 levels
+function getVehicleAdvice(pm25) {
+    const t = translations[currentLang] || translations.en;
+    
+    if (pm25 <= 100) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceGood}</div>
+        </div>`;
+    } else if (pm25 <= 150) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceModerate}</div>
+        </div>`;
+    } else {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdvicePoor}</div>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                <li>${t.vehicleAdviceList1}</li>
+                <li>${t.vehicleAdviceList2}</li>
+                <li>${t.vehicleAdviceList3}</li>
+                <li>${t.vehicleAdviceList4}</li>
+                <li>${t.vehicleAdviceList5}</li>
+            </ul>
+        </div>`;
+    }
+}
+
+// Quick actions functions
 function quickReadAll() {
     const reg = loadRegistry();
     const t = translations[currentLang] || translations.en;
@@ -946,7 +999,6 @@ function quickSimulateAll() {
     reg.forEach((vehicle, idx) => {
         simulateTrip(idx);
         
-        // Her simülasyon 24 saniye sürüyor
         setTimeout(() => {
             completed++;
             if (completed === total) {
@@ -994,7 +1046,6 @@ function updateHomeScreen() {
         }
     });
     
-    // Özet istatistik
     const summary = `
         <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
             <strong>Summary:</strong> 
@@ -1090,7 +1141,7 @@ function renderRegistered() {
     }
     
     list.innerHTML = '';
-    reg.forEach(r => {
+    reg.forEach((r, idx) => {
         const div = document.createElement('div');
         div.style.padding = '8px';
         div.style.borderBottom = '1px solid #eee';
@@ -1099,6 +1150,7 @@ function renderRegistered() {
             <strong>${r.plate}</strong> — ${r.device} 
             ${colorPreview}
             <div class="muted">${[r.make, r.model, r.city].filter(Boolean).join(' - ')}</div>
+            <button class="btn btn-danger" onclick="deleteVehicle(${idx})" style="margin-top: 5px; padding: 4px 8px; font-size: 12px;">${t.deleteVehicle}</button>
         `;
         list.appendChild(div);
     });
@@ -1126,6 +1178,8 @@ function renderMyVehicles() {
         const colorPreview = r.color ? `<span class="color-preview" style="background-color: ${getColorValue(r.color)}"></span>` : '';
         const vehicleInfo = [r.make, r.model, r.engine].filter(Boolean).join(' • ');
         
+        const advice = r.lastRead ? getVehicleAdvice(r.lastRead.pm25) : '';
+        
         const box = document.createElement('div');
         box.className = 'vehicle-card';
         box.innerHTML = `
@@ -1134,9 +1188,11 @@ function renderMyVehicles() {
             <div class="muted">${vehicleInfo}</div>
             <div class="muted">${r.city || ''}</div>
             ${last}
-            <div style="margin-top: 8px">
+            ${advice}
+            <div class="vehicle-actions">
                 <button class="btn" onclick="forceRead(${idx})">${t.manualRead}</button>
                 <button class="btn" onclick="simulateTrip(${idx})">${t.simulateTrip}</button>
+                <button class="btn btn-danger" onclick="deleteVehicle(${idx})">${t.deleteVehicle}</button>
             </div>
             <div class="muted" style="font-size: 12px; margin-top: 4px;">${t.simulationDuration}</div>
         `;
@@ -1176,7 +1232,6 @@ window.simulateTrip = function(idx) {
     const reg = loadRegistry();
     if (!reg[idx]) return;
     
-    // Simulate Trip: 8 steps, 3 seconds each = 24 seconds total
     gradualChange(idx, {
         start: reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30,
         target: Math.min(400, Math.round((reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30) * (1.6 + Math.random() * 0.6))),
@@ -1184,7 +1239,6 @@ window.simulateTrip = function(idx) {
         interval: 3000
     });
     
-    // 24 saniye sonra ana ekranı güncelle
     setTimeout(() => {
         updateHomeScreen();
     }, 24000);
@@ -1266,7 +1320,7 @@ function startBackgroundSimulation() {
     }, 20000);
 }
 
-// Ülke AQI verilerini yükle
+// Country AQI data
 function loadCountryAQIData() {
     const countryData = [
         { country: "Turkey", aqi: 65, cities: ["Istanbul", "Ankara", "Izmir"] },
@@ -1278,17 +1332,7 @@ function loadCountryAQIData() {
         { country: "USA", aqi: 72, cities: ["New York", "Los Angeles", "Chicago"] },
         { country: "China", aqi: 156, cities: ["Beijing", "Shanghai", "Guangzhou"] },
         { country: "India", aqi: 189, cities: ["Delhi", "Mumbai", "Bangalore"] },
-        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] },
-        { country: "Japan", aqi: 42, cities: ["Tokyo", "Osaka", "Yokohama"] },
-        { country: "South Korea", aqi: 55, cities: ["Seoul", "Busan", "Incheon"] },
-        { country: "Brazil", aqi: 78, cities: ["São Paulo", "Rio de Janeiro", "Brasília"] },
-        { country: "Mexico", aqi: 85, cities: ["Mexico City", "Guadalajara", "Monterrey"] },
-        { country: "Canada", aqi: 38, cities: ["Toronto", "Vancouver", "Montreal"] },
-        { country: "Australia", aqi: 35, cities: ["Sydney", "Melbourne", "Brisbane"] },
-        { country: "Egypt", aqi: 142, cities: ["Cairo", "Alexandria", "Giza"] },
-        { country: "South Africa", aqi: 68, cities: ["Johannesburg", "Cape Town", "Durban"] },
-        { country: "Saudi Arabia", aqi: 125, cities: ["Riyadh", "Jeddah", "Mecca"] },
-        { country: "Poland", aqi: 72, cities: ["Warsaw", "Krakow", "Wroclaw"] }
+        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] }
     ];
 
     const container = document.getElementById('countryAqiList');
@@ -1317,7 +1361,7 @@ function getColorForAQI(aqi) {
     return 'maroon';
 }
 
-// Global harita fonksiyonları
+// Global map functions
 function initGlobalMap() {
     if (globalMap) {
         globalMap.invalidateSize();
@@ -1330,7 +1374,6 @@ function initGlobalMap() {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(globalMap);
     
-    // Ülke AQI verilerini haritaya ekle
     addCountryAQIToMap();
 }
 
@@ -1345,22 +1388,12 @@ function addCountryAQIToMap() {
         "USA": { lat: 38.9072, lon: -77.0369, aqi: 72 },
         "China": { lat: 39.9042, lon: 116.4074, aqi: 156 },
         "India": { lat: 28.6139, lon: 77.2090, aqi: 189 },
-        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 },
-        "Japan": { lat: 35.6762, lon: 139.6503, aqi: 42 },
-        "South Korea": { lat: 37.5665, lon: 126.9780, aqi: 55 },
-        "Brazil": { lat: -15.7975, lon: -47.8919, aqi: 78 },
-        "Mexico": { lat: 19.4326, lon: -99.1332, aqi: 85 },
-        "Canada": { lat: 45.4215, lon: -75.6972, aqi: 38 },
-        "Australia": { lat: -33.8688, lon: 151.2093, aqi: 35 },
-        "Egypt": { lat: 30.0444, lon: 31.2357, aqi: 142 },
-        "South Africa": { lat: -26.2041, lon: 28.0473, aqi: 68 },
-        "Saudi Arabia": { lat: 24.7136, lon: 46.6753, aqi: 125 },
-        "Poland": { lat: 52.2297, lon: 21.0122, aqi: 72 }
+        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 }
     };
 
     Object.entries(countryAQIData).forEach(([country, data]) => {
         const color = getColorForAQI(data.aqi);
-        const radius = Math.max(100000, data.aqi * 2000); // AQI'ye göre boyut
+        const radius = Math.max(100000, data.aqi * 2000);
         
         const circle = L.circle([data.lat, data.lon], {
             radius: radius,
@@ -1389,7 +1422,7 @@ function getAQILevelText(aqi) {
     return 'Air Quality: Hazardous';
 }
 
-// Kalan AQI haritası fonksiyonları önceki gibi kalacak
+// AQI map functions
 function initAqiMap() {
     if (aqiMap) {
         aqiMap.invalidateSize();
@@ -1415,7 +1448,6 @@ function initAqiMap() {
     });
 }
 
-// Kalan AQI fonksiyonları önceki gibi kalacak
 async function handleAddressSearch() {
     const q = document.getElementById('aqiAddressInput').value;
     if (!q) { 
