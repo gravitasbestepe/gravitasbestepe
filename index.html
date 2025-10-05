@@ -604,7 +604,7 @@ footer {
                 <h2 id="aqiMapTitle">Interactive Air Quality Map</h2>
                 <div id="aqiControls">
                     <div id="addressWrapper">
-                        <input id="aqiAddressInput" placeholder="Enter city or address" autocomplete="off"/>
+                        <input id="aqiAddressInput" placeholder="Enter detailed address (street, city, country)" autocomplete="off"/>
                         <button id="aqiClearBtn">Clear</button>
                         <div id="aqiResultList"></div>
                     </div>
@@ -680,7 +680,7 @@ const translations = {
         aqiPollutant: "Dominant Pollutant", 
         locateBtn: "Locate Me", 
         aqiClear: "Clear", 
-        searchPlaceholder: "Enter city or address",
+        searchPlaceholder: "Enter detailed address (street, city, country)",
         pollutantTitle: "Pollutant Details (µg/m³)",
         pollutantPlaceholder: "Click on the map or search for a location.",
         aqiNoData: "AQI data not available for this location.",
@@ -777,7 +777,7 @@ const translations = {
         aqiPollutant: "Baskın Kirletici", 
         locateBtn: "Konumumu Bul", 
         aqiClear: "Temizle", 
-        searchPlaceholder: "Şehir veya adres girin",
+        searchPlaceholder: "Detaylı adres girin (sokak, şehir, ülke)",
         pollutantTitle: "Kirletici Detayları (µg/m³)",
         pollutantPlaceholder: "Haritaya tıklayın veya bir konum arayın.",
         aqiNoData: "Bu konum için HKİ verisi mevcut değil.",
@@ -874,7 +874,7 @@ const translations = {
         aqiPollutant: "Dominantes Schadstoff", 
         locateBtn: "Meinen Standort", 
         aqiClear: "Löschen", 
-        searchPlaceholder: "Stadt oder Adresse eingeben",
+        searchPlaceholder: "Detaillierte Adresse eingeben (Straße, Stadt, Land)",
         pollutantTitle: "Schadstoffdetails (µg/m³)",
         pollutantPlaceholder: "Klicken Sie auf die Karte oder suchen Sie nach einem Standort.",
         aqiNoData: "AQI-Daten für diesen Standort nicht verfügbar.",
@@ -971,7 +971,7 @@ const translations = {
         aqiPollutant: "Основной загрязнитель", 
         locateBtn: "Мое местоположение", 
         aqiClear: "Очистить", 
-        searchPlaceholder: "Введите город или адрес",
+        searchPlaceholder: "Введите подробный адрес (улица, город, страна)",
         pollutantTitle: "Детали загрязнителей (µg/m³)",
         pollutantPlaceholder: "Нажмите на карту или выполните поиск местоположения.",
         aqiNoData: "Данные AQI для этого местоположения недоступны.",
@@ -1631,7 +1631,37 @@ function loadCountryAQIData() {
         { country: "USA", aqi: 72, cities: ["New York", "Los Angeles", "Chicago"] },
         { country: "China", aqi: 156, cities: ["Beijing", "Shanghai", "Guangzhou"] },
         { country: "India", aqi: 189, cities: ["Delhi", "Mumbai", "Bangalore"] },
-        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] }
+        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] },
+        { country: "Japan", aqi: 42, cities: ["Tokyo", "Osaka", "Kyoto"] },
+        { country: "South Korea", aqi: 55, cities: ["Seoul", "Busan", "Incheon"] },
+        { country: "Brazil", aqi: 78, cities: ["São Paulo", "Rio de Janeiro", "Brasília"] },
+        { country: "Mexico", aqi: 85, cities: ["Mexico City", "Guadalajara", "Monterrey"] },
+        { country: "Canada", aqi: 38, cities: ["Toronto", "Vancouver", "Montreal"] },
+        { country: "Australia", aqi: 35, cities: ["Sydney", "Melbourne", "Brisbane"] },
+        { country: "Egypt", aqi: 165, cities: ["Cairo", "Alexandria", "Giza"] },
+        { country: "South Africa", aqi: 72, cities: ["Johannesburg", "Cape Town", "Durban"] },
+        { country: "Saudi Arabia", aqi: 142, cities: ["Riyadh", "Jeddah", "Mecca"] },
+        { country: "United Arab Emirates", aqi: 128, cities: ["Dubai", "Abu Dhabi", "Sharjah"] },
+        { country: "Pakistan", aqi: 195, cities: ["Karachi", "Lahore", "Islamabad"] },
+        { country: "Bangladesh", aqi: 205, cities: ["Dhaka", "Chittagong", "Khulna"] },
+        { country: "Indonesia", aqi: 112, cities: ["Jakarta", "Surabaya", "Bandung"] },
+        { country: "Thailand", aqi: 95, cities: ["Bangkok", "Chiang Mai", "Phuket"] },
+        { country: "Vietnam", aqi: 108, cities: ["Hanoi", "Ho Chi Minh City", "Da Nang"] },
+        { country: "Philippines", aqi: 88, cities: ["Manila", "Cebu", "Davao"] },
+        { country: "Malaysia", aqi: 75, cities: ["Kuala Lumpur", "Penang", "Johor Bahru"] },
+        { country: "Singapore", aqi: 48, cities: ["Singapore"] },
+        { country: "Poland", aqi: 68, cities: ["Warsaw", "Krakow", "Wroclaw"] },
+        { country: "Netherlands", aqi: 52, cities: ["Amsterdam", "Rotterdam", "Utrecht"] },
+        { country: "Belgium", aqi: 58, cities: ["Brussels", "Antwerp", "Ghent"] },
+        { country: "Switzerland", aqi: 42, cities: ["Zurich", "Geneva", "Basel"] },
+        { country: "Austria", aqi: 45, cities: ["Vienna", "Salzburg", "Innsbruck"] },
+        { country: "Sweden", aqi: 32, cities: ["Stockholm", "Gothenburg", "Malmo"] },
+        { country: "Norway", aqi: 28, cities: ["Oslo", "Bergen", "Stavanger"] },
+        { country: "Finland", aqi: 25, cities: ["Helsinki", "Espoo", "Tampere"] },
+        { country: "Denmark", aqi: 38, cities: ["Copenhagen", "Aarhus", "Odense"] },
+        { country: "Ireland", aqi: 42, cities: ["Dublin", "Cork", "Galway"] },
+        { country: "Portugal", aqi: 55, cities: ["Lisbon", "Porto", "Faro"] },
+        { country: "Greece", aqi: 62, cities: ["Athens", "Thessaloniki", "Patras"] }
     ];
 
     const container = document.getElementById('countryAqiList');
@@ -1686,7 +1716,37 @@ function addCountryAQIToMap() {
         "USA": { lat: 38.9072, lon: -77.0369, aqi: 72 },
         "China": { lat: 39.9042, lon: 116.4074, aqi: 156 },
         "India": { lat: 28.6139, lon: 77.2090, aqi: 189 },
-        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 }
+        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 },
+        "Japan": { lat: 35.6762, lon: 139.6503, aqi: 42 },
+        "South Korea": { lat: 37.5665, lon: 126.9780, aqi: 55 },
+        "Brazil": { lat: -23.5505, lon: -46.6333, aqi: 78 },
+        "Mexico": { lat: 19.4326, lon: -99.1332, aqi: 85 },
+        "Canada": { lat: 43.6532, lon: -79.3832, aqi: 38 },
+        "Australia": { lat: -33.8688, lon: 151.2093, aqi: 35 },
+        "Egypt": { lat: 30.0444, lon: 31.2357, aqi: 165 },
+        "South Africa": { lat: -26.2041, lon: 28.0473, aqi: 72 },
+        "Saudi Arabia": { lat: 24.7136, lon: 46.6753, aqi: 142 },
+        "United Arab Emirates": { lat: 25.2048, lon: 55.2708, aqi: 128 },
+        "Pakistan": { lat: 33.6844, lon: 73.0479, aqi: 195 },
+        "Bangladesh": { lat: 23.8103, lon: 90.4125, aqi: 205 },
+        "Indonesia": { lat: -6.2088, lon: 106.8456, aqi: 112 },
+        "Thailand": { lat: 13.7563, lon: 100.5018, aqi: 95 },
+        "Vietnam": { lat: 21.0278, lon: 105.8342, aqi: 108 },
+        "Philippines": { lat: 14.5995, lon: 120.9842, aqi: 88 },
+        "Malaysia": { lat: 3.1390, lon: 101.6869, aqi: 75 },
+        "Singapore": { lat: 1.3521, lon: 103.8198, aqi: 48 },
+        "Poland": { lat: 52.2297, lon: 21.0122, aqi: 68 },
+        "Netherlands": { lat: 52.3676, lon: 4.9041, aqi: 52 },
+        "Belgium": { lat: 50.8503, lon: 4.3517, aqi: 58 },
+        "Switzerland": { lat: 47.3769, lon: 8.5417, aqi: 42 },
+        "Austria": { lat: 48.2082, lon: 16.3738, aqi: 45 },
+        "Sweden": { lat: 59.3293, lon: 18.0686, aqi: 32 },
+        "Norway": { lat: 59.9139, lon: 10.7522, aqi: 28 },
+        "Finland": { lat: 60.1699, lon: 24.9384, aqi: 25 },
+        "Denmark": { lat: 55.6761, lon: 12.5683, aqi: 38 },
+        "Ireland": { lat: 53.3498, lon: -6.2603, aqi: 42 },
+        "Portugal": { lat: 38.7223, lon: -9.1393, aqi: 55 },
+        "Greece": { lat: 37.9838, lon: 23.7275, aqi: 62 }
     };
 
     Object.entries(countryAQIData).forEach(([country, data]) => {
@@ -1833,7 +1893,13 @@ function renderAqiResults(items) {
     items.forEach(item => {
         const div = document.createElement('div');
         div.className = 'resultItem';
-        div.innerHTML = `${item.display_name}`;
+        div.innerHTML = `
+            <div style="font-weight: 500;">${item.display_name}</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                ${item.type ? `${item.type} • ` : ''}
+                Lat: ${parseFloat(item.lat).toFixed(4)}, Lon: ${parseFloat(item.lon).toFixed(4)}
+            </div>
+        `;
         div.tabIndex = 0;
         div.addEventListener('click', () => selectAqiResult(item));
         div.addEventListener('keydown', (e) => {
