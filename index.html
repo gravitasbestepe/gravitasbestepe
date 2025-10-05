@@ -291,6 +291,34 @@ label {
     padding: 6px 0;
     border-bottom: 1px solid #f0f0f0;
 }
+.health-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+    font-size: 13px;
+}
+.health-warning.high {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+.health-warning.medium {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+.health-warning.low {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+.health-warning h5 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
 .input-field {
     width: 100%;
     padding: 12px;
@@ -596,6 +624,7 @@ footer {
                     <li class="muted" id="pollutantsPlaceholder">Click on the map or search for a location.</li>
                 </ul>
                 <hr/>
+                <div id="healthWarnings"></div>
                 <p id="detailWarningMsg" style="color:#b22222; font-weight:bold; font-size:14px; margin-top: 12px;"></p>
                 <p id="detailMaskMsg" style="color:#0000aa; font-weight:bold; font-size:14px;"></p>
             </aside>
@@ -693,7 +722,25 @@ const translations = {
         vehicleAdviceList3: "• Schedule engine maintenance",
         vehicleAdviceList4: "• Avoid unnecessary idling",
         vehicleAdviceList5: "• Consider professional emission test",
-        deleteConfirm: "Are you sure you want to delete this vehicle?"
+        deleteConfirm: "Are you sure you want to delete this vehicle?",
+        // Health warnings for respiratory diseases
+        healthWarningTitle: "⚠️ Health Advisory for Respiratory Conditions",
+        healthWarningGood: "✅ Safe for people with asthma, COPD, and bronchitis",
+        healthWarningModerate: "⚠️ People with respiratory conditions should:",
+        healthWarningModerate1: "• Limit prolonged outdoor exertion",
+        healthWarningModerate2: "• Keep medications handy",
+        healthWarningModerate3: "• Monitor symptoms closely",
+        healthWarningHigh: "🚫 HIGH RISK for people with:",
+        healthWarningHigh1: "• Asthma",
+        healthWarningHigh2: "• COPD (Chronic Bronchitis/Emphysema)",
+        healthWarningHigh3: "• Bronchitis",
+        healthWarningHigh4: "• Other respiratory diseases",
+        healthWarningActions: "Recommended actions:",
+        healthWarningAction1: "• Stay indoors with windows closed",
+        healthWarningAction2: "• Use air purifiers",
+        healthWarningAction3: "• Avoid physical exertion",
+        healthWarningAction4: "• Keep rescue medications available",
+        healthWarningAction5: "• Consult doctor if symptoms worsen"
     },
     tr: {
         title: "GravInAir - Hava Kalitesi & Emisyon İzleyici",
@@ -773,7 +820,221 @@ const translations = {
         vehicleAdviceList3: "• Motor bakımı planlayın",
         vehicleAdviceList4: "• Gereksiz rölantiden kaçının",
         vehicleAdviceList5: "• Profesyonel emisyon testi düşünün",
-        deleteConfirm: "Bu aracı silmek istediğinizden emin misiniz?"
+        deleteConfirm: "Bu aracı silmek istediğinizden emin misiniz?",
+        // Health warnings for respiratory diseases
+        healthWarningTitle: "⚠️ Solunum Hastalıkları İçin Sağlık Uyarısı",
+        healthWarningGood: "✅ Astım, KOAH ve bronşit hastaları için güvenli",
+        healthWarningModerate: "⚠️ Solunum rahatsızlığı olan kişiler:",
+        healthWarningModerate1: "• Uzun süreli dış mekan aktivitelerini sınırlayın",
+        healthWarningModerate2: "• İlaçlarınızı yanınızda bulundurun",
+        healthWarningModerate3: "• Belirtilerinizi yakından takip edin",
+        healthWarningHigh: "🚫 YÜKSEK RİSK altındaki kişiler:",
+        healthWarningHigh1: "• Astım",
+        healthWarningHigh2: "• KOAH (Kronik Bronşit/Amfizem)",
+        healthWarningHigh3: "• Bronşit",
+        healthWarningHigh4: "• Diğer solunum hastalıkları",
+        healthWarningActions: "Önerilen eylemler:",
+        healthWarningAction1: "• Pencereler kapalı şekilde içeride kalın",
+        healthWarningAction2: "• Hava temizleyici kullanın",
+        healthWarningAction3: "• Fiziksel efordan kaçının",
+        healthWarningAction4: "• Acil ilaçlarınızı hazır bulundurun",
+        healthWarningAction5: "• Belirtiler kötüleşirse doktora başvurun"
+    },
+    de: {
+        title: "GravInAir - Luftqualitäts- & Emissionsmonitor",
+        nav: { home:"Startseite", register:"Geräteregistrierung", vehicle:"Meine Fahrzeuge", rules:"Regeln & Ratschläge", global:"Globale Emissionskarte", aqi: "Detaillierte AQI-Karte" },
+        homeTitle: "Schneller Fahrzeugemissionssimulator",
+        homeDesc: "Registrieren Sie Ihr Gerät und erhalten Sie simulierte Emissionsmesswerte.",
+        lastReadLabel: "Letzte Messung", 
+        behaviourLabel: "Systemverhalten",
+        vehicleStatusLabel: "Fahrzeugstatus",
+        behaviourText: "Diese Demo simuliert Gerätemesswerte und Verkehrszulassung.",
+        quickRegisterTitle: "Geräteregistrierung",
+        quickRegisterDesc: "Verwenden Sie den Geräteregistrierungs-Tab, um Fahrzeuge zu verwalten.",
+        regTitle: "Geräteregistrierung", 
+        registeredTitle: "Registrierte Geräte", 
+        myVehiclesTitle: "Meine Fahrzeuge", 
+        rulesTitle: "Regeln & Ratschläge", 
+        globalTitle: "Globale Emissionskarte", 
+        globalDesc: "Zeigt durchschnittliche AQI-Werte pro Land und hochbelastete Gebiete.",
+        reg_plate_label: "Nummernschild", 
+        reg_device_label: "Geräte-ID", 
+        reg_city_label: "Stadt", 
+        reg_make_label: "Marke", 
+        reg_model_label: "Fahrzeugmodell", 
+        reg_engine_label: "Motornummer", 
+        reg_color_label: "Fahrzeugfarbe",
+        regBtn: "Registrierung erstellen", 
+        registerSuccess: "Registrierung erfolgreich erstellt!",
+        quickReadBtn: "Alle Geräte auslesen",
+        quickSimulateBtn: "Alle Fahrten simulieren",
+        aqiMapTitle: "Interaktive Luftqualitätskarte", 
+        aqiDetailTitle: "Luftqualitätsdetails",
+        globalAqiTitle: "Durchschnittliche AQI-Werte pro Land",
+        aqiLocation: "Standort", 
+        aqiText: "AQI", 
+        aqiPollutant: "Dominantes Schadstoff", 
+        locateBtn: "Meinen Standort", 
+        aqiClear: "Löschen", 
+        searchPlaceholder: "Stadt oder Adresse eingeben",
+        pollutantTitle: "Schadstoffdetails (µg/m³)",
+        pollutantPlaceholder: "Klicken Sie auf die Karte oder suchen Sie nach einem Standort.",
+        aqiNoData: "AQI-Daten für diesen Standort nicht verfügbar.",
+        aqiWarning_good: "✅ Luftqualität ist gut für alle.", 
+        aqiWarning_moderate: "⚠️ Mäßig. Empfindliche Personen sollten vorsichtig sein.", 
+        aqiWarning_usg: "⚠️ Ungesund für empfindliche Gruppen. Begrenzen Sie Aktivitäten im Freien.", 
+        aqiWarning_unhealthy: "❌ Ungesund. Vermeiden Sie Bewegung im Freien.", 
+        aqiWarning_v_unhealthy: "☠️ Sehr ungesund. Jeder sollte drinnen bleiben.", 
+        aqiWarning_hazardous: "🚫 Gefährlich. Bleiben Sie drinnen.",
+        aqiMask_usg: "Erwägen Sie eine Maske zu tragen, wenn Sie Atemwegserkrankungen haben.", 
+        aqiMask_unhealthy: "Tragen Sie eine Maske, wenn Sie nach draußen gehen.", 
+        aqiMask_v_unhealthy: "Verwenden Sie eine hochwertige Maske, wenn Sie raus müssen.", 
+        aqiMask_hazardous: "Tragen Sie eine Maske und verwenden Sie einen Luftreiniger.",
+        noDevices: "Keine Geräte registriert.",
+        noVehicles: "Keine Fahrzeuge registriert.",
+        trafficAllowed: "VERKEHR ERLAUBT",
+        trafficLimited: "EINGESCHRÄNKT (BEGRENZTE ZEITEN)",
+        trafficBanned: "VERKEHR NICHT ERLAUBT",
+        rule1: "PM2.5 > 150 => Verkehrsverbot empfohlen.",
+        rule2: "PM2.5 100-150 => Eingeschränkt (begrenzte Zeiten).",
+        rule3: "PM2.5 <= 100 => Normaler Verkehr erlaubt.",
+        advice1: "Überprüfen Sie Filter und Katalysator.",
+        advice2: "Regelmäßige Wartung.",
+        advice3: "Leerlaufzeiten reduzieren.",
+        loading: "Daten werden geladen...",
+        noHighPollution: "Keine hochbelasteten Gebiete gefunden.",
+        simulationDuration: "Simulationsdauer: 24 Sekunden",
+        manualRead: "Manuelles Auslesen",
+        simulateTrip: "Fahrt simulieren",
+        readingAll: "Alle Geräte werden ausgelesen...",
+        simulatingAll: "Alle Fahrten werden simuliert...",
+        deleteVehicle: "Löschen",
+        vehicleAdviceTitle: "Empfehlungen:",
+        vehicleAdviceGood: "✅ Ihre Fahrzeugemissionen liegen innerhalb akzeptabler Grenzen.",
+        vehicleAdviceModerate: "⚠️ Erwägen Sie regelmäßige Wartung und Filterkontrollen.",
+        vehicleAdvicePoor: "❌ Hohe Emissionen erkannt. Empfohlene Maßnahmen:",
+        vehicleAdviceList1: "• Luftfilter überprüfen und ersetzen",
+        vehicleAdviceList2: "• Katalysator überprüfen",
+        vehicleAdviceList3: "• Motorwartung planen",
+        vehicleAdviceList4: "• Unnötigen Leerlauf vermeiden",
+        vehicleAdviceList5: "• Professionellen Emissionstest in Betracht ziehen",
+        deleteConfirm: "Sind Sie sicher, dass Sie dieses Fahrzeug löschen möchten?",
+        // Health warnings for respiratory diseases
+        healthWarningTitle: "⚠️ Gesundheitshinweis für Atemwegserkrankungen",
+        healthWarningGood: "✅ Sicher für Menschen mit Asthma, COPD und Bronchitis",
+        healthWarningModerate: "⚠️ Menschen mit Atemwegserkrankungen sollten:",
+        healthWarningModerate1: "• Längere körperliche Anstrengung im Freien einschränken",
+        healthWarningModerate2: "• Medikamente griffbereit halten",
+        healthWarningModerate3: "• Symptome genau beobachten",
+        healthWarningHigh: "🚫 HOHES RISIKO für Menschen mit:",
+        healthWarningHigh1: "• Asthma",
+        healthWarningHigh2: "• COPD (Chronische Bronchitis/Emphysem)",
+        healthWarningHigh3: "• Bronchitis",
+        healthWarningHigh4: "• Anderen Atemwegserkrankungen",
+        healthWarningActions: "Empfohlene Maßnahmen:",
+        healthWarningAction1: "• Drinnen bleiben mit geschlossenen Fenstern",
+        healthWarningAction2: "• Luftreiniger verwenden",
+        healthWarningAction3: "• Körperliche Anstrengung vermeiden",
+        healthWarningAction4: "• Notfallmedikamente bereithalten",
+        healthWarningAction5: "• Arzt konsultieren bei verschlimmerten Symptomen"
+    },
+    ru: {
+        title: "GravInAir - Монитор качества воздуха и выбросов",
+        nav: { home:"Главная", register:"Регистрация устройств", vehicle:"Мои транспортные средства", rules:"Правила и рекомендации", global:"Глобальная карта выбросов", aqi: "Детальная карта AQI" },
+        homeTitle: "Быстрый симулятор выбросов транспортных средств",
+        homeDesc: "Зарегистрируйте ваше устройство и получайте смоделированные показания выбросов.",
+        lastReadLabel: "Последнее показание", 
+        behaviourLabel: "Поведение системы",
+        vehicleStatusLabel: "Статус транспортного средства",
+        behaviourText: "Эта демонстрация имитирует показания устройств и допуск к движению.",
+        quickRegisterTitle: "Регистрация устройств",
+        quickRegisterDesc: "Используйте вкладку регистрации устройств для управления транспортными средствами.",
+        regTitle: "Регистрация устройств", 
+        registeredTitle: "Зарегистрированные устройства", 
+        myVehiclesTitle: "Мои транспортные средства", 
+        rulesTitle: "Правила и рекомендации", 
+        globalTitle: "Глобальная карта выбросов", 
+        globalDesc: "Показаны средние значения AQI по странам и зоны с высоким уровнем загрязнения.",
+        reg_plate_label: "Номерной знак", 
+        reg_device_label: "ID устройства", 
+        reg_city_label: "Город", 
+        reg_make_label: "Марка", 
+        reg_model_label: "Модель транспортного средства", 
+        reg_engine_label: "Номер двигателя", 
+        reg_color_label: "Цвет транспортного средства",
+        regBtn: "Создать регистрацию", 
+        registerSuccess: "Регистрация успешно создана!",
+        quickReadBtn: "Считать все устройства",
+        quickSimulateBtn: "Смоделировать все поездки",
+        aqiMapTitle: "Интерактивная карта качества воздуха", 
+        aqiDetailTitle: "Детали качества воздуха",
+        globalAqiTitle: "Средние значения AQI по странам",
+        aqiLocation: "Местоположение", 
+        aqiText: "AQI", 
+        aqiPollutant: "Основной загрязнитель", 
+        locateBtn: "Мое местоположение", 
+        aqiClear: "Очистить", 
+        searchPlaceholder: "Введите город или адрес",
+        pollutantTitle: "Детали загрязнителей (µg/m³)",
+        pollutantPlaceholder: "Нажмите на карту или выполните поиск местоположения.",
+        aqiNoData: "Данные AQI для этого местоположения недоступны.",
+        aqiWarning_good: "✅ Качество воздуха хорошее для всех.", 
+        aqiWarning_moderate: "⚠️ Умеренное. Чувствительные люди должны быть осторожны.", 
+        aqiWarning_usg: "⚠️ Нездорово для чувствительных групп. Ограничьте активность на улице.", 
+        aqiWarning_unhealthy: "❌ Нездорово. Избегайте физических упражнений на улице.", 
+        aqiWarning_v_unhealthy: "☠️ Очень нездорово. Всем следует оставаться в помещении.", 
+        aqiWarning_hazardous: "🚫 Опасно. Оставайтесь в помещении.",
+        aqiMask_usg: "Рассмотрите возможность ношения маски, если у вас есть респираторные заболевания.", 
+        aqiMask_unhealthy: "Надевайте маску при выходе на улицу.", 
+        aqiMask_v_unhealthy: "Используйте высококачественную маску, если вам необходимо выйти.", 
+        aqiMask_hazardous: "Наденьте маску и используйте очиститель воздуха.",
+        noDevices: "Нет зарегистрированных устройств.",
+        noVehicles: "Нет зарегистрированных транспортных средств.",
+        trafficAllowed: "ДВИЖЕНИЕ РАЗРЕШЕНО",
+        trafficLimited: "ОГРАНИЧЕНО (ОГРАНИЧЕННОЕ ВРЕМЯ)",
+        trafficBanned: "ДВИЖЕНИЕ ЗАПРЕЩЕНО",
+        rule1: "PM2.5 > 150 => Рекомендуется запрет движения.",
+        rule2: "PM2.5 100-150 => Ограничено (ограниченное время).",
+        rule3: "PM2.5 <= 100 => Разрешено обычное движение.",
+        advice1: "Проверьте фильтры и каталитический нейтрализатор.",
+        advice2: "Регулярное техническое обслуживание.",
+        advice3: "Уменьшите время работы на холостом ходу.",
+        loading: "Загрузка данных...",
+        noHighPollution: "Области с высоким уровнем загрязнения не найдены.",
+        simulationDuration: "Продолжительность симуляции: 24 секунды",
+        manualRead: "Ручное считывание",
+        simulateTrip: "Смоделировать поездку",
+        readingAll: "Считывание всех устройств...",
+        simulatingAll: "Моделирование всех поездок...",
+        deleteVehicle: "Удалить",
+        vehicleAdviceTitle: "Рекомендации:",
+        vehicleAdviceGood: "✅ Выбросы вашего транспортного средства находятся в допустимых пределах.",
+        vehicleAdviceModerate: "⚠️ Рассмотрите регулярное техническое обслуживание и проверку фильтров.",
+        vehicleAdvicePoor: "❌ Обнаружены высокие выбросы. Рекомендуемые действия:",
+        vehicleAdviceList1: "• Проверьте и замените воздушные фильтры",
+        vehicleAdviceList2: "• Проверьте каталитический нейтрализатор",
+        vehicleAdviceList3: "• Запланируйте техническое обслуживание двигателя",
+        vehicleAdviceList4: "• Избегайте ненужной работы на холостом ходу",
+        vehicleAdviceList5: "• Рассмотрите профессиональную проверку выбросов",
+        deleteConfirm: "Вы уверены, что хотите удалить это транспортное средство?",
+        // Health warnings for respiratory diseases
+        healthWarningTitle: "⚠️ Медицинское предупреждение для респираторных заболеваний",
+        healthWarningGood: "✅ Безопасно для людей с астмой, ХОБЛ и бронхитом",
+        healthWarningModerate: "⚠️ Людям с респираторными заболеваниями следует:",
+        healthWarningModerate1: "• Ограничить длительные физические нагрузки на улице",
+        healthWarningModerate2: "• Держать лекарства под рукой",
+        healthWarningModerate3: "• Внимательно следить за симптомами",
+        healthWarningHigh: "🚫 ВЫСОКИЙ РИСК для людей с:",
+        healthWarningHigh1: "• Астмой",
+        healthWarningHigh2: "• ХОБЛ (Хронический бронхит/Эмфизема)",
+        healthWarningHigh3: "• Бронхитом",
+        healthWarningHigh4: "• Другими респираторными заболеваниями",
+        healthWarningActions: "Рекомендуемые действия:",
+        healthWarningAction1: "• Оставайтесь в помещении с закрытыми окнами",
+        healthWarningAction2: "• Используйте очистители воздуха",
+        healthWarningAction3: "• Избегайте физических нагрузок",
+        healthWarningAction4: "• Держите спасательные лекарства доступными",
+        healthWarningAction5: "• Проконсультируйтесь с врачом при ухудшении симптомов"
     }
 };
 
@@ -914,6 +1175,55 @@ function applyTranslations() {
 
     renderRegistered();
     renderMyVehicles();
+}
+
+// Health warnings for respiratory diseases
+function getHealthWarnings(aqi) {
+    const t = translations[currentLang] || translations.en;
+    
+    if (aqi === null) return '';
+    
+    if (aqi <= 50) {
+        return `
+            <div class="health-warning low">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningGood}</div>
+            </div>
+        `;
+    } else if (aqi <= 100) {
+        return `
+            <div class="health-warning medium">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningModerate}</div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningModerate1}</li>
+                    <li>${t.healthWarningModerate2}</li>
+                    <li>${t.healthWarningModerate3}</li>
+                </ul>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="health-warning high">
+                <h5>${t.healthWarningTitle}</h5>
+                <div><strong>${t.healthWarningHigh}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningHigh1}</li>
+                    <li>${t.healthWarningHigh2}</li>
+                    <li>${t.healthWarningHigh3}</li>
+                    <li>${t.healthWarningHigh4}</li>
+                </ul>
+                <div style="margin-top: 8px;"><strong>${t.healthWarningActions}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningAction1}</li>
+                    <li>${t.healthWarningAction2}</li>
+                    <li>${t.healthWarningAction3}</li>
+                    <li>${t.healthWarningAction4}</li>
+                    <li>${t.healthWarningAction5}</li>
+                </ul>
+            </div>
+        `;
+    }
 }
 
 // Vehicle deletion function
@@ -1565,6 +1875,7 @@ function resetAqiDetails(label) {
     document.getElementById('detailMaskMsg').textContent = "";
     document.getElementById('pollutantsList').innerHTML = 
         `<li class="muted" id="pollutantsPlaceholder">${t.pollutantPlaceholder}</li>`;
+    document.getElementById('healthWarnings').innerHTML = "";
 }
 
 async function fetchAqiData(lat, lon, label) {
@@ -1623,6 +1934,9 @@ function updateAqiUI(data, userLabel) {
     document.getElementById('detailAqiBar').textContent = (aqi === null ? '—' : aqi);
     document.getElementById('detailWarningMsg').textContent = warning;
     document.getElementById('detailMaskMsg').textContent = mask;
+
+    // Add health warnings for respiratory diseases
+    document.getElementById('healthWarnings').innerHTML = getHealthWarnings(aqi);
 
     const pollutantsList = document.getElementById('pollutantsList');
     pollutantsList.innerHTML = '';
