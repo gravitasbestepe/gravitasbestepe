@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>GravInAir - Air Quality & Emission Monitor</title>
+<title>Gravitas - Air Quality & Emission Monitor</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <style>
 :root {
@@ -525,7 +525,7 @@ footer {
 </head>
 <body>
 <header>
-    <h1><span class="logo">GravInAir</span> - Air Quality & Emission Monitor</h1>
+    <h1><span class="logo">Gravitas</span> - Air Quality & Emission Monitor</h1>
     <nav>
         <button id="nav-home" class="active">Home</button>
         <button id="nav-register">Device Register</button>
@@ -829,7 +829,7 @@ footer {
 
 <footer>
     <div class="footer-content">
-        <div class="copyright">© 2025 GravInAir - All rights reserved</div>
+        <div class="copyright">© 2025 Gravitas - All rights reserved</div>
     </div>
 </footer>
 
@@ -840,7 +840,7 @@ const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 
 const translations = {
     en: {
-        title: "GravInAir - Air Quality & Emission Monitor",
+        title: "Gravitas - Air Quality & Emission Monitor",
         nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map", resources: "Resources" },
         homeTitle: "Quick Vehicle Emission Simulator",
         homeDesc: "Register your device and get simulated emission readings here.",
@@ -939,7 +939,7 @@ const translations = {
         healthWarningAction5: "• Consult doctor if symptoms worsen"
     },
     tr: {
-        title: "GravInAir - Hava Kalitesi & Emisyon İzleyici",
+        title: "Gravitas - Hava Kalitesi & Emisyon İzleyici",
         nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası", resources: "Kaynaklar" },
         homeTitle: "Hızlı Araç Emisyon Simülatörü",
         homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
@@ -1038,7 +1038,7 @@ const translations = {
         healthWarningAction5: "• Belirtiler kötüleşirse doktora başvurun"
     },
     de: {
-        title: "GravInAir - Luftqualitäts- & Emissionsmonitor",
+        title: "Gravitas - Luftqualitäts- & Emissionsmonitor",
         nav: { home:"Startseite", register:"Geräteregistrierung", vehicle:"Meine Fahrzeuge", rules:"Regeln & Ratschläge", global:"Globale Emissionskarte", aqi: "Detaillierte AQI-Karte", resources: "Ressourcen" },
         homeTitle: "Schneller Fahrzeugemissionssimulator",
         homeDesc: "Registrieren Sie Ihr Gerät und erhalten Sie simulierte Emissionsmesswerte.",
@@ -1059,7 +1059,7 @@ const translations = {
         reg_plate_label: "Nummernschild", 
         reg_device_label: "Geräte-ID", 
         reg_city_label: "Stadt", 
-        reg_make_label: "Marke", 
+        reg_make_label: "Marka", 
         reg_model_label: "Fahrzeugmodell", 
         reg_engine_label: "Motornummer", 
         reg_color_label: "Fahrzeugfarbe",
@@ -1137,7 +1137,7 @@ const translations = {
         healthWarningAction5: "• Arzt konsultieren bei verschlimmerten Symptomen"
     },
     ru: {
-        title: "GravInAir - Монитор качества воздуха и выбросов",
+        title: "Gravitas - Монитор качества воздуха и выбросов",
         nav: { home:"Главная", register:"Регистрация устройств", vehicle:"Мои транспортные средства", rules:"Правила и рекомендации", global:"Глобальная карта выбросов", aqi: "Детальная карта AQI", resources: "Ресурсы" },
         homeTitle: "Быстрый симулятор выбросов транспортных средств",
         homeDesc: "Зарегистрируйте ваше устройство и получайте смоделированные показания выбросов.",
@@ -1381,10 +1381,869 @@ function applyTranslations() {
     renderMyVehicles();
 }
 
-// ... (kalan kod aynı, sadece resources sayfası eklendi)
+function getHealthWarnings(aqi) {
+    const t = translations[currentLang] || translations.en;
+    
+    if (aqi === null) return '';
+    
+    if (aqi <= 50) {
+        return `
+            <div class="health-warning low">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningGood}</div>
+            </div>
+        `;
+    } else if (aqi <= 100) {
+        return `
+            <div class="health-warning medium">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningModerate}</div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningModerate1}</li>
+                    <li>${t.healthWarningModerate2}</li>
+                    <li>${t.healthWarningModerate3}</li>
+                </ul>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="health-warning high">
+                <h5>${t.healthWarningTitle}</h5>
+                <div><strong>${t.healthWarningHigh}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningHigh1}</li>
+                    <li>${t.healthWarningHigh2}</li>
+                    <li>${t.healthWarningHigh3}</li>
+                    <li>${t.healthWarningHigh4}</li>
+                </ul>
+                <div style="margin-top: 8px;"><strong>${t.healthWarningActions}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningAction1}</li>
+                    <li>${t.healthWarningAction2}</li>
+                    <li>${t.healthWarningAction3}</li>
+                    <li>${t.healthWarningAction4}</li>
+                    <li>${t.healthWarningAction5}</li>
+                </ul>
+            </div>
+        `;
+    }
+}
 
-// Kalan tüm fonksiyonlar aynı kalacak, sadece resources sayfası eklendi
-// Burada sadece değişiklik yapılan kısımları gösterdim, geri kalan kod aynı
+function deleteVehicle(index) {
+    const t = translations[currentLang] || translations.en;
+    if (confirm(t.deleteConfirm)) {
+        const reg = loadRegistry();
+        reg.splice(index, 1);
+        saveRegistry(reg);
+        renderMyVehicles();
+        renderRegistered();
+        updateHomeScreen();
+    }
+}
+
+function getVehicleAdvice(pm25) {
+    const t = translations[currentLang] || translations.en;
+    
+    if (pm25 <= 100) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceGood}</div>
+        </div>`;
+    } else if (pm25 <= 150) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceModerate}</div>
+        </div>`;
+    } else {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdvicePoor}</div>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                <li>${t.vehicleAdviceList1}</li>
+                <li>${t.vehicleAdviceList2}</li>
+                <li>${t.vehicleAdviceList3}</li>
+                <li>${t.vehicleAdviceList4}</li>
+                <li>${t.vehicleAdviceList5}</li>
+            </ul>
+        </div>`;
+    }
+}
+
+function quickReadAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickReadBtn').textContent = t.readingAll;
+    document.getElementById('quickReadBtn').disabled = true;
+    
+    setTimeout(() => {
+        for (let i = 0; i < reg.length; i++) {
+            simulateDeviceRead(i);
+        }
+        updateHomeScreen();
+        document.getElementById('quickReadBtn').textContent = t.quickReadBtn;
+        document.getElementById('quickReadBtn').disabled = false;
+    }, 1000);
+}
+
+function quickSimulateAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickSimulateBtn').textContent = t.simulatingAll;
+    document.getElementById('quickSimulateBtn').disabled = true;
+    
+    let completed = 0;
+    const total = reg.length;
+    
+    reg.forEach((vehicle, idx) => {
+        simulateTrip(idx);
+        
+        setTimeout(() => {
+            completed++;
+            if (completed === total) {
+                document.getElementById('quickSimulateBtn').textContent = t.quickSimulateBtn;
+                document.getElementById('quickSimulateBtn').disabled = false;
+                updateHomeScreen();
+            }
+        }, 24000);
+    });
+}
+
+function updateHomeScreen() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        document.getElementById('vehicleStatus').innerHTML = `<div class="muted">${t.noVehicles}</div>`;
+        return;
+    }
+    
+    let statusHTML = '';
+    let allowed = 0, limited = 0, banned = 0;
+    
+    reg.forEach(vehicle => {
+        if (vehicle.lastRead) {
+            const statusClass = getStatusClass(vehicle.lastRead.status);
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="${statusClass}">${vehicle.lastRead.status}</span>
+                    <div class="muted" style="font-size: 12px;">PM2.5: ${vehicle.lastRead.pm25}</div>
+                </div>
+            `;
+            
+            if (vehicle.lastRead.status.includes('ALLOWED') && !vehicle.lastRead.status.includes('NOT')) allowed++;
+            else if (vehicle.lastRead.status.includes('LIMITED')) limited++;
+            else if (vehicle.lastRead.status.includes('NOT ALLOWED') || vehicle.lastRead.status.includes('BANNED')) banned++;
+        } else {
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="muted">No reading</span>
+                </div>
+            `;
+        }
+    });
+    
+    const summary = `
+        <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
+            <strong>Summary:</strong> 
+            <span style="color: green;">${allowed} Allowed</span> | 
+            <span style="color: orange;">${limited} Limited</span> | 
+            <span style="color: red;">${banned} Banned</span>
+        </div>
+    `;
+    
+    document.getElementById('vehicleStatus').innerHTML = summary + statusHTML;
+}
+
+function registerDevice() {
+    const plate = document.getElementById('reg_plate').value.trim();
+    const device = document.getElementById('reg_device').value.trim();
+    const city = document.getElementById('reg_city').value.trim();
+    const make = document.getElementById('reg_make').value.trim();
+    const model = document.getElementById('reg_model').value.trim();
+    const engine = document.getElementById('reg_engine').value.trim();
+    const color = document.getElementById('reg_color').value.trim();
+    
+    const t = translations[currentLang] || translations.en;
+    
+    if (!plate || !device) {
+        alert('License plate and device ID are required');
+        return;
+    }
+    
+    const reg = loadRegistry();
+    if (reg.some(r => r.device === device)) {
+        alert("Device ID already registered.");
+        return;
+    }
+
+    reg.push({ 
+        plate, 
+        device, 
+        city, 
+        make,
+        model,
+        engine,
+        color,
+        created: Date.now(), 
+        lastRead: null 
+    });
+    
+    saveRegistry(reg);
+    renderRegistered();
+    renderMyVehicles();
+    updateHomeScreen();
+    
+    document.getElementById('reg_plate').value = '';
+    document.getElementById('reg_device').value = '';
+    document.getElementById('reg_city').value = '';
+    document.getElementById('reg_make').value = '';
+    document.getElementById('reg_model').value = '';
+    document.getElementById('reg_engine').value = '';
+    document.getElementById('reg_color').value = '';
+    
+    alert(t.registerSuccess);
+    
+    const idx = reg.length - 1;
+    gradualChange(idx, { 
+        start: 20, 
+        target: Math.round(Math.random() * 140 + 10), 
+        steps: 6, 
+        interval: 2500 
+    });
+}
+
+function loadRegistry() {
+    try { 
+        return JSON.parse(localStorage.getItem('emission_registry') || '[]'); 
+    } catch (e) { 
+        return []; 
+    }
+}
+
+function saveRegistry(reg) {
+    localStorage.setItem('emission_registry', JSON.stringify(reg));
+}
+
+function renderRegistered() {
+    const list = document.getElementById('registeredList');
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (!list) return;
+    
+    if (reg.length === 0) { 
+        list.innerHTML = `<div class="muted">${t.noDevices}</div>`; 
+        return; 
+    }
+    
+    list.innerHTML = '';
+    reg.forEach((r, idx) => {
+        const div = document.createElement('div');
+        div.style.padding = '8px';
+        div.style.borderBottom = '1px solid #eee';
+        const colorPreview = r.color ? `<span class="color-preview" style="background-color: ${getColorValue(r.color)}"></span>` : '';
+        div.innerHTML = `
+            <strong>${r.plate}</strong> — ${r.device} 
+            ${colorPreview}
+            <div class="muted">${[r.make, r.model, r.city].filter(Boolean).join(' - ')}</div>
+            <button class="btn btn-danger" onclick="deleteVehicle(${idx})" style="margin-top: 5px; padding: 4px 8px; font-size: 12px;">${t.deleteVehicle}</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function renderMyVehicles() {
+    const cont = document.getElementById('myVehicles');
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (!cont) return;
+    
+    if (reg.length === 0) { 
+        cont.innerHTML = `<div class="muted">${t.noVehicles}</div>`; 
+        return; 
+    }
+    
+    cont.innerHTML = '';
+    reg.forEach((r, idx) => {
+        const statusClass = getStatusClass(r.lastRead?.status);
+        const last = r.lastRead ? 
+            `<div>PM2.5: <strong>${r.lastRead.pm25}</strong> — Status: <strong class="${statusClass}">${r.lastRead.status}</strong></div>` : 
+            '<div class="muted">No readings yet.</div>';
+        
+        const colorPreview = r.color ? `<span class="color-preview" style="background-color: ${getColorValue(r.color)}"></span>` : '';
+        const vehicleInfo = [r.make, r.model, r.engine].filter(Boolean).join(' • ');
+        
+        const advice = r.lastRead ? getVehicleAdvice(r.lastRead.pm25) : '';
+        
+        const box = document.createElement('div');
+        box.className = 'vehicle-card';
+        box.innerHTML = `
+            <strong>${r.plate}</strong> — ${r.device}
+            ${colorPreview}
+            <div class="muted">${vehicleInfo}</div>
+            <div class="muted">${r.city || ''}</div>
+            ${last}
+            ${advice}
+            <div class="vehicle-actions">
+                <button class="btn" onclick="forceRead(${idx})">${t.manualRead}</button>
+                <button class="btn" onclick="simulateTrip(${idx})">${t.simulateTrip}</button>
+                <button class="btn btn-danger" onclick="deleteVehicle(${idx})">${t.deleteVehicle}</button>
+            </div>
+            <div class="muted" style="font-size: 12px; margin-top: 4px;">${t.simulationDuration}</div>
+        `;
+        cont.appendChild(box);
+    });
+}
+
+function getColorValue(colorName) {
+    const colorMap = {
+        'red': '#ff0000',
+        'blue': '#0000ff', 
+        'black': '#000000',
+        'white': '#ffffff',
+        'silver': '#c0c0c0',
+        'gray': '#808080',
+        'green': '#008000',
+        'yellow': '#ffff00',
+        'orange': '#ffa500',
+        'purple': '#800080'
+    };
+    return colorMap[colorName.toLowerCase()] || '#cccccc';
+}
+
+function getStatusClass(status) {
+    if (status?.includes('ALLOWED') && !status?.includes('NOT')) return 'status-allowed';
+    if (status?.includes('LIMITED')) return 'status-limited';
+    if (status?.includes('NOT ALLOWED') || status?.includes('BANNED')) return 'status-banned';
+    return '';
+}
+
+window.forceRead = function(idx) {
+    simulateDeviceRead(idx);
+    updateHomeScreen();
+}
+
+window.simulateTrip = function(idx) {
+    const reg = loadRegistry();
+    if (!reg[idx]) return;
+    
+    gradualChange(idx, {
+        start: reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30,
+        target: Math.min(400, Math.round((reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30) * (1.6 + Math.random() * 0.6))),
+        steps: 8, 
+        interval: 3000
+    });
+    
+    setTimeout(() => {
+        updateHomeScreen();
+    }, 24000);
+}
+
+function simulateDeviceRead(index, opts = {}) {
+    const reg = loadRegistry();
+    if (!reg[index]) return;
+    
+    const basePM25 = Math.round(Math.random() * 180);
+    const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply || 1)));
+    const pm10 = Math.round(pm25 * (0.6 + Math.random() * 0.8));
+    const co = (Math.random() * 6).toFixed(2);
+    const status = decideStatus(pm25);
+    const read = { ts: Date.now(), pm25, pm10, co, status };
+    
+    reg[index].lastRead = read;
+    saveRegistry(reg);
+    renderMyVehicles();
+    
+    document.getElementById('lastRead').innerHTML = 
+        `${reg[index].plate} — PM2.5: ${pm25} — <strong class="${getStatusClass(status)}">${status}</strong>`;
+}
+
+function decideStatus(pm25) {
+    const t = translations[currentLang] || translations.en;
+    if (pm25 > 150) return t.trafficBanned;
+    if (pm25 > 100) return t.trafficLimited;
+    return t.trafficAllowed;
+}
+
+function gradualChange(index, opts = {start: 20, target: 80, steps: 6, interval: 3000}) {
+    const reg = loadRegistry();
+    if (!reg[index]) return;
+    
+    let step = 0;
+    const start = opts.start;
+    const target = opts.target;
+    const steps = opts.steps || 6;
+    const interval = opts.interval || 3000;
+    const delta = (target - start) / steps;
+    
+    const iv = setInterval(() => {
+        step++;
+        const currentVal = Math.round(start + delta * step + (Math.random() * 5 - 2));
+        const pm25 = Math.max(0, currentVal);
+        const pm10 = Math.round(pm25 * (0.6 + Math.random() * 0.8));
+        const co = (Math.random() * 6).toFixed(2);
+        const status = decideStatus(pm25);
+        const read = { ts: Date.now(), pm25, pm10, co, status };
+        
+        const registry = loadRegistry();
+        if (!registry[index]) { 
+            clearInterval(iv); 
+            return; 
+        }
+        
+        registry[index].lastRead = read;
+        saveRegistry(registry);
+        renderMyVehicles();
+        
+        document.getElementById('lastRead').innerHTML = 
+            `${registry[index].plate} — PM2.5: ${pm25} — <strong class="${getStatusClass(status)}">${status}</strong>`;
+            
+        if (step >= steps) clearInterval(iv);
+    }, interval);
+}
+
+function startBackgroundSimulation() {
+    setInterval(() => {
+        const reg = loadRegistry();
+        if (!reg.length) return;
+        
+        for (let i = 0; i < reg.length; i++) {
+            if (Math.random() < 0.5) simulateDeviceRead(i);
+        }
+        renderMyVehicles();
+        updateHomeScreen();
+    }, 20000);
+}
+
+function loadCountryAQIData() {
+    const countryData = [
+        { country: "Turkey", aqi: 65, cities: ["Istanbul", "Ankara", "Izmir"] },
+        { country: "Germany", aqi: 45, cities: ["Berlin", "Munich", "Hamburg"] },
+        { country: "France", aqi: 52, cities: ["Paris", "Lyon", "Marseille"] },
+        { country: "Italy", aqi: 68, cities: ["Rome", "Milan", "Naples"] },
+        { country: "Spain", aqi: 58, cities: ["Madrid", "Barcelona", "Valencia"] },
+        { country: "UK", aqi: 48, cities: ["London", "Manchester", "Birmingham"] },
+        { country: "USA", aqi: 72, cities: ["New York", "Los Angeles", "Chicago"] },
+        { country: "China", aqi: 156, cities: ["Beijing", "Shanghai", "Guangzhou"] },
+        { country: "India", aqi: 189, cities: ["Delhi", "Mumbai", "Bangalore"] },
+        { country: "Russia", aqi: 62, cities: ["Moscow", "Saint Petersburg", "Novosibirsk"] },
+        { country: "Japan", aqi: 42, cities: ["Tokyo", "Osaka", "Kyoto"] },
+        { country: "South Korea", aqi: 55, cities: ["Seoul", "Busan", "Incheon"] },
+        { country: "Brazil", aqi: 78, cities: ["São Paulo", "Rio de Janeiro", "Brasília"] },
+        { country: "Mexico", aqi: 85, cities: ["Mexico City", "Guadalajara", "Monterrey"] },
+        { country: "Canada", aqi: 38, cities: ["Toronto", "Vancouver", "Montreal"] },
+        { country: "Australia", aqi: 35, cities: ["Sydney", "Melbourne", "Brisbane"] },
+        { country: "Egypt", aqi: 165, cities: ["Cairo", "Alexandria", "Giza"] },
+        { country: "South Africa", aqi: 72, cities: ["Johannesburg", "Cape Town", "Durban"] },
+        { country: "Saudi Arabia", aqi: 142, cities: ["Riyadh", "Jeddah", "Mecca"] },
+        { country: "United Arab Emirates", aqi: 128, cities: ["Dubai", "Abu Dhabi", "Sharjah"] },
+        { country: "Pakistan", aqi: 195, cities: ["Karachi", "Lahore", "Islamabad"] },
+        { country: "Bangladesh", aqi: 205, cities: ["Dhaka", "Chittagong", "Khulna"] },
+        { country: "Indonesia", aqi: 112, cities: ["Jakarta", "Surabaya", "Bandung"] },
+        { country: "Thailand", aqi: 95, cities: ["Bangkok", "Chiang Mai", "Phuket"] },
+        { country: "Vietnam", aqi: 108, cities: ["Hanoi", "Ho Chi Minh City", "Da Nang"] },
+        { country: "Philippines", aqi: 88, cities: ["Manila", "Cebu", "Davao"] },
+        { country: "Malaysia", aqi: 75, cities: ["Kuala Lumpur", "Penang", "Johor Bahru"] },
+        { country: "Singapore", aqi: 48, cities: ["Singapore"] },
+        { country: "Poland", aqi: 68, cities: ["Warsaw", "Krakow", "Wroclaw"] },
+        { country: "Netherlands", aqi: 52, cities: ["Amsterdam", "Rotterdam", "Utrecht"] },
+        { country: "Belgium", aqi: 58, cities: ["Brussels", "Antwerp", "Ghent"] },
+        { country: "Switzerland", aqi: 42, cities: ["Zurich", "Geneva", "Basel"] },
+        { country: "Austria", aqi: 45, cities: ["Vienna", "Salzburg", "Innsbruck"] },
+        { country: "Sweden", aqi: 32, cities: ["Stockholm", "Gothenburg", "Malmo"] },
+        { country: "Norway", aqi: 28, cities: ["Oslo", "Bergen", "Stavanger"] },
+        { country: "Finland", aqi: 25, cities: ["Helsinki", "Espoo", "Tampere"] },
+        { country: "Denmark", aqi: 38, cities: ["Copenhagen", "Aarhus", "Odense"] },
+        { country: "Ireland", aqi: 42, cities: ["Dublin", "Cork", "Galway"] },
+        { country: "Portugal", aqi: 55, cities: ["Lisbon", "Porto", "Faro"] },
+        { country: "Greece", aqi: 62, cities: ["Athens", "Thessaloniki", "Patras"] }
+    ];
+
+    const container = document.getElementById('countryAqiList');
+    const t = translations[currentLang] || translations.en;
+    
+    let html = '';
+    countryData.forEach(country => {
+        const color = getColorForAQI(country.aqi);
+        html += `
+            <div class="country-aqi-item">
+                <span>${country.country}</span>
+                <span class="aqi-value" style="color: ${color};">${country.aqi}</span>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getColorForAQI(aqi) {
+    if (aqi <= 50) return 'green';
+    if (aqi <= 100) return 'yellow';
+    if (aqi <= 150) return 'orange';
+    if (aqi <= 200) return 'red';
+    if (aqi <= 300) return 'purple';
+    return 'maroon';
+}
+
+function initGlobalMap() {
+    if (globalMap) {
+        globalMap.invalidateSize();
+        return;
+    }
+    
+    globalMap = L.map('globalMap').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(globalMap);
+    
+    addCountryAQIToMap();
+}
+
+function addCountryAQIToMap() {
+    const countryAQIData = {
+        "Turkey": { lat: 39.9334, lon: 32.8597, aqi: 65 },
+        "Germany": { lat: 52.5200, lon: 13.4050, aqi: 45 },
+        "France": { lat: 48.8566, lon: 2.3522, aqi: 52 },
+        "Italy": { lat: 41.9028, lon: 12.4964, aqi: 68 },
+        "Spain": { lat: 40.4168, lon: -3.7038, aqi: 58 },
+        "UK": { lat: 51.5074, lon: -0.1278, aqi: 48 },
+        "USA": { lat: 38.9072, lon: -77.0369, aqi: 72 },
+        "China": { lat: 39.9042, lon: 116.4074, aqi: 156 },
+        "India": { lat: 28.6139, lon: 77.2090, aqi: 189 },
+        "Russia": { lat: 55.7558, lon: 37.6173, aqi: 62 },
+        "Japan": { lat: 35.6762, lon: 139.6503, aqi: 42 },
+        "South Korea": { lat: 37.5665, lon: 126.9780, aqi: 55 },
+        "Brazil": { lat: -23.5505, lon: -46.6333, aqi: 78 },
+        "Mexico": { lat: 19.4326, lon: -99.1332, aqi: 85 },
+        "Canada": { lat: 43.6532, lon: -79.3832, aqi: 38 },
+        "Australia": { lat: -33.8688, lon: 151.2093, aqi: 35 },
+        "Egypt": { lat: 30.0444, lon: 31.2357, aqi: 165 },
+        "South Africa": { lat: -26.2041, lon: 28.0473, aqi: 72 },
+        "Saudi Arabia": { lat: 24.7136, lon: 46.6753, aqi: 142 },
+        "United Arab Emirates": { lat: 25.2048, lon: 55.2708, aqi: 128 },
+        "Pakistan": { lat: 33.6844, lon: 73.0479, aqi: 195 },
+        "Bangladesh": { lat: 23.8103, lon: 90.4125, aqi: 205 },
+        "Indonesia": { lat: -6.2088, lon: 106.8456, aqi: 112 },
+        "Thailand": { lat: 13.7563, lon: 100.5018, aqi: 95 },
+        "Vietnam": { lat: 21.0278, lon: 105.8342, aqi: 108 },
+        "Philippines": { lat: 14.5995, lon: 120.9842, aqi: 88 },
+        "Malaysia": { lat: 3.1390, lon: 101.6869, aqi: 75 },
+        "Singapore": { lat: 1.3521, lon: 103.8198, aqi: 48 },
+        "Poland": { lat: 52.2297, lon: 21.0122, aqi: 68 },
+        "Netherlands": { lat: 52.3676, lon: 4.9041, aqi: 52 },
+        "Belgium": { lat: 50.8503, lon: 4.3517, aqi: 58 },
+        "Switzerland": { lat: 47.3769, lon: 8.5417, aqi: 42 },
+        "Austria": { lat: 48.2082, lon: 16.3738, aqi: 45 },
+        "Sweden": { lat: 59.3293, lon: 18.0686, aqi: 32 },
+        "Norway": { lat: 59.9139, lon: 10.7522, aqi: 28 },
+        "Finland": { lat: 60.1699, lon: 24.9384, aqi: 25 },
+        "Denmark": { lat: 55.6761, lon: 12.5683, aqi: 38 },
+        "Ireland": { lat: 53.3498, lon: -6.2603, aqi: 42 },
+        "Portugal": { lat: 38.7223, lon: -9.1393, aqi: 55 },
+        "Greece": { lat: 37.9838, lon: 23.7275, aqi: 62 }
+    };
+
+    Object.entries(countryAQIData).forEach(([country, data]) => {
+        const color = getColorForAQI(data.aqi);
+        const radius = Math.max(100000, data.aqi * 2000);
+        
+        const circle = L.circle([data.lat, data.lon], {
+            radius: radius,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.5
+        }).addTo(globalMap);
+        
+        const t = translations[currentLang] || translations.en;
+        circle.bindPopup(`
+            <strong>${country}</strong><br>
+            Average AQI: <strong style="color: ${color}">${data.aqi}</strong><br>
+            ${getAQILevelText(data.aqi, t)}
+        `);
+    });
+
+    const t = translations[currentLang] || translations.en;
+    document.getElementById('globalSummary').innerHTML = 
+        '<div class="muted">' + t.globalDesc + '</div>';
+}
+
+function getAQILevelText(aqi, t) {
+    if (aqi <= 50) return 'Air Quality: Good';
+    if (aqi <= 100) return 'Air Quality: Moderate';
+    if (aqi <= 150) return 'Air Quality: Unhealthy for Sensitive Groups';
+    if (aqi <= 200) return 'Air Quality: Unhealthy';
+    if (aqi <= 300) return 'Air Quality: Very Unhealthy';
+    return 'Air Quality: Hazardous';
+}
+
+function initAqiMap() {
+    if (aqiMap) {
+        aqiMap.invalidateSize();
+        return;
+    }
+    
+    aqiMap = L.map('aqiMap').setView([39.925, 32.866], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(aqiMap);
+    
+    aqiMap.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+        nominatimReverse(lat, lon).then(rev => {
+            const label = rev && rev.display_name ? rev.display_name : 
+                `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+            goToAqiLocation(lat, lon, label);
+            document.getElementById('aqiAddressInput').value = label;
+            document.getElementById('aqiResultList').style.display = 'none';
+        });
+    });
+}
+
+async function handleAddressSearch() {
+    const q = document.getElementById('aqiAddressInput').value;
+    if (!q) { 
+        document.getElementById('aqiResultList').style.display = "none"; 
+        return;
+    }
+    
+    const results = await nominatimSearch(q);
+    renderAqiResults(results);
+}
+
+async function handleLocateMe() {
+    const t = translations[currentLang] || translations.en;
+    
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported by this browser/device.");
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        
+        const userInput = document.getElementById('aqiAddressInput').value;
+        let label;
+        
+        if (userInput && userInput.trim() !== '') {
+            label = userInput;
+        } else {
+            const rev = await nominatimReverse(lat, lon);
+            label = rev && rev.display_name ? rev.display_name : 
+                `Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+        }
+        
+        document.getElementById('aqiAddressInput').value = label;
+        goToAqiLocation(lat, lon, label);
+        document.getElementById('aqiResultList').style.display = 'none';
+    }, err => {
+        alert("Unable to get your location. Please ensure location services are enabled.");
+    });
+}
+
+function handleClearSearch() {
+    document.getElementById('aqiAddressInput').value = "";
+    document.getElementById('aqiResultList').style.display = "none";
+    resetAqiDetails("—");
+}
+
+function setAqiMarker(lat, lon) {
+    if (aqiMarker) aqiMap.removeLayer(aqiMarker);
+    aqiMarker = L.marker([lat, lon]).addTo(aqiMap);
+    aqiMap.setView([lat, lon], 12);
+}
+
+async function nominatimSearch(q) {
+    try {
+        const res = await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`, {
+            headers: { 'Accept-Language': currentLang }
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Search error:', error);
+        return [];
+    }
+}
+
+async function nominatimReverse(lat, lon) {
+    try {
+        const res = await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+            headers: { 'Accept-Language': currentLang }
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        return null;
+    }
+}
+
+function renderAqiResults(items) {
+    const resultList = document.getElementById('aqiResultList');
+    resultList.innerHTML = "";
+    
+    if (!items || items.length === 0) {
+        resultList.style.display = "none";
+        return;
+    }
+    
+    items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'resultItem';
+        div.innerHTML = `
+            <div style="font-weight: 500;">${item.display_name}</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                ${item.type ? `${item.type} • ` : ''}
+                Lat: ${parseFloat(item.lat).toFixed(4)}, Lon: ${parseFloat(item.lon).toFixed(4)}
+            </div>
+        `;
+        div.tabIndex = 0;
+        div.addEventListener('click', () => selectAqiResult(item));
+        div.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') selectAqiResult(item);
+        });
+        resultList.appendChild(div);
+    });
+    resultList.style.display = 'block';
+}
+
+async function selectAqiResult(item) {
+    document.getElementById('aqiResultList').style.display = 'none';
+    document.getElementById('aqiAddressInput').value = item.display_name;
+    goToAqiLocation(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+}
+
+function resetAqiDetails(label) {
+    const t = translations[currentLang] || translations.en;
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${label || '—'}`;
+    document.getElementById('detailAqiText').textContent = `${t.aqiText}: —`;
+    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: —`;
+    document.getElementById('detailAqiBar').style.background = "#999";
+    document.getElementById('detailAqiBar').style.width = "0%";
+    document.getElementById('detailAqiBar').textContent = "—";
+    document.getElementById('detailWarningMsg').textContent = "";
+    document.getElementById('detailMaskMsg').textContent = "";
+    document.getElementById('pollutantsList').innerHTML = 
+        `<li class="muted" id="pollutantsPlaceholder">${t.pollutantPlaceholder}</li>`;
+    document.getElementById('healthWarnings').innerHTML = "";
+}
+
+async function fetchAqiData(lat, lon, label) {
+    try {
+        resetAqiDetails(label);
+        const res = await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`);
+        const resp = await res.json();
+        
+        if (resp.status === "ok" && resp.data) {
+            updateAqiUI(resp.data, label);
+        } else {
+            updateAqiUI(null, label);
+            const t = translations[currentLang] || translations.en;
+            alert(t.aqiNoData);
+        }
+    } catch (err) {
+        updateAqiUI(null, label);
+        alert("Error fetching AQI data.");
+        console.error(err);
+    }
+}
+
+function updateAqiUI(data, userLabel) {
+    const t = translations[currentLang] || translations.en;
+    
+    const locationName = userLabel || (data && data.city ? data.city.name : '—');
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${locationName}`;
+    
+    const aqi = data && data.aqi ? data.aqi : null;
+    document.getElementById('detailAqiText').textContent = `${t.aqiText}: ${aqi !== null ? aqi : '—'}`;
+    
+    const dominantPollutant = data && data.dominentpol ? data.dominentpol : '—';
+    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: ${dominantPollutant.toUpperCase()}`;
+
+    let color = "#999";
+    let warning = "", mask = "";
+    const percent = aqi === null ? 0 : Math.min(aqi, 500) / 500 * 100;
+
+    if (aqi === null) {
+        warning = ""; mask = "";
+    } else if (aqi <= 50) {
+        color = "green"; warning = t.aqiWarning_good; mask = "";
+    } else if (aqi <= 100) {
+        color = "yellow"; warning = t.aqiWarning_moderate; mask = "";
+    } else if (aqi <= 150) {
+        color = "orange"; warning = t.aqiWarning_usg; mask = t.aqiMask_usg;
+    } else if (aqi <= 200) {
+        color = "red"; warning = t.aqiWarning_unhealthy; mask = t.aqiMask_unhealthy;
+    } else if (aqi <= 300) {
+        color = "purple"; warning = t.aqiWarning_v_unhealthy; mask = t.aqiMask_v_unhealthy;
+    } else {
+        color = "maroon"; warning = t.aqiWarning_hazardous; mask = t.aqiMask_hazardous;
+    }
+
+    document.getElementById('detailAqiBar').style.background = color;
+    document.getElementById('detailAqiBar').style.width = percent + "%";
+    document.getElementById('detailAqiBar').textContent = (aqi === null ? '—' : aqi);
+    document.getElementById('detailWarningMsg').textContent = warning;
+    document.getElementById('detailMaskMsg').textContent = mask;
+
+    document.getElementById('healthWarnings').innerHTML = getHealthWarnings(aqi);
+
+    const pollutantsList = document.getElementById('pollutantsList');
+    pollutantsList.innerHTML = '';
+    
+    const pollutantKeys = ["pm25", "pm10", "o3", "no2", "so2", "co"];
+    if (data && data.iaqi) {
+        pollutantKeys.forEach(k => {
+            if (data.iaqi[k] && data.iaqi[k].v !== undefined) {
+                const value = data.iaqi[k].v;
+                let quality = '—';
+                if (value <= 50) quality = '(Good)';
+                else if (value <= 100) quality = '(Moderate)';
+                else quality = '(High)';
+                
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${k.toUpperCase()}</strong>: ${value} <span class="muted">${quality}</span>`;
+                pollutantsList.appendChild(li);
+            }
+        });
+        
+        if (pollutantsList.children.length === 0) {
+            pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
+        }
+    } else {
+        pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
+    }
+}
+
+async function goToAqiLocation(lat, lon, label) {
+    setAqiMarker(lat, lon);
+    await fetchAqiData(lat, lon, label);
+}
+
+function debounce(fn, wait) {
+    let t;
+    return function(...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+    };
+}
 
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
