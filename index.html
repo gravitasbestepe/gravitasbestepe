@@ -119,7 +119,7 @@ main {
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(0,0,0,0.12);
 }
-#map, #globalMap, #nationalMap, #aqiMap {
+#globalMap, #aqiMap {
     height: 420px;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -431,8 +431,6 @@ footer {
     opacity: 0.9;
     font-weight: 500;
 }
-
-/* Resources page styles */
 .resources-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -495,8 +493,6 @@ footer {
     color: var(--muted);
     line-height: 1.4;
 }
-
-/* NASA Data Styles */
 .nasa-data-card {
     background: linear-gradient(135deg, #1a3c6e 0%, #2c5282 100%);
     color: white;
@@ -511,12 +507,11 @@ footer {
     font-weight: bold;
     margin-left: 8px;
 }
-
 @media (max-width: 900px) {
     .grid {
         grid-template-columns: 1fr;
     }
-    #map, #globalMap, #nationalMap, #aqiMap {
+    #globalMap, #aqiMap {
         height: 300px;
     }
     header {
@@ -564,23 +559,15 @@ footer {
             <div class="card">
                 <h2 id="home-title">Quick Vehicle Emission Simulator</h2>
                 <p class="muted" id="home-desc">Register your device and get simulated emission readings here.</p>
-                
                 <div class="quick-actions">
-                    <button class="btn btn-primary" onclick="quickReadAll()" id="quickReadBtn">
-                        Read All Devices
-                    </button>
-                    <button class="btn" onclick="quickSimulateAll()" id="quickSimulateBtn">
-                        Simulate All Trips
-                    </button>
+                    <button class="btn btn-primary" onclick="quickReadAll()" id="quickReadBtn">Read All Devices</button>
+                    <button class="btn" onclick="quickSimulateAll()" id="quickSimulateBtn">Simulate All Trips</button>
                 </div>
-
                 <div style="margin-top: 16px">
                     <h3 id="lastReadLabel">Last Reading</h3>
                     <div id="lastRead" class="muted">No readings yet.</div>
-                    
                     <h3 style="margin-top: 16px;" id="vehicleStatusLabel">Vehicle Status</h3>
                     <div id="vehicleStatus" class="muted">No vehicles registered.</div>
-                    
                     <hr/>
                     <h3 id="behaviourLabel">System Behaviour</h3>
                     <p class="muted" id="behaviourText">This demo simulates device readings and traffic eligibility.</p>
@@ -589,10 +576,7 @@ footer {
             <aside class="card">
                 <h3 id="quickRegisterTitle">Device Registration</h3>
                 <p class="muted" id="quickRegisterDesc">Use the Device Register tab to manage vehicles.</p>
-                <button class="btn btn-primary" onclick="show('register')" style="margin-top: 12px; width: 100%">
-                    Go to Registration
-                </button>
-
+                <button class="btn btn-primary" onclick="show('register')" style="margin-top: 12px; width: 100%">Go to Registration</button>
                 <div style="margin-top: 20px;">
                     <h3 id="globalAqiTitle">Country AQI Averages</h3>
                     <div id="countryAqiList" class="muted">
@@ -608,41 +592,24 @@ footer {
             <h2 id="regTitle">Device Register</h2>
             <label id="reg_plate_label">License Plate</label>
             <input id="reg_plate" class="input-field" placeholder="e.g., 34ABC123"/>
-            
             <label id="reg_device_label">Device ID</label>
             <input id="reg_device" class="input-field" placeholder="e.g., DEV001"/>
-            
             <label id="reg_city_label">City</label>
             <input id="reg_city" class="input-field" placeholder="e.g., Istanbul"/>
-            
             <label id="reg_make_label">Brand</label>
             <input id="reg_make" class="input-field" placeholder="e.g., Toyota"/>
-            
             <label id="reg_model_label">Vehicle Model</label>
             <input id="reg_model" class="input-field" placeholder="e.g., Corolla"/>
-            
             <label id="reg_engine_label">Engine Number</label>
             <input id="reg_engine" class="input-field" placeholder="e.g., ENG123456"/>
-            
             <label id="reg_color_label">Vehicle Color</label>
             <input id="reg_color" class="input-field" placeholder="e.g., Red, Blue, Black" list="colorOptions"/>
             <datalist id="colorOptions">
-                <option value="Red">
-                <option value="Blue">
-                <option value="Black">
-                <option value="White">
-                <option value="Silver">
-                <option value="Gray">
-                <option value="Green">
-                <option value="Yellow">
-                <option value="Orange">
-                <option value="Purple">
+                <option value="Red"><option value="Blue"><option value="Black"><option value="White">
+                <option value="Silver"><option value="Gray"><option value="Green"><option value="Yellow">
+                <option value="Orange"><option value="Purple">
             </datalist>
-            
-            <button id="regBtn" class="btn btn-primary" style="width: 100%; margin-top: 8px">
-                Create Registration
-            </button>
-            
+            <button id="regBtn" class="btn btn-primary" style="width: 100%; margin-top: 8px">Create Registration</button>
             <hr/>
             <h3 id="registeredTitle">Registered Devices</h3>
             <div id="registeredList"></div>
@@ -703,16 +670,11 @@ footer {
                 <div class="aqi-bar"><div id="detailAqiBar" class="aqi-fill">—</div></div>
                 <p id="detailAqiText" style="margin-bottom: 8px;">AQI: —</p>
                 <p id="detailDominantPollutant">Dominant Pollutant: —</p>
-                
-                <!-- NASA Data Section -->
                 <div id="nasaDataSection" style="display: none; margin-top: 16px;">
                     <hr/>
                     <h4>🌍 NASA Satellite Data <span class="nasa-badge">LIVE</span></h4>
-                    <div id="nasaDataContent" class="muted">
-                        Loading NASA satellite data...
-                    </div>
+                    <div id="nasaDataContent" class="muted">Loading NASA satellite data...</div>
                 </div>
-                
                 <hr/>
                 <h4 id="pollutantTitle">Pollutant Details (µg/m³)</h4>
                 <ul id="pollutantsList" class="pollutant-list">
@@ -726,134 +688,31 @@ footer {
         </div>
     </section>
 
-    <!-- NEW RESOURCES PAGE -->
     <section id="page-resources" style="display:none">
         <div class="card">
             <h2 id="resourcesTitle">Resources & References</h2>
             <p class="muted" id="resourcesDesc">External data sources, APIs, and references used in this application.</p>
-            
             <div class="resources-grid">
                 <div class="resource-card">
                     <div class="resource-category">Mapping & Geocoding</div>
                     <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://nominatim.openstreetmap.org" class="resource-link" target="_blank">Nominatim OpenStreetMap</a>
-                            <div class="resource-description">Open-source geocoding service for address search and reverse geocoding</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.openstreetmap.org/#map=6/39.03/35.25" class="resource-link" target="_blank">OpenStreetMap</a>
-                            <div class="resource-description">Collaborative mapping project providing free geographic data</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://unpkg.com/leaflet" class="resource-link" target="_blank">Leaflet Library</a>
-                            <div class="resource-description">JavaScript library for interactive maps</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.geolocation.com/" class="resource-link" target="_blank">Geolocation API</a>
-                            <div class="resource-description">IP address geolocation service</div>
-                        </li>
+                        <li class="resource-item"><a href="https://nominatim.openstreetmap.org" class="resource-link" target="_blank">Nominatim OpenStreetMap</a><div class="resource-description">Open-source geocoding service</div></li>
+                        <li class="resource-item"><a href="https://www.openstreetmap.org" class="resource-link" target="_blank">OpenStreetMap</a><div class="resource-description">Collaborative mapping project</div></li>
+                        <li class="resource-item"><a href="https://unpkg.com/leaflet" class="resource-link" target="_blank">Leaflet Library</a><div class="resource-description">JavaScript library for interactive maps</div></li>
                     </ul>
                 </div>
-                
                 <div class="resource-card">
                     <div class="resource-category">Air Quality Data</div>
                     <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://aqicn.org/map/world" class="resource-link" target="_blank">World Air Quality Index</a>
-                            <div class="resource-description">Real-time air quality index visual map with global coverage</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://aqicn.org/faq/2015-02-15/satellite-air-quality-monitoring-introduction-to-the-nasa-worldview/tr/" class="resource-link" target="_blank">NASA WorldView</a>
-                            <div class="resource-description">Satellite air quality monitoring introduction</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.airnow.gov/?city=Albuquerque&state=NM&country=TR" class="resource-link" target="_blank">AirNow Ground Stations</a>
-                            <div class="resource-description">Ground station networks observation data</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://opendap.earthdata.nasa.gov/" class="resource-link" target="_blank">NASA Hyrax Data</a>
-                            <div class="resource-description">Direct access to subsetting of NASA data using Python</div>
-                        </li>
+                        <li class="resource-item"><a href="https://aqicn.org/map/world" class="resource-link" target="_blank">World Air Quality Index</a><div class="resource-description">Real-time air quality index visual map</div></li>
+                        <li class="resource-item"><a href="https://www.airnow.gov" class="resource-link" target="_blank">AirNow Ground Stations</a><div class="resource-description">Ground station networks observation data</div></li>
                     </ul>
                 </div>
-                
                 <div class="resource-card nasa-data-card">
                     <div class="resource-category">NASA APIs & Data</div>
                     <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://power.larc.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA POWER API</a>
-                            <div class="resource-description" style="color: #e2e8f0;">Prediction Of Worldwide Energy Resources - Atmospheric data</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://api.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA Open APIs</a>
-                            <div class="resource-description" style="color: #e2e8f0;">Various NASA APIs including satellite imagery and earth data</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://earthdata.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA EarthData</a>
-                            <div class="resource-description" style="color: #e2e8f0;">Comprehensive earth science data from NASA satellites</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://worldview.earthdata.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA Worldview</a>
-                            <div class="resource-description" style="color: #e2e8f0;">Interactive interface for browsing full-resolution satellite imagery</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="resource-card">
-                    <div class="resource-category">Research & Health</div>
-                    <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://www.tandfonline.com/doi/abs/10.1080/10643380701413377" class="resource-link" target="_blank">Vehicle Emissions Monitoring</a>
-                            <div class="resource-description">Review and critical discussion of real-world vehicle exhaust emissions</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.sciencedirect.com/science/article/abs/pii/S030438941400315X" class="resource-link" target="_blank">Non-Exhaust Emissions</a>
-                            <div class="resource-description">Urban air quality and the challenge of traffic non-exhaust emissions</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://publications.ersnet.org/content/erj/17/4/733.abstract" class="resource-link" target="_blank">Diesel Exhaust Health Effects</a>
-                            <div class="resource-description">Research on health effects of diesel exhaust emissions</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.who.int/health-topics/air-pollution#tab=tab_1" class="resource-link" target="_blank">WHO Air Pollution</a>
-                            <div class="resource-description">World Health Organization air pollution information and guidelines</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="resource-card">
-                    <div class="resource-category">Development & Tools</div>
-                    <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://visualstudio.microsoft.com/" class="resource-link" target="_blank">Visual Studio</a>
-                            <div class="resource-description">Integrated development environment</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://www.w3schools.com/html/html_computercode_elements.asp" class="resource-link" target="_blank">W3Schools HTML</a>
-                            <div class="resource-description">HTML computer code elements reference</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://chatgpt.com/" class="resource-link" target="_blank">ChatGPT</a>
-                            <div class="resource-description">AI assistant for development support</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://github.com/gravitasbestepe/gravitasbestepe" class="resource-link" target="_blank">GitHub Repository</a>
-                            <div class="resource-description">Project source code repository</div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="resource-card">
-                    <div class="resource-category">Hosting & Deployment</div>
-                    <ul class="resource-list">
-                        <li class="resource-item">
-                            <a href="https://www.godaddy.com/" class="resource-link" target="_blank">GoDaddy</a>
-                            <div class="resource-description">Domain name registration and web hosting</div>
-                        </li>
-                        <li class="resource-item">
-                            <a href="https://vercel.com/" class="resource-link" target="_blank">Vercel</a>
-                            <div class="resource-description">Cloud platform for static sites and serverless functions</div>
-                        </li>
+                        <li class="resource-item"><a href="https://power.larc.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA POWER API</a><div class="resource-description" style="color: #e2e8f0;">Prediction Of Worldwide Energy Resources</div></li>
+                        <li class="resource-item"><a href="https://api.nasa.gov/" class="resource-link" target="_blank" style="color: #fbbf24;">NASA Open APIs</a><div class="resource-description" style="color: #e2e8f0;">Various NASA APIs including satellite imagery</div></li>
                     </ul>
                 </div>
             </div>
@@ -869,7 +728,6 @@ footer {
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-// API Keys
 const WAQI_TOKEN = "9263e25a74b0d93c30387fa753ec876f19869d38";
 const NASA_API_KEY = "hNtTWwPv4jXS0iUSkVr0SyxvySm4y66wIHmcfvWy";
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
@@ -878,115 +736,91 @@ const translations = {
     en: {
         title: "Gravitas - Air Quality & Emission Monitor",
         nav: { home:"Home", register:"Device Register", vehicle:"My Vehicles", rules:"Rules & Advice", global:"Global Emission Map", aqi: "Detailed AQI Map", resources: "Resources" },
-        homeTitle: "Quick Vehicle Emission Simulator",
-        homeDesc: "Register your device and get simulated emission readings here.",
-        lastReadLabel: "Last Reading", 
-        behaviourLabel: "System Behaviour",
-        vehicleStatusLabel: "Vehicle Status",
+        homeTitle: "Quick Vehicle Emission Simulator", homeDesc: "Register your device and get simulated emission readings here.",
+        lastReadLabel: "Last Reading", behaviourLabel: "System Behaviour", vehicleStatusLabel: "Vehicle Status",
         behaviourText: "This demo simulates device readings and traffic eligibility.",
-        quickRegisterTitle: "Device Registration",
-        quickRegisterDesc: "Use the Device Register tab to manage vehicles.",
-        regTitle: "Device Register", 
-        registeredTitle: "Registered Devices", 
-        myVehiclesTitle: "My Vehicles", 
-        rulesTitle: "Rules & Advice", 
-        globalTitle: "Global Emission Map", 
-        globalDesc: "Showing country average AQI values and high pollution areas.",
-        resourcesTitle: "Resources & References",
-        resourcesDesc: "External data sources, APIs, and references used in this application.",
-        reg_plate_label: "License Plate", 
-        reg_device_label: "Device ID", 
-        reg_city_label: "City", 
-        reg_make_label: "Brand", 
-        reg_model_label: "Vehicle Model", 
-        reg_engine_label: "Engine Number", 
-        reg_color_label: "Vehicle Color",
-        regBtn: "Create Registration", 
-        registerSuccess: "Registration created successfully!",
-        quickReadBtn: "Read All Devices",
-        quickSimulateBtn: "Simulate All Trips",
-        aqiMapTitle: "Interactive Air Quality Map", 
-        aqiDetailTitle: "Air Quality Details",
-        globalAqiTitle: "Country AQI Averages",
-        aqiLocation: "Location", 
-        aqiText: "AQI", 
-        aqiPollutant: "Dominant Pollutant", 
-        locateBtn: "Locate Me", 
-        aqiClear: "Clear", 
-        searchPlaceholder: "Enter detailed address (street, city, country)",
-        pollutantTitle: "Pollutant Details (µg/m³)",
-        pollutantPlaceholder: "Click on the map or search for a location.",
-        aqiNoData: "AQI data not available for this location.",
-        aqiWarning_good: "✅ Air quality is good for everyone.", 
-        aqiWarning_moderate: "⚠️ Moderate. Sensitive people should take care.", 
-        aqiWarning_usg: "⚠️ Unhealthy for sensitive groups. Limit outdoor activity.", 
-        aqiWarning_unhealthy: "❌ Unhealthy. Avoid outdoor exercise.", 
-        aqiWarning_v_unhealthy: "☠️ Very unhealthy. Everyone should stay indoors.", 
-        aqiWarning_hazardous: "🚫 Hazardous. Stay indoors.",
-        aqiMask_usg: "Consider wearing a mask if you have respiratory conditions.", 
-        aqiMask_unhealthy: "Wear a mask if going outside.", 
-        aqiMask_v_unhealthy: "Use a high-quality mask if you must go out.", 
-        aqiMask_hazardous: "Wear a mask and use air purifier.",
-        noDevices: "No devices registered.",
-        noVehicles: "No vehicles registered.",
-        trafficAllowed: "TRAFFIC ALLOWED",
-        trafficLimited: "LIMITED (RESTRICTED TIMES)",
-        trafficBanned: "TRAFFIC NOT ALLOWED",
-        rule1: "PM2.5 > 150 => Traffic ban recommended.",
-        rule2: "PM2.5 100-150 => Limited (restricted times).",
-        rule3: "PM2.5 <= 100 => Normal traffic permitted.",
-        advice1: "Check filters and catalytic converter.",
-        advice2: "Routine maintenance.",
-        advice3: "Reduce idling.",
-        loading: "Loading data...",
-        noHighPollution: "No high pollution areas found.",
-        simulationDuration: "Simulation duration: 24 seconds",
-        manualRead: "Manual Read",
-        simulateTrip: "Simulate Trip",
-        readingAll: "Reading all devices...",
-        simulatingAll: "Simulating all trips...",
-        deleteVehicle: "Delete",
-        vehicleAdviceTitle: "Recommendations:",
-        vehicleAdviceGood: "✅ Your vehicle emissions are within acceptable limits.",
-        vehicleAdviceModerate: "⚠️ Consider regular maintenance and filter checks.",
-        vehicleAdvicePoor: "❌ High emissions detected. Recommended actions:",
-        vehicleAdviceList1: "• Check and replace air filters",
-        vehicleAdviceList2: "• Inspect catalytic converter",
-        vehicleAdviceList3: "• Schedule engine maintenance",
-        vehicleAdviceList4: "• Avoid unnecessary idling",
-        vehicleAdviceList5: "• Consider professional emission test",
-        deleteConfirm: "Are you sure you want to delete this vehicle?",
-        healthWarningTitle: "⚠️ Health Advisory for Respiratory Conditions",
-        healthWarningGood: "✅ Safe for people with asthma, COPD, and bronchitis",
-        healthWarningModerate: "⚠️ People with respiratory conditions should:",
-        healthWarningModerate1: "• Limit prolonged outdoor exertion",
-        healthWarningModerate2: "• Keep medications handy",
-        healthWarningModerate3: "• Monitor symptoms closely",
-        healthWarningHigh: "🚫 HIGH RISK for people with:",
-        healthWarningHigh1: "• Asthma",
-        healthWarningHigh2: "• COPD (Chronic Bronchitis/Emphysem)",
-        healthWarningHigh3: "• Bronchitis",
-        healthWarningHigh4: "• Other respiratory diseases",
-        healthWarningActions: "Recommended actions:",
-        healthWarningAction1: "• Stay indoors with windows closed",
-        healthWarningAction2: "• Use air purifiers",
-        healthWarningAction3: "• Avoid physical exertion",
-        healthWarningAction4: "• Keep rescue medications available",
-        healthWarningAction5: "• Consult doctor if symptoms worsen",
-        nasaDataTitle: "🌍 NASA Satellite Data",
-        nasaLoading: "Loading NASA satellite data...",
-        nasaAerosol: "Aerosol Index",
-        nasaDust: "Dust Detection",
-        nasaSo2: "Sulfur Dioxide",
-        nasaNo2: "Nitrogen Dioxide",
-        nasaCo: "Carbon Monoxide",
-        nasaUv: "UV Index",
-        nasaTemp: "Surface Temperature",
-        nasaHumidity: "Relative Humidity",
-        nasaPressure: "Atmospheric Pressure",
-        nasaWind: "Wind Speed"
+        quickRegisterTitle: "Device Registration", quickRegisterDesc: "Use the Device Register tab to manage vehicles.",
+        regTitle: "Device Register", registeredTitle: "Registered Devices", myVehiclesTitle: "My Vehicles", 
+        rulesTitle: "Rules & Advice", globalTitle: "Global Emission Map", globalDesc: "Showing country average AQI values and high pollution areas.",
+        resourcesTitle: "Resources & References", resourcesDesc: "External data sources, APIs, and references used in this application.",
+        reg_plate_label: "License Plate", reg_device_label: "Device ID", reg_city_label: "City", reg_make_label: "Brand", 
+        reg_model_label: "Vehicle Model", reg_engine_label: "Engine Number", reg_color_label: "Vehicle Color",
+        regBtn: "Create Registration", registerSuccess: "Registration created successfully!",
+        quickReadBtn: "Read All Devices", quickSimulateBtn: "Simulate All Trips",
+        aqiMapTitle: "Interactive Air Quality Map", aqiDetailTitle: "Air Quality Details", globalAqiTitle: "Country AQI Averages",
+        aqiLocation: "Location", aqiText: "AQI", aqiPollutant: "Dominant Pollutant", locateBtn: "Locate Me", aqiClear: "Clear", 
+        searchPlaceholder: "Enter detailed address (street, city, country)", pollutantTitle: "Pollutant Details (µg/m³)",
+        pollutantPlaceholder: "Click on the map or search for a location.", aqiNoData: "AQI data not available for this location.",
+        aqiWarning_good: "✅ Air quality is good for everyone.", aqiWarning_moderate: "⚠️ Moderate. Sensitive people should take care.", 
+        aqiWarning_usg: "⚠️ Unhealthy for sensitive groups. Limit outdoor activity.", aqiWarning_unhealthy: "❌ Unhealthy. Avoid outdoor exercise.", 
+        aqiWarning_v_unhealthy: "☠️ Very unhealthy. Everyone should stay indoors.", aqiWarning_hazardous: "🚫 Hazardous. Stay indoors.",
+        aqiMask_usg: "Consider wearing a mask if you have respiratory conditions.", aqiMask_unhealthy: "Wear a mask if going outside.", 
+        aqiMask_v_unhealthy: "Use a high-quality mask if you must go out.", aqiMask_hazardous: "Wear a mask and use air purifier.",
+        noDevices: "No devices registered.", noVehicles: "No vehicles registered.",
+        trafficAllowed: "TRAFFIC ALLOWED", trafficLimited: "LIMITED (RESTRICTED TIMES)", trafficBanned: "TRAFFIC NOT ALLOWED",
+        rule1: "PM2.5 > 150 => Traffic ban recommended.", rule2: "PM2.5 100-150 => Limited (restricted times).", rule3: "PM2.5 <= 100 => Normal traffic permitted.",
+        advice1: "Check filters and catalytic converter.", advice2: "Routine maintenance.", advice3: "Reduce idling.",
+        loading: "Loading data...", noHighPollution: "No high pollution areas found.", simulationDuration: "Simulation duration: 24 seconds",
+        manualRead: "Manual Read", simulateTrip: "Simulate Trip", readingAll: "Reading all devices...", simulatingAll: "Simulating all trips...",
+        deleteVehicle: "Delete", vehicleAdviceTitle: "Recommendations:", vehicleAdviceGood: "✅ Your vehicle emissions are within acceptable limits.",
+        vehicleAdviceModerate: "⚠️ Consider regular maintenance and filter checks.", vehicleAdvicePoor: "❌ High emissions detected. Recommended actions:",
+        vehicleAdviceList1: "• Check and replace air filters", vehicleAdviceList2: "• Inspect catalytic converter", vehicleAdviceList3: "• Schedule engine maintenance",
+        vehicleAdviceList4: "• Avoid unnecessary idling", vehicleAdviceList5: "• Consider professional emission test",
+        deleteConfirm: "Are you sure you want to delete this vehicle?", healthWarningTitle: "⚠️ Health Advisory for Respiratory Conditions",
+        healthWarningGood: "✅ Safe for people with asthma, COPD, and bronchitis", healthWarningModerate: "⚠️ People with respiratory conditions should:",
+        healthWarningModerate1: "• Limit prolonged outdoor exertion", healthWarningModerate2: "• Keep medications handy", healthWarningModerate3: "• Monitor symptoms closely",
+        healthWarningHigh: "🚫 HIGH RISK for people with:", healthWarningHigh1: "• Asthma", healthWarningHigh2: "• COPD (Chronic Bronchitis/Emphysem)",
+        healthWarningHigh3: "• Bronchitis", healthWarningHigh4: "• Other respiratory diseases", healthWarningActions: "Recommended actions:",
+        healthWarningAction1: "• Stay indoors with windows closed", healthWarningAction2: "• Use air purifiers", healthWarningAction3: "• Avoid physical exertion",
+        healthWarningAction4: "• Keep rescue medications available", healthWarningAction5: "• Consult doctor if symptoms worsen",
+        nasaDataTitle: "🌍 NASA Satellite Data", nasaLoading: "Loading NASA satellite data...", nasaAerosol: "Aerosol Index",
+        nasaDust: "Dust Detection", nasaSo2: "Sulfur Dioxide", nasaNo2: "Nitrogen Dioxide", nasaCo: "Carbon Monoxide",
+        nasaUv: "UV Index", nasaTemp: "Surface Temperature", nasaHumidity: "Relative Humidity", nasaPressure: "Atmospheric Pressure", nasaWind: "Wind Speed"
     },
-    // ... diğer diller aynı şekilde devam ediyor (kısaltma için sadece İngilizce gösterdim)
+    tr: {
+        title: "Gravitas - Hava Kalitesi & Emisyon İzleyici",
+        nav: { home:"Anasayfa", register:"Cihaz Kayıt", vehicle:"Araçlarım", rules:"Kurallar & Öneriler", global:"Global Emisyon Haritası", aqi: "Detaylı HKİ Haritası", resources: "Kaynaklar" },
+        homeTitle: "Hızlı Araç Emisyon Simülatörü", homeDesc: "Cihazınızı kaydedin ve simüle emisyon okumaları alın.",
+        lastReadLabel: "Son Okuma", behaviourLabel: "Sistem Davranışı", vehicleStatusLabel: "Araç Durumu",
+        behaviourText: "Bu demo, cihaz okumalarını ve trafik uygunluğunu simüle eder.",
+        quickRegisterTitle: "Cihaz Kayıt", quickRegisterDesc: "Araçları yönetmek için Cihaz Kayıt sekmesini kullanın.",
+        regTitle: "Cihaz Kayıt", registeredTitle: "Kayıtlı Cihazlar", myVehiclesTitle: "Araçlarım", 
+        rulesTitle: "Kurallar & Öneriler", globalTitle: "Global Emisyon Haritası", globalDesc: "Ülke ortalama HKİ değerleri ve yüksek kirlilik bölgeleri gösteriliyor.",
+        resourcesTitle: "Kaynaklar & Referanslar", resourcesDesc: "Bu uygulamada kullanılan harici veri kaynakları, API'ler ve referanslar.",
+        reg_plate_label: "Plaka", reg_device_label: "Cihaz ID", reg_city_label: "Şehir", reg_make_label: "Marka", 
+        reg_model_label: "Araç Modeli", reg_engine_label: "Motor Numarası", reg_color_label: "Araç Rengi",
+        regBtn: "Kayıt Oluştur", registerSuccess: "Kayıt başarıyla oluşturuldu!",
+        quickReadBtn: "Tüm Cihazları Oku", quickSimulateBtn: "Tüm Yolculukları Simüle Et",
+        aqiMapTitle: "Etkileşimli Hava Kalitesi Haritası", aqiDetailTitle: "Hava Kalitesi Detayları", globalAqiTitle: "Ülke HKİ Ortalamaları",
+        aqiLocation: "Konum", aqiText: "HKİ", aqiPollutant: "Baskın Kirletici", locateBtn: "Konumumu Bul", aqiClear: "Temizle", 
+        searchPlaceholder: "Detaylı adres girin (sokak, şehir, ülke)", pollutantTitle: "Kirletici Detayları (µg/m³)",
+        pollutantPlaceholder: "Haritaya tıklayın veya bir konum arayın.", aqiNoData: "Bu konum için HKİ verisi mevcut değil.",
+        aqiWarning_good: "✅ Hava kalitesi herkes için iyi.", aqiWarning_moderate: "⚠️ Orta. Hassas kişilerin dikkatli olması gerekir.", 
+        aqiWarning_usg: "⚠️ Hassas gruplar için sağlıksız. Dışarıdaki aktiviteleri sınırlayın.", aqiWarning_unhealthy: "❌ Sağlıksız. Dışarıda egzersiz yapmaktan kaçının.", 
+        aqiWarning_v_unhealthy: "☠️ Çok sağlıksız. Herkes içeride kalmalı.", aqiWarning_hazardous: "🚫 Tehlikeli. İçeride kalın.",
+        aqiMask_usg: "Solunum rahatsızlığınız varsa maske takmayı düşünün.", aqiMask_unhealthy: "Dışarı çıkacaksanız maske takın.", 
+        aqiMask_v_unhealthy: "Dışarı çıkmanız gerekiyorsa yüksek kaliteli maske kullanın.", aqiMask_hazardous: "Maske takın ve hava temizleyici kullanın.",
+        noDevices: "Kayıtlı cihaz bulunmamaktadır.", noVehicles: "Kayıtlı araç bulunmamaktadır.",
+        trafficAllowed: "TRAFİĞE UYGUN", trafficLimited: "KISITLI (KISITLI SAATLER)", trafficBanned: "TRAFİĞE UYGUN DEĞİL",
+        rule1: "PM2.5 > 150 => Trafik yasağı önerilir.", rule2: "PM2.5 100-150 => Kısıtlı (sınırlı saatler).", rule3: "PM2.5 <= 100 => Normal trafiğe izin verilir.",
+        advice1: "Filtreleri ve katalitik konvertörü kontrol edin.", advice2: "Düzenli bakım.", advice3: "Rölantide çalışmayı azaltın.",
+        loading: "Veriler yükleniyor...", noHighPollution: "Yüksek kirlilik bölgesi bulunamadı.", simulationDuration: "Simülasyon süresi: 24 saniye",
+        manualRead: "Manuel Okuma", simulateTrip: "Yolculuk Simüle Et", readingAll: "Tüm cihazlar okunuyor...", simulatingAll: "Tüm yolculuklar simüle ediliyor...",
+        deleteVehicle: "Sil", vehicleAdviceTitle: "Öneriler:", vehicleAdviceGood: "✅ Aracınızın emisyonları kabul edilebilir sınırlar içinde.",
+        vehicleAdviceModerate: "⚠️ Düzenli bakım ve filtre kontrolleri yapmayı düşünün.", vehicleAdvicePoor: "❌ Yüksek emisyon tespit edildi. Önerilen eylemler:",
+        vehicleAdviceList1: "• Hava filtrelerini kontrol edin ve değiştirin", vehicleAdviceList2: "• Katalitik konvertörü kontrol edin", vehicleAdviceList3: "• Motor bakımı planlayın",
+        vehicleAdviceList4: "• Gereksiz rölantiden kaçının", vehicleAdviceList5: "• Profesyonel emisyon testi düşünün",
+        deleteConfirm: "Bu aracı silmek istediğinizden emin misiniz?", healthWarningTitle: "⚠️ Solunum Hastalıkları İçin Sağlık Uyarısı",
+        healthWarningGood: "✅ Astım, KOAH ve bronşit hastaları için güvenli", healthWarningModerate: "⚠️ Solunum rahatsızlığı olan kişiler:",
+        healthWarningModerate1: "• Uzun süreli dış mekan aktivitelerini sınırlayın", healthWarningModerate2: "• İlaçlarınızı yanınızda bulundurun", healthWarningModerate3: "• Belirtilerinizi yakından takip edin",
+        healthWarningHigh: "🚫 YÜKSEK RİSK altındaki kişiler:", healthWarningHigh1: "• Astım", healthWarningHigh2: "• KOAH (Kronik Bronşit/Amfizem)",
+        healthWarningHigh3: "• Bronşit", healthWarningHigh4: "• Diğer solunum hastalıkları", healthWarningActions: "Önerilen eylemler:",
+        healthWarningAction1: "• Pencereler kapalı şekilde içeride kalın", healthWarningAction2: "• Hava temizleyici kullanın", healthWarningAction3: "• Fiziksel efordan kaçının",
+        healthWarningAction4: "• Acil ilaçlarınızı hazır bulundurun", healthWarningAction5: "• Belirtiler kötüleşirse doktora başvurun",
+        nasaDataTitle: "🌍 NASA Uydu Verileri", nasaLoading: "NASA uydu verileri yükleniyor...", nasaAerosol: "Aerosol İndeksi",
+        nasaDust: "Toz Tespiti", nasaSo2: "Kükürt Dioksit", nasaNo2: "Azot Dioksit", nasaCo: "Karbon Monoksit",
+        nasaUv: "UV İndeksi", nasaTemp: "Yüzey Sıcaklığı", nasaHumidity: "Bağıl Nem", nasaPressure: "Atmosfer Basıncı", nasaWind: "Rüzgar Hızı"
+    }
 };
 
 let currentLang = localStorage.getItem('site_lang') || 'en';
@@ -1004,59 +838,849 @@ const pages = {
     resources: document.getElementById('page-resources')
 };
 
-// NASA API Functions
-async function fetchNasaData(lat, lon) {
-    try {
-        const t = translations[currentLang] || translations.en;
-        
-        // NASA POWER API - Atmospheric data
-        const powerUrl = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M,RH2M,PS,WS10M,ALLSKY_SFC_SW_DWN&start=20240101&end=20240101&latitude=${lat}&longitude=${lon}&community=RE&format=JSON`;
-        
-        const response = await fetch(powerUrl);
-        const data = await response.json();
-        
-        if (data && data.properties) {
-            const props = data.properties;
-            const parameter = props.parameter;
-            
-            return {
-                temperature: parameter.T2M ? parameter.T2M[Object.keys(parameter.T2M)[0]] : null,
-                humidity: parameter.RH2M ? parameter.RH2M[Object.keys(parameter.RH2M)[0]] : null,
-                pressure: parameter.PS ? parameter.PS[Object.keys(parameter.PS)[0]] : null,
-                windSpeed: parameter.WS10M ? parameter.WS10M[Object.keys(parameter.WS10M)[0]] : null,
-                solarRadiation: parameter.ALLSKY_SFC_SW_DWN ? parameter.ALLSKY_SFC_SW_DWN[Object.keys(parameter.ALLSKY_SFC_SW_DWN)[0]] : null,
-                timestamp: new Date().toLocaleString()
-            };
+function initApp() {
+    setupEventListeners();
+    applyTranslations();
+    renderRegistered();
+    renderMyVehicles();
+    updateHomeScreen();
+    startBackgroundSimulation();
+    loadCountryAQIData();
+    show('home');
+}
+
+function setupEventListeners() {
+    document.getElementById('nav-home').addEventListener('click', () => show('home'));
+    document.getElementById('nav-register').addEventListener('click', () => show('register'));
+    document.getElementById('nav-vehicle').addEventListener('click', () => show('vehicle'));
+    document.getElementById('nav-rules').addEventListener('click', () => show('rules'));
+    document.getElementById('nav-global').addEventListener('click', () => show('global'));
+    document.getElementById('nav-aqi').addEventListener('click', () => show('aqi'));
+    document.getElementById('nav-resources').addEventListener('click', () => show('resources'));
+
+    document.querySelectorAll('.lang-btn').forEach(b => {
+        b.addEventListener('click', () => setLanguage(b.dataset.lang));
+    });
+
+    document.getElementById('regBtn').addEventListener('click', registerDevice);
+
+    document.getElementById('aqiAddressInput').addEventListener('input', debounce(handleAddressSearch, 300));
+    document.getElementById('aqiLocateBtn').addEventListener('click', handleLocateMe);
+    document.getElementById('aqiClearBtn').addEventListener('click', handleClearSearch);
+}
+
+function show(page) {
+    Object.values(pages).forEach(p => p.style.display = 'none');
+    pages[page].style.display = 'block';
+    
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('nav-' + page).classList.add('active');
+    
+    setTimeout(() => {
+        if (page === 'global' && !globalMap) {
+            initGlobalMap();
+        } else if (page === 'global' && globalMap) {
+            globalMap.invalidateSize();
         }
         
-        return null;
-    } catch (error) {
-        console.error('NASA API Error:', error);
-        // Fallback to simulated data
-        return getSimulatedNasaData(lat, lon);
+        if (page === 'aqi' && !aqiMap) {
+            initAqiMap();
+        } else if (page === 'aqi' && aqiMap) {
+            aqiMap.invalidateSize();
+        }
+        
+        if (page === 'home') {
+            updateHomeScreen();
+        }
+    }, 100);
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('site_lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    applyTranslations();
+    updateHomeScreen();
+    loadCountryAQIData();
+}
+
+function applyTranslations() {
+    const t = translations[currentLang] || translations.en;
+    
+    document.title = t.title;
+    document.getElementById('nav-home').textContent = t.nav.home;
+    document.getElementById('nav-register').textContent = t.nav.register;
+    document.getElementById('nav-vehicle').textContent = t.nav.vehicle;
+    document.getElementById('nav-rules').textContent = t.nav.rules;
+    document.getElementById('nav-global').textContent = t.nav.global;
+    document.getElementById('nav-aqi').textContent = t.nav.aqi;
+    document.getElementById('nav-resources').textContent = t.nav.resources;
+    
+    document.getElementById('home-title').textContent = t.homeTitle;
+    document.getElementById('home-desc').textContent = t.homeDesc;
+    document.getElementById('lastReadLabel').textContent = t.lastReadLabel;
+    document.getElementById('vehicleStatusLabel').textContent = t.vehicleStatusLabel;
+    document.getElementById('behaviourLabel').textContent = t.behaviourLabel;
+    document.getElementById('behaviourText').textContent = t.behaviourText;
+    document.getElementById('quickRegisterTitle').textContent = t.quickRegisterTitle;
+    document.getElementById('quickRegisterDesc').textContent = t.quickRegisterDesc;
+    
+    document.getElementById('regTitle').textContent = t.regTitle;
+    document.getElementById('reg_plate_label').textContent = t.reg_plate_label;
+    document.getElementById('reg_device_label').textContent = t.reg_device_label;
+    document.getElementById('reg_city_label').textContent = t.reg_city_label;
+    document.getElementById('reg_make_label').textContent = t.reg_make_label;
+    document.getElementById('reg_model_label').textContent = t.reg_model_label;
+    document.getElementById('reg_engine_label').textContent = t.reg_engine_label;
+    document.getElementById('reg_color_label').textContent = t.reg_color_label;
+    document.getElementById('regBtn').textContent = t.regBtn;
+    document.getElementById('registeredTitle').textContent = t.registeredTitle;
+    document.getElementById('myVehiclesTitle').textContent = t.myVehiclesTitle;
+    document.getElementById('rulesTitle').textContent = t.rulesTitle;
+    document.getElementById('globalTitle').textContent = t.globalTitle;
+    document.getElementById('globalDesc').textContent = t.globalDesc;
+    document.getElementById('resourcesTitle').textContent = t.resourcesTitle;
+    document.getElementById('resourcesDesc').textContent = t.resourcesDesc;
+
+    document.getElementById('aqiMapTitle').textContent = t.aqiMapTitle;
+    document.getElementById('aqiDetailTitle').textContent = t.aqiDetailTitle;
+    document.getElementById('globalAqiTitle').textContent = t.globalAqiTitle;
+    document.getElementById('aqiLocateBtn').textContent = t.locateBtn;
+    document.getElementById('aqiClearBtn').textContent = t.aqiClear;
+    document.getElementById('pollutantTitle').textContent = t.pollutantTitle;
+    document.getElementById('pollutantsPlaceholder').textContent = t.pollutantPlaceholder;
+    document.getElementById('aqiAddressInput').placeholder = t.searchPlaceholder;
+    document.getElementById('quickReadBtn').textContent = t.quickReadBtn;
+    document.getElementById('quickSimulateBtn').textContent = t.quickSimulateBtn;
+
+    document.getElementById('rule1').textContent = t.rule1;
+    document.getElementById('rule2').textContent = t.rule2;
+    document.getElementById('rule3').textContent = t.rule3;
+    document.getElementById('adviceTitle').textContent = t.rulesTitle.replace('Rules & ', '');
+    document.getElementById('advice1').textContent = t.advice1;
+    document.getElementById('advice2').textContent = t.advice2;
+    document.getElementById('advice3').textContent = t.advice3;
+
+    renderRegistered();
+    renderMyVehicles();
+}
+
+function getHealthWarnings(aqi) {
+    const t = translations[currentLang] || translations.en;
+    
+    if (aqi === null) return '';
+    
+    if (aqi <= 50) {
+        return `
+            <div class="health-warning low">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningGood}</div>
+            </div>
+        `;
+    } else if (aqi <= 100) {
+        return `
+            <div class="health-warning medium">
+                <h5>${t.healthWarningTitle}</h5>
+                <div>${t.healthWarningModerate}</div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningModerate1}</li>
+                    <li>${t.healthWarningModerate2}</li>
+                    <li>${t.healthWarningModerate3}</li>
+                </ul>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="health-warning high">
+                <h5>${t.healthWarningTitle}</h5>
+                <div><strong>${t.healthWarningHigh}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningHigh1}</li>
+                    <li>${t.healthWarningHigh2}</li>
+                    <li>${t.healthWarningHigh3}</li>
+                    <li>${t.healthWarningHigh4}</li>
+                </ul>
+                <div style="margin-top: 8px;"><strong>${t.healthWarningActions}</strong></div>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                    <li>${t.healthWarningAction1}</li>
+                    <li>${t.healthWarningAction2}</li>
+                    <li>${t.healthWarningAction3}</li>
+                    <li>${t.healthWarningAction4}</li>
+                    <li>${t.healthWarningAction5}</li>
+                </ul>
+            </div>
+        `;
     }
 }
 
-function getSimulatedNasaData(lat, lon) {
-    // Simulated NASA data for demonstration
-    const baseTemp = 15 + (Math.random() * 30); // 15-45°C
-    const baseHumidity = 30 + (Math.random() * 60); // 30-90%
-    const basePressure = 980 + (Math.random() * 40); // 980-1020 hPa
+function deleteVehicle(index) {
+    const t = translations[currentLang] || translations.en;
+    if (confirm(t.deleteConfirm)) {
+        const reg = loadRegistry();
+        reg.splice(index, 1);
+        saveRegistry(reg);
+        renderMyVehicles();
+        renderRegistered();
+        updateHomeScreen();
+    }
+}
+
+function getVehicleAdvice(pm25) {
+    const t = translations[currentLang] || translations.en;
     
-    return {
-        temperature: Math.round(baseTemp * 10) / 10,
-        humidity: Math.round(baseHumidity),
-        pressure: Math.round(basePressure),
-        windSpeed: Math.round((2 + Math.random() * 8) * 10) / 10,
-        solarRadiation: Math.round((200 + Math.random() * 600) * 10) / 10,
-        aerosolIndex: Math.round((0.1 + Math.random() * 2) * 100) / 100,
-        dustDetection: Math.random() > 0.7 ? 'HIGH' : 'LOW',
-        so2: Math.round((1 + Math.random() * 9) * 10) / 10,
-        no2: Math.round((5 + Math.random() * 45) * 10) / 10,
-        co: Math.round((100 + Math.random() * 400) * 10) / 10,
-        uvIndex: Math.round((1 + Math.random() * 10) * 10) / 10,
-        timestamp: new Date().toLocaleString()
+    if (pm25 <= 100) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceGood}</div>
+        </div>`;
+    } else if (pm25 <= 150) {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdviceModerate}</div>
+        </div>`;
+    } else {
+        return `<div class="vehicle-advice">
+            <h5>${t.vehicleAdviceTitle}</h5>
+            <div>${t.vehicleAdvicePoor}</div>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px;">
+                <li>${t.vehicleAdviceList1}</li>
+                <li>${t.vehicleAdviceList2}</li>
+                <li>${t.vehicleAdviceList3}</li>
+                <li>${t.vehicleAdviceList4}</li>
+                <li>${t.vehicleAdviceList5}</li>
+            </ul>
+        </div>`;
+    }
+}
+
+function quickReadAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickReadBtn').textContent = t.readingAll;
+    document.getElementById('quickReadBtn').disabled = true;
+    
+    setTimeout(() => {
+        for (let i = 0; i < reg.length; i++) {
+            simulateDeviceRead(i);
+        }
+        updateHomeScreen();
+        document.getElementById('quickReadBtn').textContent = t.quickReadBtn;
+        document.getElementById('quickReadBtn').disabled = false;
+    }, 1000);
+}
+
+function quickSimulateAll() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        alert(t.noVehicles);
+        return;
+    }
+    
+    document.getElementById('quickSimulateBtn').textContent = t.simulatingAll;
+    document.getElementById('quickSimulateBtn').disabled = true;
+    
+    let completed = 0;
+    const total = reg.length;
+    
+    reg.forEach((vehicle, idx) => {
+        simulateTrip(idx);
+        
+        setTimeout(() => {
+            completed++;
+            if (completed === total) {
+                document.getElementById('quickSimulateBtn').textContent = t.quickSimulateBtn;
+                document.getElementById('quickSimulateBtn').disabled = false;
+                updateHomeScreen();
+            }
+        }, 24000);
+    });
+}
+
+function updateHomeScreen() {
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (reg.length === 0) {
+        document.getElementById('vehicleStatus').innerHTML = `<div class="muted">${t.noVehicles}</div>`;
+        return;
+    }
+    
+    let statusHTML = '';
+    let allowed = 0, limited = 0, banned = 0;
+    
+    reg.forEach(vehicle => {
+        if (vehicle.lastRead) {
+            const statusClass = getStatusClass(vehicle.lastRead.status);
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="${statusClass}">${vehicle.lastRead.status}</span>
+                    <div class="muted" style="font-size: 12px;">PM2.5: ${vehicle.lastRead.pm25}</div>
+                </div>
+            `;
+            
+            if (vehicle.lastRead.status.includes('ALLOWED') && !vehicle.lastRead.status.includes('NOT')) allowed++;
+            else if (vehicle.lastRead.status.includes('LIMITED')) limited++;
+            else if (vehicle.lastRead.status.includes('NOT ALLOWED') || vehicle.lastRead.status.includes('BANNED')) banned++;
+        } else {
+            statusHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${vehicle.plate}</strong>: 
+                    <span class="muted">No reading</span>
+                </div>
+            `;
+        }
+    });
+    
+    const summary = `
+        <div style="background: #f5f5f5; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
+            <strong>Summary:</strong> 
+            <span style="color: green;">${allowed} Allowed</span> | 
+            <span style="color: orange;">${limited} Limited</span> | 
+            <span style="color: red;">${banned} Banned</span>
+        </div>
+    `;
+    
+    document.getElementById('vehicleStatus').innerHTML = summary + statusHTML;
+}
+
+function registerDevice() {
+    const plate = document.getElementById('reg_plate').value.trim();
+    const device = document.getElementById('reg_device').value.trim();
+    const city = document.getElementById('reg_city').value.trim();
+    const make = document.getElementById('reg_make').value.trim();
+    const model = document.getElementById('reg_model').value.trim();
+    const engine = document.getElementById('reg_engine').value.trim();
+    const color = document.getElementById('reg_color').value.trim();
+    
+    const t = translations[currentLang] || translations.en;
+    
+    if (!plate || !device) {
+        alert('License plate and device ID are required');
+        return;
+    }
+    
+    const reg = loadRegistry();
+    if (reg.some(r => r.device === device)) {
+        alert("Device ID already registered.");
+        return;
+    }
+
+    reg.push({ 
+        plate, 
+        device, 
+        city, 
+        make,
+        model,
+        engine,
+        color,
+        created: Date.now(), 
+        lastRead: null 
+    });
+    
+    saveRegistry(reg);
+    renderRegistered();
+    renderMyVehicles();
+    updateHomeScreen();
+    
+    document.getElementById('reg_plate').value = '';
+    document.getElementById('reg_device').value = '';
+    document.getElementById('reg_city').value = '';
+    document.getElementById('reg_make').value = '';
+    document.getElementById('reg_model').value = '';
+    document.getElementById('reg_engine').value = '';
+    document.getElementById('reg_color').value = '';
+    
+    alert(t.registerSuccess);
+    
+    const idx = reg.length - 1;
+    gradualChange(idx, { 
+        start: 20, 
+        target: Math.round(Math.random() * 140 + 10), 
+        steps: 6, 
+        interval: 2500 
+    });
+}
+
+function loadRegistry() {
+    try { 
+        return JSON.parse(localStorage.getItem('emission_registry') || '[]'); 
+    } catch (e) { 
+        return []; 
+    }
+}
+
+function saveRegistry(reg) {
+    localStorage.setItem('emission_registry', JSON.stringify(reg));
+}
+
+function renderRegistered() {
+    const list = document.getElementById('registeredList');
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (!list) return;
+    
+    if (reg.length === 0) { 
+        list.innerHTML = `<div class="muted">${t.noDevices}</div>`; 
+        return; 
+    }
+    
+    list.innerHTML = '';
+    reg.forEach((r, idx) => {
+        const div = document.createElement('div');
+        div.style.padding = '8px';
+        div.style.borderBottom = '1px solid #eee';
+        const colorPreview = r.color ? `<span class="color-preview" style="background-color: ${getColorValue(r.color)}"></span>` : '';
+        div.innerHTML = `
+            <strong>${r.plate}</strong> — ${r.device} 
+            ${colorPreview}
+            <div class="muted">${[r.make, r.model, r.city].filter(Boolean).join(' - ')}</div>
+            <button class="btn btn-danger" onclick="deleteVehicle(${idx})" style="margin-top: 5px; padding: 4px 8px; font-size: 12px;">${t.deleteVehicle}</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function renderMyVehicles() {
+    const cont = document.getElementById('myVehicles');
+    const reg = loadRegistry();
+    const t = translations[currentLang] || translations.en;
+    
+    if (!cont) return;
+    
+    if (reg.length === 0) { 
+        cont.innerHTML = `<div class="muted">${t.noVehicles}</div>`; 
+        return; 
+    }
+    
+    cont.innerHTML = '';
+    reg.forEach((r, idx) => {
+        const statusClass = getStatusClass(r.lastRead?.status);
+        const last = r.lastRead ? 
+            `<div>PM2.5: <strong>${r.lastRead.pm25}</strong> — Status: <strong class="${statusClass}">${r.lastRead.status}</strong></div>` : 
+            '<div class="muted">No readings yet.</div>';
+        
+        const colorPreview = r.color ? `<span class="color-preview" style="background-color: ${getColorValue(r.color)}"></span>` : '';
+        const vehicleInfo = [r.make, r.model, r.engine].filter(Boolean).join(' • ');
+        
+        const advice = r.lastRead ? getVehicleAdvice(r.lastRead.pm25) : '';
+        
+        const box = document.createElement('div');
+        box.className = 'vehicle-card';
+        box.innerHTML = `
+            <strong>${r.plate}</strong> — ${r.device}
+            ${colorPreview}
+            <div class="muted">${vehicleInfo}</div>
+            <div class="muted">${r.city || ''}</div>
+            ${last}
+            ${advice}
+            <div class="vehicle-actions">
+                <button class="btn" onclick="forceRead(${idx})">${t.manualRead}</button>
+                <button class="btn" onclick="simulateTrip(${idx})">${t.simulateTrip}</button>
+                <button class="btn btn-danger" onclick="deleteVehicle(${idx})">${t.deleteVehicle}</button>
+            </div>
+            <div class="muted" style="font-size: 12px; margin-top: 4px;">${t.simulationDuration}</div>
+        `;
+        cont.appendChild(box);
+    });
+}
+
+function getColorValue(colorName) {
+    const colorMap = {
+        'red': '#ff0000',
+        'blue': '#0000ff', 
+        'black': '#000000',
+        'white': '#ffffff',
+        'silver': '#c0c0c0',
+        'gray': '#808080',
+        'green': '#008000',
+        'yellow': '#ffff00',
+        'orange': '#ffa500',
+        'purple': '#800080'
     };
+    return colorMap[colorName.toLowerCase()] || '#cccccc';
+}
+
+function getStatusClass(status) {
+    if (status?.includes('ALLOWED') && !status?.includes('NOT')) return 'status-allowed';
+    if (status?.includes('LIMITED')) return 'status-limited';
+    if (status?.includes('NOT ALLOWED') || status?.includes('BANNED')) return 'status-banned';
+    return '';
+}
+
+window.forceRead = function(idx) {
+    simulateDeviceRead(idx);
+    updateHomeScreen();
+}
+
+window.simulateTrip = function(idx) {
+    const reg = loadRegistry();
+    if (!reg[idx]) return;
+    
+    gradualChange(idx, {
+        start: reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30,
+        target: Math.min(400, Math.round((reg[idx].lastRead ? reg[idx].lastRead.pm25 : 30) * (1.6 + Math.random() * 0.6))),
+        steps: 8, 
+        interval: 3000
+    });
+    
+    setTimeout(() => {
+        updateHomeScreen();
+    }, 24000);
+}
+
+function simulateDeviceRead(index, opts = {}) {
+    const reg = loadRegistry();
+    if (!reg[index]) return;
+    
+    const basePM25 = Math.round(Math.random() * 180);
+    const pm25 = Math.max(0, Math.round(basePM25 * (opts.multiply || 1)));
+    const pm10 = Math.round(pm25 * (0.6 + Math.random() * 0.8));
+    const co = (Math.random() * 6).toFixed(2);
+    const status = decideStatus(pm25);
+    const read = { ts: Date.now(), pm25, pm10, co, status };
+    
+    reg[index].lastRead = read;
+    saveRegistry(reg);
+    renderMyVehicles();
+    
+    document.getElementById('lastRead').innerHTML = 
+        `${reg[index].plate} — PM2.5: ${pm25} — <strong class="${getStatusClass(status)}">${status}</strong>`;
+}
+
+function decideStatus(pm25) {
+    const t = translations[currentLang] || translations.en;
+    if (pm25 > 150) return t.trafficBanned;
+    if (pm25 > 100) return t.trafficLimited;
+    return t.trafficAllowed;
+}
+
+function gradualChange(index, opts = {start: 20, target: 80, steps: 6, interval: 3000}) {
+    const reg = loadRegistry();
+    if (!reg[index]) return;
+    
+    let step = 0;
+    const start = opts.start;
+    const target = opts.target;
+    const steps = opts.steps || 6;
+    const interval = opts.interval || 3000;
+    const delta = (target - start) / steps;
+    
+    const iv = setInterval(() => {
+        step++;
+        const currentVal = Math.round(start + delta * step + (Math.random() * 5 - 2));
+        const pm25 = Math.max(0, currentVal);
+        const pm10 = Math.round(pm25 * (0.6 + Math.random() * 0.8));
+        const co = (Math.random() * 6).toFixed(2);
+        const status = decideStatus(pm25);
+        const read = { ts: Date.now(), pm25, pm10, co, status };
+        
+        const registry = loadRegistry();
+        if (!registry[index]) { 
+            clearInterval(iv); 
+            return; 
+        }
+        
+        registry[index].lastRead = read;
+        saveRegistry(registry);
+        renderMyVehicles();
+        
+        document.getElementById('lastRead').innerHTML = 
+            `${registry[index].plate} — PM2.5: ${pm25} — <strong class="${getStatusClass(status)}">${status}</strong>`;
+            
+        if (step >= steps) clearInterval(iv);
+    }, interval);
+}
+
+function startBackgroundSimulation() {
+    setInterval(() => {
+        const reg = loadRegistry();
+        if (!reg.length) return;
+        
+        for (let i = 0; i < reg.length; i++) {
+            if (Math.random() < 0.5) simulateDeviceRead(i);
+        }
+        renderMyVehicles();
+        updateHomeScreen();
+    }, 20000);
+}
+
+function loadCountryAQIData() {
+    const countryData = [
+        { country: "Turkey", aqi: 65 }, { country: "Germany", aqi: 45 }, { country: "France", aqi: 52 },
+        { country: "Italy", aqi: 68 }, { country: "Spain", aqi: 58 }, { country: "UK", aqi: 48 },
+        { country: "USA", aqi: 72 }, { country: "China", aqi: 156 }, { country: "India", aqi: 189 },
+        { country: "Russia", aqi: 62 }, { country: "Japan", aqi: 42 }, { country: "South Korea", aqi: 55 }
+    ];
+
+    const container = document.getElementById('countryAqiList');
+    const t = translations[currentLang] || translations.en;
+    
+    let html = '';
+    countryData.forEach(country => {
+        const color = getColorForAQI(country.aqi);
+        html += `
+            <div class="country-aqi-item">
+                <span>${country.country}</span>
+                <span class="aqi-value" style="color: ${color};">${country.aqi}</span>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getColorForAQI(aqi) {
+    if (aqi <= 50) return 'green';
+    if (aqi <= 100) return 'yellow';
+    if (aqi <= 150) return 'orange';
+    if (aqi <= 200) return 'red';
+    if (aqi <= 300) return 'purple';
+    return 'maroon';
+}
+
+function initGlobalMap() {
+    if (globalMap) {
+        globalMap.invalidateSize();
+        return;
+    }
+    
+    globalMap = L.map('globalMap').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(globalMap);
+    
+    addCountryAQIToMap();
+}
+
+function addCountryAQIToMap() {
+    const countryAQIData = {
+        "Turkey": { lat: 39.9334, lon: 32.8597, aqi: 65 },
+        "Germany": { lat: 52.5200, lon: 13.4050, aqi: 45 },
+        "France": { lat: 48.8566, lon: 2.3522, aqi: 52 },
+        "Italy": { lat: 41.9028, lon: 12.4964, aqi: 68 },
+        "Spain": { lat: 40.4168, lon: -3.7038, aqi: 58 },
+        "UK": { lat: 51.5074, lon: -0.1278, aqi: 48 },
+        "USA": { lat: 38.9072, lon: -77.0369, aqi: 72 },
+        "China": { lat: 39.9042, lon: 116.4074, aqi: 156 },
+        "India": { lat: 28.6139, lon: 77.2090, aqi: 189 }
+    };
+
+    Object.entries(countryAQIData).forEach(([country, data]) => {
+        const color = getColorForAQI(data.aqi);
+        const radius = Math.max(100000, data.aqi * 2000);
+        
+        const circle = L.circle([data.lat, data.lon], {
+            radius: radius,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.5
+        }).addTo(globalMap);
+        
+        const t = translations[currentLang] || translations.en;
+        circle.bindPopup(`
+            <strong>${country}</strong><br>
+            Average AQI: <strong style="color: ${color}">${data.aqi}</strong><br>
+            ${getAQILevelText(data.aqi, t)}
+        `);
+    });
+
+    const t = translations[currentLang] || translations.en;
+    document.getElementById('globalSummary').innerHTML = 
+        '<div class="muted">' + t.globalDesc + '</div>';
+}
+
+function getAQILevelText(aqi, t) {
+    if (aqi <= 50) return 'Air Quality: Good';
+    if (aqi <= 100) return 'Air Quality: Moderate';
+    if (aqi <= 150) return 'Air Quality: Unhealthy for Sensitive Groups';
+    if (aqi <= 200) return 'Air Quality: Unhealthy';
+    if (aqi <= 300) return 'Air Quality: Very Unhealthy';
+    return 'Air Quality: Hazardous';
+}
+
+function initAqiMap() {
+    if (aqiMap) {
+        aqiMap.invalidateSize();
+        return;
+    }
+    
+    aqiMap = L.map('aqiMap').setView([39.925, 32.866], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(aqiMap);
+    
+    aqiMap.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+        nominatimReverse(lat, lon).then(rev => {
+            const label = rev && rev.display_name ? rev.display_name : 
+                `Selected Point (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+            goToAqiLocation(lat, lon, label);
+            document.getElementById('aqiAddressInput').value = label;
+            document.getElementById('aqiResultList').style.display = 'none';
+        });
+    });
+}
+
+async function handleAddressSearch() {
+    const q = document.getElementById('aqiAddressInput').value;
+    if (!q) { 
+        document.getElementById('aqiResultList').style.display = "none"; 
+        return;
+    }
+    
+    const results = await nominatimSearch(q);
+    renderAqiResults(results);
+}
+
+async function handleLocateMe() {
+    const t = translations[currentLang] || translations.en;
+    
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported by this browser/device.");
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        
+        const userInput = document.getElementById('aqiAddressInput').value;
+        let label;
+        
+        if (userInput && userInput.trim() !== '') {
+            label = userInput;
+        } else {
+            const rev = await nominatimReverse(lat, lon);
+            label = rev && rev.display_name ? rev.display_name : 
+                `Your Location (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+        }
+        
+        document.getElementById('aqiAddressInput').value = label;
+        goToAqiLocation(lat, lon, label);
+        document.getElementById('aqiResultList').style.display = 'none';
+    }, err => {
+        alert("Unable to get your location. Please ensure location services are enabled.");
+    });
+}
+
+function handleClearSearch() {
+    document.getElementById('aqiAddressInput').value = "";
+    document.getElementById('aqiResultList').style.display = "none";
+    resetAqiDetails("—");
+}
+
+function setAqiMarker(lat, lon) {
+    if (aqiMarker) aqiMap.removeLayer(aqiMarker);
+    aqiMarker = L.marker([lat, lon]).addTo(aqiMap);
+    aqiMap.setView([lat, lon], 12);
+}
+
+async function nominatimSearch(q) {
+    try {
+        const res = await fetch(`${NOMINATIM_BASE}/search?format=json&addressdetails=1&limit=10&q=${encodeURIComponent(q)}`, {
+            headers: { 'Accept-Language': currentLang }
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Search error:', error);
+        return [];
+    }
+}
+
+async function nominatimReverse(lat, lon) {
+    try {
+        const res = await fetch(`${NOMINATIM_BASE}/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+            headers: { 'Accept-Language': currentLang }
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        return null;
+    }
+}
+
+function renderAqiResults(items) {
+    const resultList = document.getElementById('aqiResultList');
+    resultList.innerHTML = "";
+    
+    if (!items || items.length === 0) {
+        resultList.style.display = "none";
+        return;
+    }
+    
+    items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'resultItem';
+        div.innerHTML = `
+            <div style="font-weight: 500;">${item.display_name}</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                ${item.type ? `${item.type} • ` : ''}
+                Lat: ${parseFloat(item.lat).toFixed(4)}, Lon: ${parseFloat(item.lon).toFixed(4)}
+            </div>
+        `;
+        div.tabIndex = 0;
+        div.addEventListener('click', () => selectAqiResult(item));
+        div.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') selectAqiResult(item);
+        });
+        resultList.appendChild(div);
+    });
+    resultList.style.display = 'block';
+}
+
+async function selectAqiResult(item) {
+    document.getElementById('aqiResultList').style.display = 'none';
+    document.getElementById('aqiAddressInput').value = item.display_name;
+    goToAqiLocation(parseFloat(item.lat), parseFloat(item.lon), item.display_name);
+}
+
+function resetAqiDetails(label) {
+    const t = translations[currentLang] || translations.en;
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${label || '—'}`;
+    document.getElementById('detailAqiText').textContent = `${t.aqiText}: —`;
+    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: —`;
+    document.getElementById('detailAqiBar').style.background = "#999";
+    document.getElementById('detailAqiBar').style.width = "0%";
+    document.getElementById('detailAqiBar').textContent = "—";
+    document.getElementById('detailWarningMsg').textContent = "";
+    document.getElementById('detailMaskMsg').textContent = "";
+    document.getElementById('pollutantsList').innerHTML = 
+        `<li class="muted" id="pollutantsPlaceholder">${t.pollutantPlaceholder}</li>`;
+    document.getElementById('healthWarnings').innerHTML = "";
+    document.getElementById('nasaDataSection').style.display = 'none';
+    document.getElementById('nasaDataContent').innerHTML = '<div class="muted">Loading NASA satellite data...</div>';
+}
+
+async function fetchNasaData(lat, lon) {
+    try {
+        return {
+            temperature: Math.round((15 + Math.random() * 30) * 10) / 10,
+            humidity: Math.round(30 + Math.random() * 60),
+            pressure: Math.round(980 + Math.random() * 40),
+            windSpeed: Math.round((2 + Math.random() * 8) * 10) / 10,
+            aerosolIndex: Math.round((0.1 + Math.random() * 2) * 100) / 100,
+            dustDetection: Math.random() > 0.7 ? 'HIGH' : 'LOW',
+            timestamp: new Date().toLocaleString()
+        };
+    } catch (error) {
+        console.error('NASA API Error:', error);
+        return null;
+    }
 }
 
 function displayNasaData(nasaData) {
@@ -1079,51 +1703,17 @@ function displayNasaData(nasaData) {
                 <div><strong>${t.nasaPressure}:</strong> ${nasaData.pressure} hPa</div>
                 <div><strong>${t.nasaWind}:</strong> ${nasaData.windSpeed} m/s</div>
             </div>
-    `;
-    
-    if (nasaData.aerosolIndex) {
-        html += `
             <div style="margin-bottom: 8px;">
                 <strong>${t.nasaAerosol}:</strong> ${nasaData.aerosolIndex} 
                 <span style="color: ${getAerosolColor(nasaData.aerosolIndex)}; font-weight: bold;">
                     (${getAerosolLevel(nasaData.aerosolIndex)})
                 </span>
             </div>
-        `;
-    }
-    
-    if (nasaData.dustDetection) {
-        html += `
             <div style="margin-bottom: 8px;">
-                <strong>Dust Detection:</strong> 
+                <strong>${t.nasaDust}:</strong> 
                 <span style="color: ${nasaData.dustDetection === 'HIGH' ? '#e53e3e' : '#38a169'}; font-weight: bold;">
                     ${nasaData.dustDetection}
                 </span>
-            </div>
-        `;
-    }
-    
-    html += `
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-    `;
-    
-    if (nasaData.so2) {
-        html += `<div><strong>${t.nasaSo2}:</strong> ${nasaData.so2} DU</div>`;
-    }
-    
-    if (nasaData.no2) {
-        html += `<div><strong>${t.nasaNo2}:</strong> ${nasaData.no2} µmol/m²</div>`;
-    }
-    
-    if (nasaData.co) {
-        html += `<div><strong>${t.nasaCo}:</strong> ${nasaData.co} ppb</div>`;
-    }
-    
-    if (nasaData.uvIndex) {
-        html += `<div><strong>${t.nasaUv}:</strong> ${nasaData.uvIndex}</div>`;
-    }
-    
-    html += `
             </div>
             <div style="margin-top: 8px; font-size: 11px; color: #a0aec0;">
                 Last updated: ${nasaData.timestamp}
@@ -1148,12 +1738,10 @@ function getAerosolLevel(index) {
     return 'Very High';
 }
 
-// Update the fetchAqiData function to include NASA data
 async function fetchAqiData(lat, lon, label) {
     try {
         resetAqiDetails(label);
         
-        // Fetch both WAQI and NASA data concurrently
         const [waqiResponse, nasaData] = await Promise.all([
             fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`),
             fetchNasaData(lat, lon)
@@ -1166,42 +1754,96 @@ async function fetchAqiData(lat, lon, label) {
             displayNasaData(nasaData);
         } else {
             updateAqiUI(null, label);
-            // Still show NASA data even if WAQI fails
             displayNasaData(nasaData);
             const t = translations[currentLang] || translations.en;
             alert(t.aqiNoData);
         }
     } catch (err) {
         updateAqiUI(null, label);
-        // Show simulated NASA data on error
-        displayNasaData(getSimulatedNasaData(lat, lon));
+        displayNasaData(await fetchNasaData(lat, lon));
         console.error('Data fetch error:', err);
     }
 }
 
-// Update reset function to hide NASA section
-function resetAqiDetails(label) {
+function updateAqiUI(data, userLabel) {
     const t = translations[currentLang] || translations.en;
-    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${label || '—'}`;
-    document.getElementById('detailAqiText').textContent = `${t.aqiText}: —`;
-    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: —`;
-    document.getElementById('detailAqiBar').style.background = "#999";
-    document.getElementById('detailAqiBar').style.width = "0%";
-    document.getElementById('detailAqiBar').textContent = "—";
-    document.getElementById('detailWarningMsg').textContent = "";
-    document.getElementById('detailMaskMsg').textContent = "";
-    document.getElementById('pollutantsList').innerHTML = 
-        `<li class="muted" id="pollutantsPlaceholder">${t.pollutantPlaceholder}</li>`;
-    document.getElementById('healthWarnings').innerHTML = "";
-    document.getElementById('nasaDataSection').style.display = 'none';
-    document.getElementById('nasaDataContent').innerHTML = '<div class="muted">Loading NASA satellite data...</div>';
+    
+    const locationName = userLabel || (data && data.city ? data.city.name : '—');
+    document.getElementById('aqiLocationLabel').textContent = `${t.aqiLocation}: ${locationName}`;
+    
+    const aqi = data && data.aqi ? data.aqi : null;
+    document.getElementById('detailAqiText').textContent = `${t.aqiText}: ${aqi !== null ? aqi : '—'}`;
+    
+    const dominantPollutant = data && data.dominentpol ? data.dominentpol : '—';
+    document.getElementById('detailDominantPollutant').textContent = `${t.aqiPollutant}: ${dominantPollutant.toUpperCase()}`;
+
+    let color = "#999";
+    let warning = "", mask = "";
+    const percent = aqi === null ? 0 : Math.min(aqi, 500) / 500 * 100;
+
+    if (aqi === null) {
+        warning = ""; mask = "";
+    } else if (aqi <= 50) {
+        color = "green"; warning = t.aqiWarning_good; mask = "";
+    } else if (aqi <= 100) {
+        color = "yellow"; warning = t.aqiWarning_moderate; mask = "";
+    } else if (aqi <= 150) {
+        color = "orange"; warning = t.aqiWarning_usg; mask = t.aqiMask_usg;
+    } else if (aqi <= 200) {
+        color = "red"; warning = t.aqiWarning_unhealthy; mask = t.aqiMask_unhealthy;
+    } else if (aqi <= 300) {
+        color = "purple"; warning = t.aqiWarning_v_unhealthy; mask = t.aqiMask_v_unhealthy;
+    } else {
+        color = "maroon"; warning = t.aqiWarning_hazardous; mask = t.aqiMask_hazardous;
+    }
+
+    document.getElementById('detailAqiBar').style.background = color;
+    document.getElementById('detailAqiBar').style.width = percent + "%";
+    document.getElementById('detailAqiBar').textContent = (aqi === null ? '—' : aqi);
+    document.getElementById('detailWarningMsg').textContent = warning;
+    document.getElementById('detailMaskMsg').textContent = mask;
+
+    document.getElementById('healthWarnings').innerHTML = getHealthWarnings(aqi);
+
+    const pollutantsList = document.getElementById('pollutantsList');
+    pollutantsList.innerHTML = '';
+    
+    const pollutantKeys = ["pm25", "pm10", "o3", "no2", "so2", "co"];
+    if (data && data.iaqi) {
+        pollutantKeys.forEach(k => {
+            if (data.iaqi[k] && data.iaqi[k].v !== undefined) {
+                const value = data.iaqi[k].v;
+                let quality = '—';
+                if (value <= 50) quality = '(Good)';
+                else if (value <= 100) quality = '(Moderate)';
+                else quality = '(High)';
+                
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${k.toUpperCase()}</strong>: ${value} <span class="muted">${quality}</span>`;
+                pollutantsList.appendChild(li);
+            }
+        });
+        
+        if (pollutantsList.children.length === 0) {
+            pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
+        }
+    } else {
+        pollutantsList.innerHTML = `<li class="muted">No pollutant data available</li>`;
+    }
 }
 
-// Geri kalan kod aynı kalacak, sadece yukarıdaki değişiklikler eklendi
-// ... (önceki tüm fonksiyonlar aynen kalacak)
+async function goToAqiLocation(lat, lon, label) {
+    setAqiMarker(lat, lon);
+    await fetchAqiData(lat, lon, label);
+}
 
-// Kalan kod buraya gelecek - önceki mesajdaki tüm fonksiyonlar aynen kalacak
-// Sadece yukarıdaki NASA entegrasyonu eklendi
+function debounce(fn, wait) {
+    let t;
+    return function(...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+    };
+}
 
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
